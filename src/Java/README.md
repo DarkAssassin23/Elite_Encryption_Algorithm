@@ -15,7 +15,7 @@ when running the makefile.
 
 Use the included makefile in order to build the .jar file to run the application.
 
-To build the applications .jar file, navigate to the folder of the make file and
+To build the applications .jar file, navigate to the folder of the makefile and
 run the following command:
 ```
 make jar
