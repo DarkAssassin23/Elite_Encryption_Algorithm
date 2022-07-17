@@ -457,36 +457,6 @@ public class AppUI {
 		
 	}
 	
-//	private String getValues()
-//	{
-//		String out = "";
-//		
-//		if(encryptionOn)
-//			out += "Encrypting\n";
-//		else
-//			out += "Decrypting\n";
-//		
-//	    switch(typeOfOperation)
-//	    {
-//	    case FILE:
-//	    	out += "typeOfOperation: File\n";
-//	    	break;
-//	    case TEXT:
-//	    	out += "typeOfOperation: Text\n";
-//	    	break;
-//	    default:
-//	    	out += "typeOfOperation: Directory\n";
-//	    	break;
-//	    }
-//	    out += "Overwrite Files: " + overwriteFiles + "\n";
-//	    out += "Ghost Mode: " + ghostMode + "\n";
-//	    out += "URI for File/Directory: " + uri + "\n";
-//	    out += "Number of keys: " + numKeys + "\n";
-//	    out += "Key length: " + keyLen + "\n";
-//		
-//		return out;
-//	}
-	
 	private void getFilesInDirectory(File dirname)
 	{
 		File[] tempFilesList = dirname.listFiles();

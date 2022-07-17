@@ -107,16 +107,4 @@ public class Utilities implements Serializable
 		File file = new File("keys.ser");
 		return file.delete();
 	}
-	
-	
-	public String toHex(String text)
-	{
-		String temp = "";
-		for(int x=0;x<text.length();x++)
-		{
-			// Converts  each character to hex
-			temp += Integer.toHexString(text.charAt(x));
-		}
-		return temp;
-	}
 }
