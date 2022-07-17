@@ -10,7 +10,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
- * Class of utilities used for generating keys, and reading and writing the keys
+ * Class of utilities used for reading and writing the keys
+ * checking if the key file exists, and deleting the key file
  * @author DarkAssassin23 - Will Jones
  *
  */

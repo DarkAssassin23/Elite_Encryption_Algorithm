@@ -33,12 +33,6 @@ import java.util.ArrayList;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
-
-/*
- * TODO:
- *  - Literally everything related to encrypting files and directories
- */
-
 public class AppUI {
 	enum TypeOfOperation
 	{
