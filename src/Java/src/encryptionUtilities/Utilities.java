@@ -20,6 +20,11 @@ public class Utilities implements Serializable
 	// Added to fix Serializable warning
 	private static final long serialVersionUID = 1L;
 	
+	// Fixes bug where double-clicking on the .jar file would
+	// set the working directory as a temproary location and 
+	// not where the file is
+	static final String keyFilePath = new File(Utilities.class.getProtectionDomain().getCodeSource().getLocation().getPath()).toString().replace("EEA_App.jar", "keys.ser");
+	
 	/**
 	 * Saves the the array of keys as a serialized object into keys.ser
 	 * @param keys Array of keys to save
@@ -29,7 +34,7 @@ public class Utilities implements Serializable
 	{
 		try 
 		{
-			ObjectOutputStream objOutputStream = new ObjectOutputStream(new FileOutputStream("keys.ser"));
+			ObjectOutputStream objOutputStream = new ObjectOutputStream(new FileOutputStream(keyFilePath));
 			objOutputStream.writeObject(keys);
 			objOutputStream.close();
 		} 
@@ -55,7 +60,7 @@ public class Utilities implements Serializable
 		String[] keys = new String[] {};
 		try 
 		{
-			ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream("keys.ser"));
+			ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream(keyFilePath));
 			keys = (String[]) objInputStream.readObject();
 			objInputStream.close();
 		} 
@@ -77,7 +82,7 @@ public class Utilities implements Serializable
 	 */
 	public boolean keysExist()
 	{
-		File file = new File("keys.ser");
+		File file = new File(keyFilePath);
 		return file.exists();
 	}
 	
@@ -104,7 +109,7 @@ public class Utilities implements Serializable
 	 */
 	public boolean deleteKeys()
 	{
-		File file = new File("keys.ser");
+		File file = new File(keyFilePath);
 		return file.delete();
 	}
 }
