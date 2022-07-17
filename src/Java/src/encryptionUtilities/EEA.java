@@ -154,17 +154,8 @@ public class EEA
 			case 256:
 				md = MessageDigest.getInstance("SHA-256");
 				break;
-			case 512:
-				md = MessageDigest.getInstance("SHA-512");
-				break;
-			case 1024:
-				md = MessageDigest.getInstance("SHA-512");
-				break;
-			case 2048:
-				md = MessageDigest.getInstance("SHA-512");
-				break;
 			default:
-				md = MessageDigest.getInstance("SHA-256");
+				md = MessageDigest.getInstance("SHA-512");
 				break;
 			}
 		}
