@@ -21,11 +21,7 @@ run the following command:
 make jar
 ```
 This will compile and build the application. To run the application, simply 
-double-click on the ```EEA_App.jar``` file; or, if you wanna be cool and launch it 
-from the command line, you can run the following command:
-```
-java -jar EEA_App.jar
-```
+double-click on the ```EEA_App.jar```
 
 Usage
 -------
