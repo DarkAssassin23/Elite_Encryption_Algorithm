@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "keygen.h"
 #include "encrypt.h"
+#include "decrypt.h"
 
 void test_keygen(void)
 {
@@ -61,7 +62,7 @@ int main (int argc, char** argv)
 
 
     int num_keys = 3;
-    char** keys = generate_keys(HASH_TYPE_SHA512, num_keys);
+    char** keys = generate_keys(HASH_TYPE_SHA256, num_keys);
 
     unsigned char* data = NULL;
     size_t file_size = read_in_file("file.txt", &data);
@@ -81,14 +82,30 @@ int main (int argc, char** argv)
     for(int k=0; k<num_keys; k++)
     {
         printf("%d.: %s\n", (k+1), keys[k]);
-        free(keys[k]);
     }
 
-    if(!save_to_file("file.txt.eea", cipher_text, cipher_text_size))
-        printf("Error saving all the data to the file\n");
+    printf("Cipher text: %s\n", cipher_text);
+    printf("Cipher text size: %zu\n", cipher_text_size);
+
+    unsigned char* plain_text = NULL;
+    size_t plain_text_size = decrypt(cipher_text, cipher_text_size, &plain_text, keys, num_keys);
+    if(plain_text == NULL)
+    {
+        printf("Error decrypting data\n");
+        return -1;
+    }
+    printf("Plain text: %s\n", (char*)plain_text);
+    printf("Plain text size: %zu\n", plain_text_size);
+
+    // if(!save_to_file("file.txt.eea", cipher_text, cipher_text_size))
+    //     printf("Error saving all the data to the file\n");
 
     free(data);
+    for(int k=0; k<num_keys; k++)
+        free(keys[k]);
+
     free(keys);
     free(cipher_text);
+    free(plain_text);
     return 0;
 }
