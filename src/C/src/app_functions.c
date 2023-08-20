@@ -227,6 +227,33 @@ int prompt_for_num_keys(void)
     }
 }
 
+/**
+* @brief Remove the users keys file
+* @param[in] filename Name of the keys file to delete
+*/
+void delete_keys_file(const char* filename)
+{
+    int was_deleted = -1;
+    printf("Are you sure you want to delete \'%s\'? (y/n): ", filename);
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+
+    if(strcmp(line, "y") == 0 || strcmp(line, "Y") == 0)
+        was_deleted = (remove(filename) == 0);
+    
+    free(line);
+
+    if(was_deleted == 1)
+        printf("Keys file was deleted successfully\n");
+    else if(was_deleted == 0)
+        fprintf(stderr, "Unable to delete the keys file\n");
+    else
+        printf("Deletion aborted.\n");
+}
+
 void manage_keys(void)
 {
     if(!file_exists(keys_file))
@@ -255,20 +282,6 @@ void manage_keys(void)
     }
     else
     {
-        printf("Keys file exists, remove it? (y/n): ");
-        char* line = NULL;
-        size_t line_len = 0;
-        line_len = getline(&line, &line_len, stdin);
-        // Replace new line with null terminator
-        line[line_len-1] = '\0';
-
-        if(strcmp(line, "y") == 0 || strcmp(line, "Y") == 0)
-        {
-            if(remove(keys_file) == 0)
-                printf("Keys file was deleted successfully\n");
-            else
-                fprintf(stderr, "Unable to delete the keys file\n");
-        }
-        free(line);
+        delete_keys_file(keys_file);
     }
 }
