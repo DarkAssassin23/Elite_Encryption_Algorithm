@@ -24,7 +24,7 @@ static size_t get_cipher_text_len(size_t data_len, size_t key_len)
 }
 
 size_t encrypt(unsigned char* data, size_t data_len, 
-                unsigned char** cipher_text, char** keys, int num_keys)
+                unsigned char** cipher_text, const char** keys, int num_keys)
 {
     size_t key_len = strlen(keys[0]);
     size_t cipher_text_len = get_cipher_text_len(data_len, key_len);

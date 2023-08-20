@@ -17,18 +17,25 @@ void message_digest_to_hash(unsigned char* md, char* hash, int digest_length);
 char* get_random_uint64_hexstr(void);
 
 /**
+* @brief Checks to see if the file exists
+* @param[in] filename File to see if it exists
+* @return If the file exists
+*/
+int file_exists(const char* filename);
+
+/**
 * @brief Save the cipher text to a file
 * @param[in] filename The file to save the data to
 * @param[in] data The data to be written to the file
 * @param[in] bytes_to_write The number of bytes to write to the file
 * @return If the save was successful
 */
-int save_to_file(char* filename, unsigned char* data, size_t bytes_to_write);
+int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_write);
 
 /**
 * @brief Read in data from a file
 * @param[in] filename The file to read the data from
 * @param[in] buffer The buffer store the contents of the file in
-* @return The number of bytes read in
+* @return The number of bytes read in, -1 if the reading failed
 */
-size_t read_in_file(char* filename, unsigned char** buffer);
+size_t read_in_file(const char* filename, unsigned char** buffer);

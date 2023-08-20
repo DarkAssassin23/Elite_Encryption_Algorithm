@@ -1,5 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef WIN32
+#include <io.h>
+#define F_OK 0
+#define access _access
+#else
+#include <unistd.h>
+#endif
+
 #include <openssl/rand.h>
 
 #include "utils.h"
@@ -41,28 +50,33 @@ char* get_random_uint64_hexstr(void)
     return hexstr;
 }
 
-int save_to_file(char* filename, unsigned char* data, size_t bytes_to_write)
+int file_exists(const char* filename)
+{
+    return (access(filename, F_OK) == 0);
+}
+
+int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_write)
 {
     FILE* fout = fopen(filename, "wb");
     if(fout == NULL)
     {
         printf("Error opening file \'%s\'\n", filename);
-        return -1;
+        return 0;
     }
 
     size_t bytes_written = fwrite(data, sizeof(data[0]), bytes_to_write, fout);
     printf("Wrote %zu bytes out of %zu requested\n", bytes_written,  bytes_to_write);
     fclose(fout);
-    return bytes_written == bytes_to_write;
+    return 1;
 }
 
-size_t read_in_file(char* filename, unsigned char** buffer)
+size_t read_in_file(const char* filename, unsigned char** buffer)
 {
     FILE* fin = fopen(filename, "rb");
     if(fin == NULL)
     {
         printf("Error opening file \'%s\'\n", filename);
-        return 0;
+        return -1;
     }
 
     fseek(fin, 0, SEEK_END);
@@ -71,7 +85,7 @@ size_t read_in_file(char* filename, unsigned char** buffer)
 
     *buffer = malloc(file_size + 1);
     if(*buffer == NULL)
-        return 0;
+        return -1;
 
     size_t read_bytes = fread(*buffer, sizeof(unsigned char), file_size, fin);
     fclose(fin);

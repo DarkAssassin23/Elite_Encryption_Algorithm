@@ -10,4 +10,4 @@
 * @return Length of cipher text
 */
 size_t encrypt(unsigned char* data, size_t data_len, 
-                unsigned char** cipher_text, char** keys, int num_keys);
+                unsigned char** cipher_text, const char** keys, int num_keys);

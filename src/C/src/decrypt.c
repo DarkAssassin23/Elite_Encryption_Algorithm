@@ -91,7 +91,7 @@ static size_t remove_padding(unsigned char** plain_text, size_t plain_text_len)
 }
 
 size_t decrypt(unsigned char* data, size_t data_len, 
-                unsigned char** plain_text, char** keys, int num_keys)
+                unsigned char** plain_text, const char** keys, int num_keys)
 {
     size_t key_len = strlen(keys[0]);
 
