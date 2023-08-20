@@ -22,9 +22,9 @@ dnf install openssl openssl-dev
 ```
 #### Arch-based
 ```bash
-pacman -S install openssl openssl-dev
+pacman -S install openssl openssl-devel
 ```
 ### Windows (using MSYS2)
 ```bash
-pacman -S install openssl openssl-dev
+pacman -S install openssl openssl-devel
 ```
