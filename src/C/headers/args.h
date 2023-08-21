@@ -19,12 +19,12 @@ typedef enum
     MENU_DECRYPT = 2
 } MENU_OPTIONS;
 
-static const char* menu_items[] = {
+static const char* main_menu_items[] = {
     "1. Manage Keys",
     "2. Encrypt",
     "3. Decrypt"
 };
-static const size_t num_menu_items = sizeof(menu_items) / sizeof(char*);
+static const size_t num_main_menu_items = sizeof(main_menu_items) / sizeof(char*);
 
 static const char* key_gen_menu_items[] = {
     "1. 256-bits",
@@ -34,6 +34,6 @@ static const char* key_gen_menu_items[] = {
 };
 static const size_t num_key_gen_menu_items = sizeof(key_gen_menu_items) / sizeof(char*);
 
-void print_menu(void);
+void print_main_menu(void);
 void print_key_gen_menu(void);
 options_t parse_args(int argc, char** argv);

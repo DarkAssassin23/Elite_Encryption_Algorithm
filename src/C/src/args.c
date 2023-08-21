@@ -4,12 +4,12 @@
 
 #include "args.h"
 
-void print_menu(void)
+void print_main_menu(void)
 {
     printf("Select one of the following options: \n");
-    for(size_t x = 0; x < num_menu_items; x++)
-        printf("%s\n", menu_items[x]);
-    printf("(1-%zu) or 'q' to quit: ", num_menu_items);
+    for(size_t x = 0; x < num_main_menu_items; x++)
+        printf("%s\n", main_menu_items[x]);
+    printf("(1-%zu) or 'q' to quit: ", num_main_menu_items);
 }
 
 void print_key_gen_menu(void)

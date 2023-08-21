@@ -128,7 +128,7 @@ int main (int argc, char** argv)
     const int num_keys = sizeof(keys) / sizeof(char*);
     while(1)
     {
-        print_menu();
+        print_main_menu();
 
         char* line = NULL;
         size_t line_len = 0;
@@ -145,7 +145,7 @@ int main (int argc, char** argv)
         
         int selection = strtol(line, NULL, 10);
         free(line);
-        if(selection <= 0 || selection > num_menu_items)
+        if(selection <= 0 || selection > num_main_menu_items)
         {
             printf("Invalid selection\n");
             continue;
