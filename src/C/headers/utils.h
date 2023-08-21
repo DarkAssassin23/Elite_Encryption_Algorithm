@@ -24,6 +24,12 @@ char* get_random_uint64_hexstr(void);
 int file_exists(const char* filename);
 
 /**
+* @brief Checks to see if any keys files exist
+* @return If any keys files exists in the current directory
+*/
+int keys_file_exists(void);
+
+/**
 * @brief Save the cipher text to a file
 * @param[in] filename The file to save the data to
 * @param[in] data The data to be written to the file

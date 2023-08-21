@@ -10,7 +10,7 @@
 #include "app_functions.h"
 
 // TODO: make a better name
-static const char keys_file[] = "keys";
+static const char keys_file[] = "keys.keys";
 
 char* get_output_filename(const char* filename, int encrypting)
 {
@@ -256,7 +256,7 @@ void delete_keys_file(const char* filename)
 
 void manage_keys(void)
 {
-    if(!file_exists(keys_file))
+    if(!keys_file_exists())
     {
         printf("No keys file exists. Would you like to create one? (y/n): ");
         char* line = NULL;
@@ -282,6 +282,7 @@ void manage_keys(void)
     }
     else
     {
+        keys_file_exists();
         delete_keys_file(keys_file);
     }
 }

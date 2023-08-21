@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
 
 #ifdef WIN32
 #include <io.h>
@@ -53,6 +55,47 @@ char* get_random_uint64_hexstr(void)
 int file_exists(const char* filename)
 {
     return (access(filename, F_OK) == 0);
+}
+
+/**
+* @brief Check if the given file is a keys file
+* @param[in] filename The file to check if it is a keys file
+* @return If the given file is a keys file
+*/
+static int is_keys_file(const char* filename)
+{
+    const char extention[] = ".keys";
+    size_t filename_len = strlen(filename);
+    if(filename_len < sizeof(extention))
+        return 0;
+    
+    char* cur_file_extention = strrchr(filename, '.');
+    if(cur_file_extention == NULL)
+        return 0;
+
+    return (strcmp(cur_file_extention, extention) == 0);
+}
+
+int keys_file_exists(void)
+{
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(".");
+    if(!d)
+        return 0;
+
+    int success = 0;
+    while ((dir = readdir(d)) != NULL) 
+    {
+        if(is_keys_file(dir->d_name))
+        {
+            success = 1;
+            break;
+        }
+    }
+    closedir(d);
+
+    return success;
 }
 
 int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_write)
