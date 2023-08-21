@@ -161,7 +161,10 @@ int get_hash_type_for_key_gen(void)
         // Replace new line with null terminator
         line[line_len-1] = '\0';
         if(strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
             return -1;
+        }
 
         int selection = strtol(line, NULL, 10);
         free(line);
@@ -189,7 +192,10 @@ int prompt_for_num_keys(void)
         // Replace new line with null terminator
         line[line_len-1] = '\0';
         if(strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
             return -1;
+        }
 
         int num_keys = strtol(line, NULL, 10);
         int is_negative = (line[0] == '-');
@@ -207,6 +213,58 @@ int prompt_for_num_keys(void)
 }
 
 /**
+* @brief Prompt for the name of the file the keys should be saved too
+* @param[out] filename Variable to set the filename too
+* @return If the file is valid, -1 for the user exiting
+* @note Value passed int must be freed
+*/
+int prompt_for_keys_filename(char** filename)
+{
+    while(1)
+    {
+        printf("Enter the filename to save your keys to. ");
+        printf("It should end in .keys\nFilename or 'q' to quit: ");
+        char* line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len-1] = '\0';
+        if(strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
+            return -1;
+        }
+
+        if(!is_keys_file(line))
+        {
+            printf("Invalid filename. It should end in .keys\n");
+            free(line);
+            continue;
+        }
+
+        if(file_exists(line))
+        {
+            printf("WARNING the file \'%s\' already exists.\n", line);
+            printf("Are you sure you want to override it? (y/n): ");
+            char* choice = NULL;
+            size_t len = 0;
+            len = getline(&choice, &len, stdin);
+            // Replace new line with null terminator
+            choice[len-1] = '\0';
+            if(strcmp(choice, "y") != 0 && strcmp(choice, "Y") != 0)
+            {
+                free(choice);
+                free(line);
+                continue;
+            }
+            free(choice);
+        }
+        *filename = line;
+        return 1;
+    }
+}
+
+/**
 * @brief Creates a new keys file
 * @return If new file was created
 */
@@ -220,7 +278,17 @@ int generate_new_keys_file(void)
     if(num_keys == -1)
         return 0;
 
-    return generate_new_keys(hash_type, num_keys, NULL);
+    char* filename = NULL;
+    if(prompt_for_keys_filename(&filename) < 0)
+    {
+        if(filename != NULL)
+            free(filename);
+        return 0;
+    }
+
+    int rc = generate_new_keys(hash_type, num_keys, filename);
+    free(filename);
+    return rc;
 }
 
 /**

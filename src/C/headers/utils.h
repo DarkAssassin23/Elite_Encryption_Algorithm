@@ -24,6 +24,13 @@ char* get_random_uint64_hexstr(void);
 int file_exists(const char* filename);
 
 /**
+* @brief Check if the given file is a keys file
+* @param[in] filename The file to check if it is a keys file
+* @return If the given file is a keys file
+*/
+int is_keys_file(const char* filename);
+
+/**
 * @brief Checks to see if any keys files exist
 * @return If any keys files exists in the current directory
 */

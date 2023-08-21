@@ -57,12 +57,7 @@ int file_exists(const char* filename)
     return (access(filename, F_OK) == 0);
 }
 
-/**
-* @brief Check if the given file is a keys file
-* @param[in] filename The file to check if it is a keys file
-* @return If the given file is a keys file
-*/
-static int is_keys_file(const char* filename)
+int is_keys_file(const char* filename)
 {
     const char extention[] = ".keys";
     size_t filename_len = strlen(filename);
