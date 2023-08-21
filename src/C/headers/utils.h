@@ -30,6 +30,14 @@ int file_exists(const char* filename);
 int keys_file_exists(void);
 
 /**
+* @brief Gets all the keys files in the current directory
+* @param[out] key_files_count The number of keys files found
+* @return The list of keys files in the current directory
+* @note Return value must be freed
+*/
+char** get_all_keys_files(size_t* key_files_count);
+
+/**
 * @brief Save the cipher text to a file
 * @param[in] filename The file to save the data to
 * @param[in] data The data to be written to the file

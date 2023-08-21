@@ -10,7 +10,7 @@
 #include "app_functions.h"
 
 // TODO: make a better name
-static const char keys_file[] = "keys.keys";
+static const char DEFAULT_KEYS_FILE[] = "keys.keys";
 
 char* get_output_filename(const char* filename, int encrypting)
 {
@@ -132,10 +132,11 @@ char* keys_to_string(const char** keys, int num_keys)
 * @brief Create new set of keys to use for encryption/decryption
 * @param[in] hash_type The kind of SHA has to use
 * @param[in] num_keys The number of keys to generate
+* @param[in] filename Name fo the new keys file to create
 * @return If the keys were generated and saved successfully
 * @see HASH_TYPE enum for more info on the hash_type parameter
 */
-int generate_new_keys(HASH_TYPE hash_type, int num_keys)
+int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
 {
     int success = 1;
     char** keys = generate_keys(hash_type, num_keys);
@@ -145,6 +146,7 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys)
         return 0;
     }
 
+    // TODO: look into encrypting this via AES
     char* keys_string = keys_to_string((const char**)keys, num_keys);
     printf("Individual Keys: \n");
     for(int k = 0; k < num_keys; k++)
@@ -154,8 +156,10 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys)
     }
     printf("\nKeys as one string: %s\n", keys_string);
 
-    // TODO: look into encrypting this file via AES
-    if(!save_to_file(keys_file, (unsigned char*)keys_string, strlen(keys_string)))
+    if(filename == NULL)
+        filename = DEFAULT_KEYS_FILE;
+
+    if(!save_to_file(filename, (unsigned char*)keys_string, strlen(keys_string)))
     {
         fprintf(stderr, "Error saving keys\n");
         success = 0;
@@ -228,6 +232,23 @@ int prompt_for_num_keys(void)
 }
 
 /**
+* @brief Creates a new keys file
+* @return If new file was created
+*/
+int generate_new_keys_file(void)
+{
+    int hash_type = get_hash_type_for_key_gen();
+    if(hash_type == -1)
+        return 0; 
+    
+    int num_keys = prompt_for_num_keys();
+    if(num_keys == -1)
+        return 0;
+
+    return generate_new_keys(hash_type, num_keys, NULL);
+}
+
+/**
 * @brief Remove the users keys file
 * @param[in] filename Name of the keys file to delete
 */
@@ -254,6 +275,61 @@ void delete_keys_file(const char* filename)
         printf("Deletion aborted.\n");
 }
 
+/**
+* @brief Handle deleting keys files
+*/
+void delete_keys_file_manager(void)
+{
+    if(!keys_file_exists())
+    {
+        printf("You don't have any keys files\n");
+        return;
+    }
+    do
+    {
+        size_t num_key_files = 0;
+        char** keys_files_list = get_all_keys_files(&num_key_files);
+        if(keys_files_list == NULL)
+            return;
+
+        printf("Select which keys file would you like to delete:\n");
+        for(size_t f = 0; f < num_key_files; f++)
+            printf("%zu: %s\n", (f + 1), keys_files_list[f]);
+        if(num_key_files > 1)
+            printf("(1-%zu) or 'q' to quit: ", num_key_files);
+        else 
+            printf("(1) or 'q' to quit: ");
+
+        char* line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len-1] = '\0';
+        
+        if(strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
+            for(size_t f = 0; f < num_key_files; f++)
+                free(keys_files_list[f]);
+            free(keys_files_list);
+            break;
+        }
+
+        int selection = strtol(line, NULL, 10);
+        free(line);
+        if(selection <= 0 || selection > num_key_files)
+        {
+            printf("Invalid selection.\n");
+            continue;
+        }
+        delete_keys_file(keys_files_list[selection - 1]);
+        
+        for(size_t f = 0; f < num_key_files; f++)
+            free(keys_files_list[f]);
+        free(keys_files_list);
+    } while(keys_file_exists());
+}
+
 void manage_keys(void)
 {
     if(!keys_file_exists())
@@ -266,23 +342,43 @@ void manage_keys(void)
         line[line_len-1] = '\0';
 
         if(strcmp(line, "y") == 0 || strcmp(line, "Y") == 0)
-        {
-            // Will need to prompt for key size and number
-            int hash_type = get_hash_type_for_key_gen();
-            if(hash_type == -1)
-                return; // change this later
-            
-            int num_keys = prompt_for_num_keys();
-            if(num_keys == -1)
-                return; // change this later
-
-            generate_new_keys(hash_type, num_keys);
-        }
+            generate_new_keys_file();
         free(line);
     }
-    else
+    while(1)
     {
-        keys_file_exists();
-        delete_keys_file(keys_file);
+        print_manage_keys_menu();
+        char* line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len-1] = '\0';
+        
+        if(strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
+            return;
+        }
+
+        int selection = strtol(line, NULL, 10);
+        free(line);
+        if(selection <= 0 || selection > num_manage_keys_menu_items)
+        {
+            printf("Invalid selection.\n");
+            continue;
+        }
+        MANAGE_KEYS_MENU_OPTIONS choice = selection - 1;
+        switch(choice)
+        {
+            case MANAGE_KEYS_MENU_ADD:
+                generate_new_keys_file();
+                break;
+            case MANAGE_KEYS_MENU_DELETE:
+                delete_keys_file_manager();
+                break;
+            default:
+                printf("Invalid selection\n");
+                break;
+        }
     }
 }

@@ -98,6 +98,46 @@ int keys_file_exists(void)
     return success;
 }
 
+char** get_all_keys_files(size_t* key_files_count)
+{
+    char** file_list = malloc(sizeof(char*));
+    if(file_list == NULL)
+    {
+        *key_files_count = 0;
+        return NULL;
+    }
+
+    size_t count = *key_files_count;
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(".");
+    if(!d)
+        return 0;
+
+    while ((dir = readdir(d)) != NULL) 
+    {
+        if(is_keys_file(dir->d_name))
+        {
+            size_t cur_filename_len = strlen(dir->d_name);
+
+            file_list = realloc(file_list, sizeof(file_list) + cur_filename_len + 1);
+
+            if(file_list == NULL)
+            {
+                *key_files_count = 0;
+                return NULL;
+            }
+
+            file_list[count] = strdup(dir->d_name);
+            count++;
+        }
+    }
+    closedir(d);
+    *key_files_count = count;
+
+    return file_list;
+}
+
 int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_write)
 {
     FILE* fout = fopen(filename, "wb");

@@ -151,22 +151,25 @@ int main (int argc, char** argv)
             continue;
         }
         
-        MENU_OPTIONS menu_selection;
+        MAIN_MENU_OPTIONS menu_selection;
         menu_selection = selection - 1;
         // printf("valid\n");
         // printf("item selected = %s\n", menu_items[menu_selection]);
         switch(menu_selection)
         {
-            case MENU_KEYS:
+            case MAIN_MENU_KEYS:
                 manage_keys();
                 break;
-            case MENU_ENCRYPT:
+            case MAIN_MENU_ENCRYPT:
                 if(encrypt_file("file.txt", keys, num_keys))
                     printf("File encrypted successfully\n");
                 break;
-            case MENU_DECRYPT:
+            case MAIN_MENU_DECRYPT:
                 if(decrypt_file("file.txt.eea", keys, num_keys))
                     printf("File decrypted successfully\n");
+                break;
+            default:
+                printf("Invalid selection\n");
                 break;
         }
     }

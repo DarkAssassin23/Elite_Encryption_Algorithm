@@ -14,10 +14,16 @@ typedef struct
 
 typedef enum
 {
-    MENU_KEYS = 0,
-    MENU_ENCRYPT = 1,
-    MENU_DECRYPT = 2
-} MENU_OPTIONS;
+    MAIN_MENU_KEYS = 0,
+    MAIN_MENU_ENCRYPT = 1,
+    MAIN_MENU_DECRYPT = 2
+} MAIN_MENU_OPTIONS;
+
+typedef enum
+{
+    MANAGE_KEYS_MENU_ADD = 0,
+    MANAGE_KEYS_MENU_DELETE = 1
+} MANAGE_KEYS_MENU_OPTIONS;
 
 static const char* main_menu_items[] = {
     "1. Manage Keys",
@@ -34,6 +40,24 @@ static const char* key_gen_menu_items[] = {
 };
 static const size_t num_key_gen_menu_items = sizeof(key_gen_menu_items) / sizeof(char*);
 
+static const char* manage_keys_menu_items[] = {
+    "1. Add Keys",
+    "2. Delete Keys"
+};
+static const size_t num_manage_keys_menu_items = sizeof(manage_keys_menu_items) / sizeof(char*);
+
+/**
+* @brief Prints out the main menu
+*/
 void print_main_menu(void);
+
+/**
+* @brief Prints out the key generation menu
+*/
 void print_key_gen_menu(void);
+
+/**
+* @brief Prints out the key management menu
+*/
+void print_manage_keys_menu(void);
 options_t parse_args(int argc, char** argv);
