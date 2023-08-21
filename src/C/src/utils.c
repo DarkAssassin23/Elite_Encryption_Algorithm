@@ -138,6 +138,23 @@ char** get_all_keys_files(size_t* key_files_count)
     return file_list;
 }
 
+char* keys_to_string(const char** keys, int num_keys)
+{
+    size_t single_key_len = strlen(keys[0]);
+    // Add enough extra characters for new lines
+    size_t keys_string_len = (single_key_len * num_keys) + num_keys;
+    char* keys_string = malloc(keys_string_len + 1);
+    if(keys_string == NULL)
+        return NULL;
+
+    for(int k = 0; k < num_keys; k++)
+        sprintf(&keys_string[k * (single_key_len + 1)], "%s%s", 
+            keys[k], (k+1 != num_keys) ? "\n" : "");
+    
+    keys_string[keys_string_len] = '\0';
+    return keys_string;
+}
+
 int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_write)
 {
     FILE* fout = fopen(filename, "wb");

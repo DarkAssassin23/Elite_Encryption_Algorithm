@@ -104,31 +104,6 @@ int decrypt_file(const char* filename, const char** keys, int num_keys)
 }
 
 /**
-* @brief Convert the array of keys to a single string so they can be 
-*   written to a file
-* @param[in] keys The keys that will be saved
-* @param[in] num_keys The number of keys that will be saved
-* @return The keys as a single string
-* @note The returned string must be freed 
-*/
-char* keys_to_string(const char** keys, int num_keys)
-{
-    size_t single_key_len = strlen(keys[0]);
-    // Add enough extra characters for new lines
-    size_t keys_string_len = (single_key_len * num_keys) + num_keys;
-    char* keys_string = malloc(keys_string_len + 1);
-    if(keys_string == NULL)
-        return NULL;
-
-    for(int k = 0; k < num_keys; k++)
-        sprintf(&keys_string[k * (single_key_len + 1)], "%s%s", 
-            keys[k], (k+1 != num_keys) ? "\n" : "");
-    
-    keys_string[keys_string_len] = '\0';
-    return keys_string;
-}
-
-/**
 * @brief Create new set of keys to use for encryption/decryption
 * @param[in] hash_type The kind of SHA has to use
 * @param[in] num_keys The number of keys to generate

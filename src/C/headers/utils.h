@@ -38,6 +38,16 @@ int keys_file_exists(void);
 char** get_all_keys_files(size_t* key_files_count);
 
 /**
+* @brief Convert the array of keys to a single string so they can be 
+*   written to a file
+* @param[in] keys The keys that will be saved
+* @param[in] num_keys The number of keys that will be saved
+* @return The keys as a single string
+* @note The returned string must be freed 
+*/
+char* keys_to_string(const char** keys, int num_keys);
+
+/**
 * @brief Save the cipher text to a file
 * @param[in] filename The file to save the data to
 * @param[in] data The data to be written to the file
