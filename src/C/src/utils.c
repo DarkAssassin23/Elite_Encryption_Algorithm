@@ -25,9 +25,9 @@ void message_digest_to_hash(unsigned char* md, char* hash, int digest_length)
         sprintf(&hash[x*2], "%02hhx", md[x]);
 }
 
-char* get_random_uint64_hexstr(void)
+char* get_random_hexstr(size_t size)
 {
-    unsigned char buffer[8];
+    unsigned char buffer[size];
     int tries = 0;
     int rc = 1;
     do

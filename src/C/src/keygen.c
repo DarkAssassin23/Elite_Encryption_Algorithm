@@ -13,7 +13,7 @@ static char* get_sha256_key(void)
         return NULL;
 
     unsigned char md[SHA256_DIGEST_LENGTH];
-    char* hexstr = get_random_uint64_hexstr();
+    char* hexstr = get_random_hexstr(DEFAULT_KEY_BYTES);
 
     SHA256((const unsigned char*)hexstr, strlen(hexstr), md);
     message_digest_to_hash(md, hash, SHA256_DIGEST_LENGTH);
@@ -29,7 +29,7 @@ static char* get_sha512_key(void)
         return NULL;
 
     unsigned char md[SHA512_DIGEST_LENGTH];
-    char* hexstr = get_random_uint64_hexstr();
+    char* hexstr = get_random_hexstr(DEFAULT_KEY_BYTES);
 
     SHA512((const unsigned char*)hexstr, strlen(hexstr), md);
     message_digest_to_hash(md, hash, SHA512_DIGEST_LENGTH);

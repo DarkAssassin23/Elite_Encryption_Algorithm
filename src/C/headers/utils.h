@@ -10,11 +10,11 @@
 void message_digest_to_hash(unsigned char* md, char* hash, int digest_length);
 
 /**
-* @brief Create a randomized hex number the size of a uint64_t and return 
-*   it as a string
-* @return Random uint64_t as a hex string
+* @brief Create a randomized hex number and return it as a string
+* @param[in] size The number of randomized bytes to create
+* @return Random hex number as a hex string
 */
-char* get_random_uint64_hexstr(void);
+char* get_random_hexstr(size_t size);
 
 /**
 * @brief Prompt the user for a password and return the result

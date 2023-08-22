@@ -1,6 +1,9 @@
 #pragma once
 
+#define DEFAULT_KEY_BYTES 8
+
 /**
+* @enum HASH_TYPE enum of the diffrent hash types
 * @brief Types of available hash functions
 * @details Types of hash functions where SHA1024 and 2048
 *   are a collection of SHA512 hashes to get to the length of what a 

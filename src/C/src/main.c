@@ -40,7 +40,7 @@ void test_hashing(void)
 {
     unsigned char md[SHA256_DIGEST_LENGTH];
     char hash[(SHA256_DIGEST_LENGTH * 2) + 1];
-    char* hexstr = get_random_uint64_hexstr();
+    char* hexstr = get_random_hexstr(DEFAULT_KEY_BYTES);
 
     SHA256((const unsigned char*)hexstr, strlen(hexstr), md);
     message_digest_to_hash(md, hash, SHA256_DIGEST_LENGTH);
