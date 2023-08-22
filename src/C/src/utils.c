@@ -97,32 +97,36 @@ char* get_password(const char* prompt)
     return password;
 }
 
-char* get_hashed_password(void)
+char* get_hashed_password(int set_password)
 {
-    char* password1 = get_password("Enter a password for the keys file: ");
-    char* password2 = get_password("Re-type password: ");
-
-    if(strlen(password1) != strlen(password2))
-    {
-        free(password1);
-        free(password2);
-        fprintf(stderr,"Error: Passwords don't match\n");
-        return NULL;
-    }
-    if(strcmp(password1, password2) != 0)
-    {
-        free(password1);
-        free(password2);
-        fprintf(stderr,"Error: Passwords don't match\n");
-        return NULL;
-    }
+    char* password1 = NULL;
     char* password_hash = malloc((SHA512_DIGEST_LENGTH * 2) + 1);
     if(password_hash == NULL)
-    {
-        free(password1);
-        free(password2);
         return NULL;
+    
+    if(set_password)
+    {
+        password1 = get_password("Enter a password for the keys file: ");
+        char* password2 = get_password("Re-type password: ");
+
+        if(strlen(password1) != strlen(password2))
+        {
+            free(password1);
+            free(password2);
+            fprintf(stderr,"Error: Passwords don't match\n");
+            return NULL;
+        }
+        if(strcmp(password1, password2) != 0)
+        {
+            free(password1);
+            free(password2);
+            fprintf(stderr,"Error: Passwords don't match\n");
+            return NULL;
+        }
+        free(password2);
     }
+    else
+        password1 = get_password("Password: ");
 
     unsigned char md[SHA512_DIGEST_LENGTH];
 
@@ -130,7 +134,6 @@ char* get_hashed_password(void)
     message_digest_to_hash(md, password_hash, SHA512_DIGEST_LENGTH);
 
     free(password1);
-    free(password2);
 
     if(password_hash == NULL)
         return NULL;

@@ -26,10 +26,11 @@ char* get_password(const char* prompt);
 
 /**
 * @brief Prompt the user for a password and return the result as a hash
+* @param[in] set_password Is the password being created or just entered
 * @return The password entered by the user as a hash
 * @note The returned password must be freed
 */
-char* get_hashed_password(void);
+char* get_hashed_password(int set_password);
 
 /**
 * @brief Checks to see if the file exists

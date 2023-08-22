@@ -73,7 +73,8 @@ size_t encrypt(unsigned char* data, size_t data_len,
 
 size_t encrypt_keys(char* keys_string, unsigned char** encrypted_string)
 {
-    char* password_hash = get_hashed_password();
+    // We are creating a password
+    char* password_hash = get_hashed_password(1);
     if(password_hash == NULL)
         return 0;
 

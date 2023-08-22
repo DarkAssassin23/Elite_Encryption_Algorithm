@@ -128,7 +128,8 @@ size_t decrypt(unsigned char* data, size_t data_len,
 size_t decrypt_keys(unsigned char* encrypted_string, size_t encrypted_size,
                     char** keys_string)
 {
-    char* password_hash = get_hashed_password();
+    // We are not setting the password
+    char* password_hash = get_hashed_password(0); 
     if(password_hash == NULL)
         return 0;
 
