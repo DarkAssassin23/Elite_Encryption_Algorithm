@@ -121,20 +121,37 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
         return 0;
     }
 
-    // TODO: look into encrypting this via AES
     char* keys_string = keys_to_string((const char**)keys, num_keys);
-    printf("Individual Keys: \n");
+    unsigned char* keys_encrypted = NULL;
+    size_t encrypted_keys_string_len = encrypt_keys(keys_string, &keys_encrypted);
+
+    // Here just for testing to make sure encrypting and decrypting the passwords works
+    printf("Pre-encrypt:\n%s\n",keys_string);
+    for(size_t c = 0; c < encrypted_keys_string_len; c++)
+        printf("%c"/*"%02hhx"*/, keys_encrypted[c]);
+    printf("\n");
+
+    char* keys_decrypted = NULL;
+    size_t keys_string_len = decrypt_keys(keys_encrypted, encrypted_keys_string_len, &keys_decrypted);
+
+    printf("post-encrypt:\n%s\n", keys_decrypted);
+    printf("encryption and decryption %s\n", (strcmp(keys_decrypted, keys_string) == 0 ? "succeeded" : "failed"));
+    free(keys_decrypted);
+    
+
+    // printf("Individual Keys: \n");
     for(int k = 0; k < num_keys; k++)
     {
-        printf("%d: %s\n",(k+1), keys[k]);
+        //printf("%d: %s\n",(k+1), keys[k]);
         free(keys[k]);
     }
-    printf("\nKeys as one string: %s\n", keys_string);
+    //printf("\nKeys as one string: %s\n", keys_string);
 
     if(filename == NULL)
         filename = DEFAULT_KEYS_FILE;
 
-    if(!save_to_file(filename, (unsigned char*)keys_string, strlen(keys_string)))
+    //if(!save_to_file(filename, (unsigned char*)keys_string, strlen(keys_string)))
+    if(!save_to_file(filename, keys_encrypted, keys_string_len))
     {
         fprintf(stderr, "Error saving keys\n");
         success = 0;
@@ -142,6 +159,7 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
 
     free(keys);
     free(keys_string);
+    free(keys_encrypted);
     return success;
 }
 

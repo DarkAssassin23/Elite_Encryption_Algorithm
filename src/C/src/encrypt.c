@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <openssl/sha.h>
 
+#include "globals.h"
+#include "utils.h"
 #include "encrypt.h"
-
-static const unsigned char PADDING = 0;
 
 /**
 * @brief Return the size of how big the resulting cipher text will be
@@ -68,4 +69,23 @@ size_t encrypt(unsigned char* data, size_t data_len,
     }
     *cipher_text = temp;
     return cipher_text_len;
+}
+
+size_t encrypt_keys(char* keys_string, unsigned char** encrypted_string)
+{
+    char* password_hash = get_hashed_password();
+    if(password_hash == NULL)
+        return 0;
+
+    unsigned char* encrypted_keys = (unsigned char*)strdup(keys_string);
+    size_t encrypted_keys_len = strlen(keys_string);
+    for(int x = 0; x < ROUNDS; x++)
+    {
+        encrypted_keys_len = encrypt(encrypted_keys, 
+                    encrypted_keys_len, &encrypted_keys, 
+                    (const char**)&password_hash, 1);
+    }
+    *encrypted_string = encrypted_keys;
+    free(password_hash);
+    return encrypted_keys_len;
 }

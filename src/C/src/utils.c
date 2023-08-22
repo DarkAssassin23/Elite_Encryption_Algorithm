@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <openssl/sha.h>
 
-#ifdef WIN32
-#include <io.h>
-#define F_OK 0
-#define access _access
-#else
+// #ifdef WIN32
+// #include <io.h>
+// #define F_OK 0
+// #define access _access
+// #else
 #include <unistd.h>
-#endif
+#include <termios.h>
+// #endif
 
 #include <openssl/rand.h>
 
@@ -50,6 +52,90 @@ char* get_random_uint64_hexstr(void)
         sprintf(&hexstr[x*2], "%02hhx", buffer[x]);
 
     return hexstr;
+}
+
+/**
+* @see https://stackoverflow.com/a/1786733
+*/
+char* get_password(const char* prompt)
+{
+    printf("%s", prompt);
+    static struct termios oldt, newt;
+    int i = 0;
+    int c;
+    size_t password_max_len = 8;
+    char* password = malloc(password_max_len);
+    if(password == NULL)
+        return NULL;
+
+    /*saving the old settings of STDIN_FILENO and copy settings for resetting*/
+    tcgetattr( STDIN_FILENO, &oldt);
+    newt = oldt;
+
+    /*setting the approriate bit in the termios struct*/
+    newt.c_lflag &= ~(ECHO);          
+
+    /*setting the new bits*/
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+
+    /*reading the password from the console*/
+    while ((c = getchar())!= '\n' && c != EOF)
+    {
+        if(i+1 == password_max_len)
+        {
+            password = realloc(password, password_max_len *= 2);
+            if(password == NULL)
+                return NULL;
+        }
+        password[i++] = c;
+    }
+    password[i] = '\0';
+
+    /*resetting our old STDIN_FILENO*/ 
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
+    printf("\n");
+    return password;
+}
+
+char* get_hashed_password(void)
+{
+    char* password1 = get_password("Enter a password for the keys file: ");
+    char* password2 = get_password("Re-type password: ");
+
+    if(strlen(password1) != strlen(password2))
+    {
+        free(password1);
+        free(password2);
+        fprintf(stderr,"Error: Passwords don't match\n");
+        return NULL;
+    }
+    if(strcmp(password1, password2) != 0)
+    {
+        free(password1);
+        free(password2);
+        fprintf(stderr,"Error: Passwords don't match\n");
+        return NULL;
+    }
+    char* password_hash = malloc((SHA512_DIGEST_LENGTH * 2) + 1);
+    if(password_hash == NULL)
+    {
+        free(password1);
+        free(password2);
+        return NULL;
+    }
+
+    unsigned char md[SHA512_DIGEST_LENGTH];
+
+    SHA512((const unsigned char*)password1, strlen(password1), md);
+    message_digest_to_hash(md, password_hash, SHA512_DIGEST_LENGTH);
+
+    free(password1);
+    free(password2);
+
+    if(password_hash == NULL)
+        return NULL;
+
+    return password_hash;
 }
 
 int file_exists(const char* filename)

@@ -17,6 +17,21 @@ void message_digest_to_hash(unsigned char* md, char* hash, int digest_length);
 char* get_random_uint64_hexstr(void);
 
 /**
+* @brief Prompt the user for a password and return the result
+* @param[in] prompt The prompt to display to the user
+* @return The password entered by the user
+* @note The returned password must be freed
+*/
+char* get_password(const char* prompt);
+
+/**
+* @brief Prompt the user for a password and return the result as a hash
+* @return The password entered by the user as a hash
+* @note The returned password must be freed
+*/
+char* get_hashed_password(void);
+
+/**
 * @brief Checks to see if the file exists
 * @param[in] filename File to see if it exists
 * @return If the file exists
