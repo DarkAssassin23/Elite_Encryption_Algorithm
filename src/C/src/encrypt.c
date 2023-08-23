@@ -5,6 +5,8 @@
 
 #include "globals.h"
 #include "utils.h"
+#include "prompts.h"
+#include "file_handling.h"
 #include "encrypt.h"
 
 /**
@@ -89,4 +91,40 @@ size_t encrypt_keys(char* keys_string, unsigned char** encrypted_string)
     *encrypted_string = encrypted_keys;
     free(password_hash);
     return encrypted_keys_len;
+}
+
+int encrypt_file(const char* filename, const char** keys, int num_keys)
+{
+    int success = 1;
+    // int num_keys = 3;
+    // char** keys = generate_keys(HASH_TYPE_SHA256, num_keys);
+
+    unsigned char* data = NULL;
+    size_t file_size = read_in_file(filename, &data);
+    if(file_size == -1)
+        return 0;
+
+    // printf("File contents: %s\n", data);
+    // printf("File size: %zu bytes\n", file_size);
+
+    unsigned char* cipher_text = NULL;
+    size_t cipher_text_size = encrypt(data, file_size, &cipher_text, 
+                                        keys, num_keys);
+    if(cipher_text == NULL)
+        return 0;
+
+    char* output_file = get_output_filename(filename, 1);
+
+    // printf("Cipher text: %s\n", cipher_text);
+    // printf("Cipher text size: %zu\n", cipher_text_size);
+    if(!save_to_file(output_file, cipher_text, cipher_text_size))
+    {
+        printf("Error saving data to the file\n");
+        success = 0;
+    }
+
+    free(data);
+    free(cipher_text);
+    free(output_file);
+    return success;
 }

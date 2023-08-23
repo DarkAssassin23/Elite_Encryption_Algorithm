@@ -20,3 +20,12 @@ size_t encrypt(unsigned char* data, size_t data_len,
 * @return Length of encrypted key string
 */
 size_t encrypt_keys(char* keys_string, unsigned char** encrypted_string);
+
+/**
+* @brief Encrypt the given file with the given keys
+* @param[in] filename The file to be encrypted
+* @param[in] keys The keys to be used for encryption
+* @param[in] num_keys The number of keys that are being used
+* @return If the file was encrypted successfully 
+*/
+int encrypt_file(const char* filename, const char** keys, int num_keys);

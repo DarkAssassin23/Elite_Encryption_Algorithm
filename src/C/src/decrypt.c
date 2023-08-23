@@ -4,6 +4,8 @@
 
 #include "globals.h"
 #include "utils.h"
+#include "prompts.h"
+#include "file_handling.h"
 #include "decrypt.h"
 
 /**
@@ -151,4 +153,33 @@ size_t decrypt_keys(unsigned char* encrypted_string, size_t encrypted_size,
     *keys_string = (char*)decrypted_keys;
     free(password_hash);
     return decrypted_keys_len;
+}
+
+int decrypt_file(const char* filename, const char** keys, int num_keys)
+{
+    int success = 1;
+    unsigned char* plain_text = NULL;
+    unsigned char* cipher_text = NULL;
+    size_t file_size = read_in_file(filename, &cipher_text);
+    if(file_size == -1)
+        return 0;
+
+    size_t plain_text_size = decrypt(cipher_text, file_size, &plain_text, keys, num_keys);
+    if(plain_text == NULL)
+        return 0;
+
+    // printf("Plain text: %s\n", (char*)plain_text);
+    // printf("Plain text size: %zu\n", plain_text_size);
+
+    char* output_file = get_output_filename(filename, 0);
+    if(!save_to_file(output_file, plain_text, plain_text_size))
+    {
+        printf("Error saving data to the file\n");
+        success = 0;
+    }
+
+    free(cipher_text);
+    free(plain_text);
+    free(output_file);
+    return success;
 }

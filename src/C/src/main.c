@@ -8,7 +8,8 @@
 #include "keygen.h"
 #include "encrypt.h"
 #include "decrypt.h"
-#include "args.h"
+#include "file_handling.h"
+#include "menu.h"
 #include "app_functions.h"
 
 void test_keygen(void)

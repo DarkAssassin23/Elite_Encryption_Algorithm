@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "args.h"
+#include "globals.h"
+#include "menu.h"
 
 void print_main_menu(void)
 {
@@ -17,7 +18,8 @@ void print_key_gen_menu(void)
     printf("Select how large would you like your keys to be: \n");
     for(size_t x = 0; x < num_key_gen_menu_items; x++)
         printf("%s\n", key_gen_menu_items[x]);
-    printf("(1-%zu) or 'q' to quit: ", num_key_gen_menu_items);
+    printf("(1-%zu) or 'q' to quit (default: %d): ", 
+        num_key_gen_menu_items, DEFAULT_KEY_SELECTION);
 }
 
 void print_manage_keys_menu(void)
