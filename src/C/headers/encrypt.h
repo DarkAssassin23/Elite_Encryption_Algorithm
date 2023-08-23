@@ -14,12 +14,13 @@ size_t encrypt(unsigned char* data, size_t data_len,
 
 /**
 * @brief Encrypt the keys prior to saving them to a file with a password
-* @param[in] keys_string The string containing all the keys
+* @param[in] keys The keys to be encrypted
+* @param[in] num_keys The number of keys being encrypted
 * @param[out] encrypted_string The string of keys encrypted
 * @note encrypted_string must be freed
 * @return Length of encrypted key string
 */
-size_t encrypt_keys(char* keys_string, unsigned char** encrypted_string);
+size_t encrypt_keys(char** keys, int num_keys, unsigned char** encrypted_string);
 
 /**
 * @brief Encrypt the given file with the given keys

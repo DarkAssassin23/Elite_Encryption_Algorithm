@@ -30,15 +30,17 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
         return 0;
     }
 
+    // Here for testing
     char* keys_string = keys_to_string((const char**)keys, num_keys);
+
     unsigned char* keys_encrypted = NULL;
-    size_t encrypted_keys_string_len = encrypt_keys(keys_string, &keys_encrypted);
+    size_t encrypted_keys_string_len = encrypt_keys(keys, num_keys, &keys_encrypted);
 
     // Here just for testing to make sure encrypting and decrypting the passwords works
-    printf("Pre-encrypt:\n%s\n",keys_string);
-    for(size_t c = 0; c < encrypted_keys_string_len; c++)
-        printf("%c"/*"%02hhx"*/, keys_encrypted[c]);
-    printf("\n");
+    // printf("Pre-encrypt:\n%s\n",keys_string);
+    // for(size_t c = 0; c < encrypted_keys_string_len; c++)
+    //     printf("%c"/*"%02hhx"*/, keys_encrypted[c]);
+    // printf("\n");
 
     char* keys_decrypted = NULL;
     size_t keys_string_len = decrypt_keys(keys_encrypted, encrypted_keys_string_len, &keys_decrypted);

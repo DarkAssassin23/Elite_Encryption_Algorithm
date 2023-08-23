@@ -73,20 +73,37 @@ size_t encrypt(unsigned char* data, size_t data_len,
     return cipher_text_len;
 }
 
-size_t encrypt_keys(char* keys_string, unsigned char** encrypted_string)
+size_t encrypt_keys(char** keys, int num_keys, unsigned char** encrypted_string)
 {
     // We are creating a password
     char* password_hash = get_hashed_password(1);
     if(password_hash == NULL)
         return 0;
+    
+    size_t key_size = strlen(keys[0]);
 
-    unsigned char* encrypted_keys = (unsigned char*)strdup(keys_string);
-    size_t encrypted_keys_len = strlen(keys_string);
+    // Add salt to harden the encryption since we are only using
+    // the one key that comes from the password
+    char* salt = get_random_hexstr(key_size / 2);
+    char* keys_string = keys_to_string((const char**)keys, num_keys);
+    size_t encrypted_keys_len = (key_size + 1) + strlen(keys_string);
+    unsigned char* encrypted_keys = malloc(encrypted_keys_len);//(unsigned char*)strdup(keys_string);
+    if(encrypted_keys == NULL)
+        return 0;
+
+    memcpy(encrypted_keys, salt, strlen(salt));
+    encrypted_keys[key_size] = '\n';
+    memcpy(encrypted_keys + (key_size + 1), keys_string, strlen(keys_string));
+
+    free(salt);
+    free(keys_string);
     for(int x = 0; x < ROUNDS; x++)
     {
-        encrypted_keys_len = encrypt(encrypted_keys, 
+        unsigned char* unchanged = encrypted_keys;
+        encrypted_keys_len = encrypt(unchanged, 
                     encrypted_keys_len, &encrypted_keys, 
                     (const char**)&password_hash, 1);
+        free(unchanged);
     }
     *encrypted_string = encrypted_keys;
     free(password_hash);

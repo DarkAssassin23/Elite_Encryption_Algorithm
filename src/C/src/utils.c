@@ -33,7 +33,7 @@ char* get_random_hexstr(size_t size)
         exit(rc);
     }
 
-    char *hexstr = malloc((sizeof(buffer) * 2)+ 1);
+    char *hexstr = malloc((sizeof(buffer) * 2) + 1);
     if(hexstr == NULL)
         return NULL;
 

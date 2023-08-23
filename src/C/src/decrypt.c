@@ -135,22 +135,21 @@ size_t decrypt_keys(unsigned char* encrypted_string, size_t encrypted_size,
     if(password_hash == NULL)
         return 0;
 
-    unsigned char* decrypted_keys = NULL;
-    //memcpy(decrypted_keys, encrypted_string, encrypted_size);
+    unsigned char* decrypted_keys = malloc(encrypted_size);
+    memcpy(decrypted_keys, encrypted_string, encrypted_size);
     size_t decrypted_keys_len = encrypted_size;
     for(int x = 0; x < ROUNDS; x++)
     {
-        if(x == 0)
-            decrypted_keys_len = decrypt(encrypted_string, 
-                    encrypted_size, &decrypted_keys, 
-                    (const char**)&password_hash, 1);
-        else
-            decrypted_keys_len = decrypt(decrypted_keys, 
-                    decrypted_keys_len, &decrypted_keys, 
-                    (const char**)&password_hash, 1);
+        unsigned char* unchanged = decrypted_keys;
+        decrypted_keys_len = decrypt(unchanged, 
+            decrypted_keys_len, &decrypted_keys, 
+            (const char**)&password_hash, 1);
+        free(unchanged);
     }
 
-    *keys_string = (char*)decrypted_keys;
+    // Remove the salt
+    *keys_string = strdup(strchr((char*)decrypted_keys, '\n') + 1);
+    free(decrypted_keys);
     free(password_hash);
     return decrypted_keys_len;
 }
