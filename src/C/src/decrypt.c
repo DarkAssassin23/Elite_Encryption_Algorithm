@@ -149,6 +149,9 @@ size_t decrypt_keys(unsigned char* encrypted_string, size_t encrypted_size,
 
     // Remove the salt
     *keys_string = strdup(strchr((char*)decrypted_keys, '\n') + 1);
+    size_t key_len = find_key_len((char*)decrypted_keys);
+    decrypted_keys_len -= key_len;
+
     free(decrypted_keys);
     free(password_hash);
     return decrypted_keys_len;

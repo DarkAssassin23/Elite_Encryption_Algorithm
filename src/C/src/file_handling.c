@@ -63,8 +63,8 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
         free(keys_string);
         return 0;
     }
-    // Minus 1 since the string key len includes the salt
-    int num_keys = (key_string_len / key_len) - 1;
+
+    int num_keys = (key_string_len / key_len);
     size_t index = 0;
     char** keys = malloc(sizeof(char*) * num_keys);
     if(keys == NULL)
