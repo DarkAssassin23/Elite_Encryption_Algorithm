@@ -59,3 +59,19 @@ char* keys_to_string(const char** keys, int num_keys)
     keys_string[keys_string_len] = '\0';
     return keys_string;
 }
+
+size_t find_key_len(const char* keys_string)
+{
+    // Minimum key length
+    size_t key_len = 64;
+    size_t keys_string_len = strlen(keys_string);
+    while(key_len < keys_string_len)
+    {
+        if(keys_string[key_len] == '\n' || keys_string[key_len] == EOF)
+            return key_len;
+        key_len *= 2;
+    }
+
+    // No keys were found
+    return -1;
+}

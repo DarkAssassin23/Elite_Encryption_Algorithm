@@ -42,18 +42,18 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
     //     printf("%c"/*"%02hhx"*/, keys_encrypted[c]);
     // printf("\n");
 
-    char* keys_decrypted = NULL;
-    size_t keys_string_len = decrypt_keys(keys_encrypted, encrypted_keys_string_len, &keys_decrypted);
+    // char* keys_decrypted = NULL;
+    // size_t keys_string_len = decrypt_keys(keys_encrypted, encrypted_keys_string_len, &keys_decrypted);
 
-    printf("post-encrypt:\n%s\n", keys_decrypted);
-    printf("encryption and decryption %s\n", (strcmp(keys_decrypted, keys_string) == 0 ? "succeeded" : "failed"));
-    free(keys_decrypted);
+    // printf("post-encrypt:\n%s\n", keys_decrypted);
+    // printf("encryption and decryption %s\n", (strcmp(keys_decrypted, keys_string) == 0 ? "succeeded" : "failed"));
+    // free(keys_decrypted);
     
 
     // printf("Individual Keys: \n");
     for(int k = 0; k < num_keys; k++)
     {
-        //printf("%d: %s\n",(k+1), keys[k]);
+        printf("%d: %s\n",(k+1), keys[k]);
         free(keys[k]);
     }
     //printf("\nKeys as one string: %s\n", keys_string);
@@ -62,7 +62,7 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
         filename = DEFAULT_KEYS_FILE;
 
     //if(!save_to_file(filename, (unsigned char*)keys_string, strlen(keys_string)))
-    if(!save_to_file(filename, keys_encrypted, keys_string_len))
+    if(!save_to_file(filename, keys_encrypted, encrypted_keys_string_len))
     {
         fprintf(stderr, "Error saving keys\n");
         success = 0;
@@ -71,6 +71,17 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
     free(keys);
     free(keys_string);
     free(keys_encrypted);
+
+    char** keys_decrypted = NULL;
+    size_t key_len = 0;
+    keys_decrypted = load_keys_from_file(filename, &num_keys, &key_len);
+    for(int k = 0; k < num_keys; k++)
+    {
+        printf("%d: %s\n",(k+1), keys_decrypted[k]);
+        free(keys_decrypted[k]);
+    }
+
+    free(keys_decrypted);
     return success;
 }
 

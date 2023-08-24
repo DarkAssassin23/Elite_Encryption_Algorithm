@@ -11,6 +11,16 @@
 char* get_output_filename(const char* filename, int encrypting);
 
 /**
+* @brief Load in the keys for encryption form they key file
+* @param[in] filename The name of the file to load the keys from
+* @param[out] total_keys The number of keys loaded in from the file
+* @param[out] key_len The length of an individual key
+* @return The keys loaded in from the file
+* @note The keys must be freed
+*/
+char** load_keys_from_file(const char* filename, int* total_keys, size_t* len);
+
+/**
 * @brief Checks to see if the file exists
 * @param[in] filename File to see if it exists
 * @return If the file exists

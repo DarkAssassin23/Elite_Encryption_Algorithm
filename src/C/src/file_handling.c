@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <dirent.h>
 #include <unistd.h>
 
+#include "utils.h"
+#include "decrypt.h"
 #include "file_handling.h"
 
 char* get_output_filename(const char* filename, int encrypting)
@@ -30,6 +33,61 @@ char* get_output_filename(const char* filename, int encrypting)
     output_filename[output_filename_len] = '\0';
 
     return output_filename;
+}
+
+char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
+{
+    // Make sure the file exists and it is a keys file
+    if(!file_exists(filename) || !is_keys_file(filename))
+        return 0;
+
+    unsigned char* encrypted_keys_string = NULL;
+    size_t file_size = read_in_file(filename, &encrypted_keys_string);
+    if(encrypted_keys_string == NULL)
+        return 0;
+
+    char* keys_string = NULL;
+    size_t key_string_len = decrypt_keys(encrypted_keys_string,
+                                            file_size, &keys_string);
+                                        
+    free(encrypted_keys_string);
+    if(keys_string == NULL)
+        return 0;
+
+    size_t key_len = find_key_len(keys_string);
+    if(key_string_len < key_len)
+    {
+        fprintf(stderr, "An error occured decrypting your keys.\n"
+            "Make sure the keys in this file are valid "
+            "and you entered the correct password");
+        free(keys_string);
+        return 0;
+    }
+    // Minus 1 since the string key len includes the salt
+    int num_keys = (key_string_len / key_len) - 1;
+    size_t index = 0;
+    char** keys = malloc(sizeof(char*) * num_keys);
+    if(keys == NULL)
+        return 0;
+
+    for(int k = 0; k < num_keys; k++)
+    {
+        char* key = malloc(key_len + 1);
+        if(key == NULL)
+        {
+            fprintf(stderr, "Error occurred mallocing memory for keys. "
+                "Aborting...");
+            exit(EXIT_FAILURE);
+        }
+        strncpy(key, &keys_string[index], key_len);
+        key[key_len] = '\0';
+        keys[k] = key;
+        index += key_len + 1;
+    }
+    free(keys_string);
+    *len = key_len;
+    *total_keys = num_keys;
+    return keys;
 }
 
 int file_exists(const char* filename)
@@ -147,6 +205,7 @@ size_t read_in_file(const char* filename, unsigned char** buffer)
 
     size_t read_bytes = fread(*buffer, sizeof(unsigned char), file_size, fin);
     fclose(fin);
-    buffer[read_bytes] = 0;
+    printf("%zu vs %zu\n", file_size, read_bytes);
+    //buffer[read_bytes] = 0;
     return read_bytes;
 }

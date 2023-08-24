@@ -25,3 +25,10 @@ char* get_random_hexstr(size_t size);
 * @note The returned string must be freed 
 */
 char* keys_to_string(const char** keys, int num_keys);
+
+/**
+* @brief Find the length of each key, given a string of keys
+* @param[in] keys_string The string of keys
+* @return The length of the keys
+*/
+size_t find_key_len(const char* keys_string);
