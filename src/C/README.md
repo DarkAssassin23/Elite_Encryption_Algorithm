@@ -2,6 +2,10 @@
 
 ## About
 The Elite Encryption Algorithm (EEA) implemented in C
+> **Warning**:
+> This implementation encrypts your keys via password. There are some
+> checks to help make sure you enter your password correctly, but it is not 
+> full-proof.
 
 ## Dependencies
 This implementation of EEA depends on having `openssl`. It can be installed

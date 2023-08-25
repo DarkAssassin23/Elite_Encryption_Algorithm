@@ -39,12 +39,12 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
 {
     // Make sure the file exists and it is a keys file
     if(!file_exists(filename) || !is_keys_file(filename))
-        return 0;
+        return NULL;
 
     unsigned char* encrypted_keys_string = NULL;
     size_t file_size = read_in_file(filename, &encrypted_keys_string);
     if(encrypted_keys_string == NULL)
-        return 0;
+        return NULL;
 
     char* keys_string = NULL;
     size_t key_string_len = decrypt_keys(encrypted_keys_string,
@@ -52,23 +52,23 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
                                         
     free(encrypted_keys_string);
     if(keys_string == NULL)
-        return 0;
+        return NULL;
 
     size_t key_len = find_key_len(keys_string);
     if(key_string_len < key_len)
     {
         fprintf(stderr, "An error occured decrypting your keys.\n"
             "Make sure the keys in this file are valid "
-            "and you entered the correct password");
+            "and you entered the correct password\n");
         free(keys_string);
-        return 0;
+        return NULL;
     }
 
     int num_keys = (key_string_len / key_len);
     size_t index = 0;
     char** keys = malloc(sizeof(char*) * num_keys);
     if(keys == NULL)
-        return 0;
+        return NULL;
 
     for(int k = 0; k < num_keys; k++)
     {
@@ -87,6 +87,13 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
     free(keys_string);
     *len = key_len;
     *total_keys = num_keys;
+    if(!validate_keys((const char**)keys, num_keys))
+    {
+        fprintf(stderr,"Error: Invalid keys detected\n"
+            "Make sure you entered your password correctly\n");
+
+        exit(EXIT_FAILURE);
+    }
     return keys;
 }
 
@@ -180,8 +187,7 @@ int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_writ
         return 0;
     }
 
-    size_t bytes_written = fwrite(data, sizeof(data[0]), bytes_to_write, fout);
-    printf("Wrote %zu bytes out of %zu requested\n", bytes_written,  bytes_to_write);
+    fwrite(data, sizeof(data[0]), bytes_to_write, fout);
     fclose(fout);
     return 1;
 }
@@ -205,7 +211,6 @@ size_t read_in_file(const char* filename, unsigned char** buffer)
 
     size_t read_bytes = fread(*buffer, sizeof(unsigned char), file_size, fin);
     fclose(fin);
-    printf("%zu vs %zu\n", file_size, read_bytes);
-    //buffer[read_bytes] = 0;
+
     return read_bytes;
 }

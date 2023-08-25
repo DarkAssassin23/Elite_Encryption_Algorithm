@@ -60,14 +60,27 @@ char* keys_to_string(const char** keys, int num_keys)
     return keys_string;
 }
 
+/**
+* @see https://stackoverflow.com/a/8393473
+*/
+int validate_keys(const char** keys, int num_keys)
+{
+    for(int k = 0; k < num_keys; k++)
+    {
+        if(keys[k][strspn(keys[k], "0123456789abcdefABCDEF")] != 0)
+            return 0;
+    }
+    return 1;
+}
 size_t find_key_len(const char* keys_string)
 {
     // Minimum key length
     size_t key_len = 64;
     size_t keys_string_len = strlen(keys_string);
-    while(key_len < keys_string_len)
+
+    while(key_len <= keys_string_len)
     {
-        if(keys_string[key_len] == '\n' || keys_string[key_len] == EOF)
+        if(keys_string[key_len] == '\n' || keys_string[key_len] == '\0')
             return key_len;
         key_len *= 2;
     }

@@ -27,6 +27,14 @@ char* get_random_hexstr(size_t size);
 char* keys_to_string(const char** keys, int num_keys);
 
 /**
+* @brief Checks to see if they keys are valid
+* @param[in] keys The keys that will be checked
+* @param[in] num_keys The number of keys
+* @return If they keys are valid
+*/
+int validate_keys(const char** keys, int num_keys);
+
+/**
 * @brief Find the length of each key, given a string of keys
 * @param[in] keys_string The string of keys
 * @return The length of the keys
