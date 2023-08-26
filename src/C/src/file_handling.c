@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "globals.h"
@@ -139,6 +140,22 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
 int file_exists(const char* filename)
 {
     return (access(filename, F_OK) == 0);
+}
+
+int get_file_type(const char* path)
+{
+    if(!file_exists(path))
+        return FILE_TYPE_NA;
+
+    struct stat path_stat;
+    stat(path, &path_stat);
+    if(S_ISREG(path_stat.st_mode))
+        return FILE_TYPE_REG;
+
+    if(S_ISDIR(path_stat.st_mode))
+        return FILE_TYPE_DIR;
+
+    return FILE_TYPE_OTHER;
 }
 
 int is_of_filetype(const char* filename, const char* extention)

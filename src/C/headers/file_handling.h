@@ -1,6 +1,18 @@
 #pragma once
 
 /**
+* @enum FILE_TYPE
+* @brief The kind of value returned from get_file_type()
+*/
+typedef enum
+{
+    FILE_TYPE_NA = -2,
+    FILE_TYPE_OTHER = -1,
+    FILE_TYPE_DIR = 0,
+    FILE_TYPE_REG = 1
+}FILE_TYPE;
+
+/**
 * @brief Get the name of the output file based on if you are encrypting or
 *   decrypting
 * @param[in] filename Current name of the file
@@ -34,6 +46,16 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len);
 * @return If the file exists
 */
 int file_exists(const char* filename);
+
+/**
+* @brief Checks to see what kind of file type it is
+* @param[in] path Path to file/directory to see its file type
+* @return -2 - file doesn't exist, 
+*         -1 - other,
+*          0 - directory, 
+*          1 - regular file, 
+*/
+int get_file_type(const char* path);
 
 /**
 * @brief Check if the given file is of the given file extention

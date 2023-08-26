@@ -172,9 +172,6 @@ int decrypt_file(const char* filename, const char** keys, int num_keys)
     if(plain_text == NULL)
         return 0;
 
-    // printf("Plain text: %s\n", (char*)plain_text);
-    // printf("Plain text size: %zu\n", plain_text_size);
-
     char* output_file = get_output_filename(filename, 0);
     if(!save_to_file(output_file, plain_text, plain_text_size))
     {

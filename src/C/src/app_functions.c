@@ -313,6 +313,38 @@ static int handle_no_keys(void)
     return success;
 }
 
+static void encrypt_single_file(void)
+{
+    // Menu for files vs directories and ghost mode
+    char* filename = get_input_filename(1); // We are encrypting
+    if(filename == NULL)
+        return;
+
+    if(get_file_type(filename) != FILE_TYPE_REG)
+    {
+        fprintf(stderr, "Error: %s is not a regular file\n", filename);
+        free(filename);
+        return;
+    }
+
+    int num_keys = 0;
+    char** keys = load_keys(&num_keys);
+
+    if(keys == NULL)
+        return;
+
+    if(encrypt_file(filename, (const char**)keys, num_keys))
+        printf("%s was encrypted successfully\n", filename);
+    else
+        fprintf(stderr,"Error: Failed to encrypt %s\n", filename);
+    
+    free(filename);
+    for(int k = 0; k < num_keys; k++)
+        free(keys[k]);
+    free(keys);
+    return;
+}
+
 void manage_keys(void)
 {
     handle_no_keys();
@@ -366,30 +398,10 @@ void do_encryption(void)
         printf("You cannot encrypt files without having a keys file\n");
         return;
     }
-    while(1)
-    {
-        // Menu for files vs directories and ghost mode
-        char* filename = get_input_filename(1); // We are encrypting
-        if(filename == NULL)
-            return;
-
-        int num_keys = 0;
-        char** keys = load_keys(&num_keys);
-
-        if(keys == NULL)
-            return;
-
-        if(encrypt_file(filename, (const char**)keys, num_keys))
-            printf("%s was encrypted successfully\n", filename);
-        else
-            fprintf(stderr,"Error: Failed to encrypt %s\n", filename);
-        
-        free(filename);
-        for(int k = 0; k < num_keys; k++)
-            free(keys[k]);
-        free(keys);
-        return;
-    }
+    // while(1)
+    // {
+    encrypt_single_file();
+    // }
 }
 
 void do_decryption(void)
