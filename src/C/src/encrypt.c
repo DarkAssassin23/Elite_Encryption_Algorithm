@@ -121,9 +121,6 @@ int encrypt_file(const char* filename, const char** keys, int num_keys)
     if(file_size == -1)
         return 0;
 
-    // printf("File contents: %s\n", data);
-    // printf("File size: %zu bytes\n", file_size);
-
     unsigned char* cipher_text = NULL;
     size_t cipher_text_size = encrypt(data, file_size, &cipher_text, 
                                         keys, num_keys);
@@ -132,11 +129,10 @@ int encrypt_file(const char* filename, const char** keys, int num_keys)
 
     char* output_file = get_output_filename(filename, 1);
 
-    // printf("Cipher text: %s\n", cipher_text);
-    // printf("Cipher text size: %zu\n", cipher_text_size);
     if(!save_to_file(output_file, cipher_text, cipher_text_size))
     {
-        printf("Error saving data to the file\n");
+        fprintf(stderr, "%sError:%s Saving data to the file failed\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
         success = 0;
     }
 

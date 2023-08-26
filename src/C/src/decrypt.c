@@ -40,7 +40,8 @@ static void decrypt_multi_block(unsigned char* data, size_t data_len,
     unsigned char* temp = malloc(data_len);
     if(temp == NULL)
     {
-        printf("Error: unable to allocate memory for decryption.\n");
+        fprintf(stderr, "%sError:%s Unable to allocate memory for "
+            "decryption.\n", colors[COLOR_ERROR], colors[COLOR_RESET]);
         exit(EXIT_FAILURE);
     }
     memcpy(temp, *being_decrypted, data_len);
@@ -175,7 +176,8 @@ int decrypt_file(const char* filename, const char** keys, int num_keys)
     char* output_file = get_output_filename(filename, 0);
     if(!save_to_file(output_file, plain_text, plain_text_size))
     {
-        printf("Error saving data to the file\n");
+        fprintf(stderr, "%sError:%s Saving data to the file failed\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET]);
         success = 0;
     }
 

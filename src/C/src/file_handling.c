@@ -53,7 +53,8 @@ char* get_input_filename(int encrypting)
     line_len--;
     if(!file_exists(line))
     {
-        fprintf(stderr, "Error: The file, \'%s\', does not exist\n", line);
+        fprintf(stderr, "%sError:%s The file, \'%s\', does not exist\n", 
+            colors[COLOR_ERROR], colors[COLOR_RESET], line);
         free(line);
         return NULL;
     }
@@ -62,8 +63,9 @@ char* get_input_filename(int encrypting)
     {
         if(!is_of_filetype(line, EEA_FILE_EXTENTION))
         {
-            fprintf(stderr, "Error: The file needs to be a \'%s\' file "
-                "in order to be decrypted\n", EEA_FILE_EXTENTION);
+            fprintf(stderr, "%sError:%s The file needs to be a \'%s\' file "
+                "in order to be decrypted\n", 
+                colors[COLOR_ERROR], colors[COLOR_RESET], EEA_FILE_EXTENTION);
             free(line);
             return NULL;
         }
@@ -97,9 +99,10 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
     size_t key_len = find_key_len(keys_string);
     if(key_string_len < key_len)
     {
-        fprintf(stderr, "An error occured decrypting your keys.\n"
+        fprintf(stderr, "%sError:%s Failed to decrypt your keys.\n"
             "Make sure the keys in this file are valid "
-            "and you entered the correct password\n");
+            "and you entered the correct password\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET]);
         free(keys_string);
         return NULL;
     }
@@ -115,8 +118,8 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
         char* key = malloc(key_len + 1);
         if(key == NULL)
         {
-            fprintf(stderr, "Error occurred mallocing memory for keys. "
-                "Aborting...");
+            fprintf(stderr, "%sError:%s Mallocing memory for keys failed. "
+                "Aborting...", colors[COLOR_ERROR], colors[COLOR_RESET]);
             exit(EXIT_FAILURE);
         }
         strncpy(key, &keys_string[index], key_len);
@@ -129,8 +132,9 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
     *total_keys = num_keys;
     if(!validate_keys((const char**)keys, num_keys))
     {
-        fprintf(stderr,"Error: Invalid keys detected\n"
-            "Make sure you entered your password correctly\n");
+        fprintf(stderr,"%sError:%s Invalid keys detected\n"
+            "Make sure you entered your password correctly\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET]);
 
         exit(EXIT_FAILURE);
     }
@@ -239,7 +243,8 @@ int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_writ
     FILE* fout = fopen(filename, "wb");
     if(fout == NULL)
     {
-        printf("Error opening file \'%s\'\n", filename);
+        fprintf(stderr, "%sError:%s Failed to open the file \'%s\'\n", 
+            colors[COLOR_ERROR], colors[COLOR_RESET], filename);
         return 0;
     }
 
@@ -253,7 +258,8 @@ size_t read_in_file(const char* filename, unsigned char** buffer)
     FILE* fin = fopen(filename, "rb");
     if(fin == NULL)
     {
-        printf("Error opening file \'%s\'\n", filename);
+        fprintf(stderr, "%sError:%s Failed to open the file \'%s\'\n", 
+            colors[COLOR_ERROR], colors[COLOR_RESET], filename);
         return -1;
     }
 

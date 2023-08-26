@@ -15,6 +15,13 @@ int prompt_for_keys_filename(char** filename);
 int prompt_for_num_keys(void);
 
 /**
+* @brief Warn the user they are about to use ghost mode and ask if they
+*       wish to proceed
+* @return Whether or not to proceed with ghost mode
+*/
+int prompt_for_ghost_mode_confirmation(void);
+
+/**
 * @brief Prompt the user for a password and return the result
 * @param[in] prompt The prompt to display to the user
 * @return The password entered by the user

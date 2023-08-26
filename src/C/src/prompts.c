@@ -108,6 +108,27 @@ int prompt_for_num_keys(void)
     }
 }
 
+int prompt_for_ghost_mode_confirmation(void)
+{
+    int success = 0;
+    printf("%sWarning:%s You are about to encrypt the data "
+        "with one time use keys.\nYou will be unable to decrypt the data "
+        "unless you manually copy down\nthe keys after you encrypt your data"
+		"\n\nAre you sure you would like to continue? (y/n) (default: n) ",
+        colors[COLOR_WARNING], colors[COLOR_RESET]);
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+
+    if(strcmp(line, "y") == 0 || strcmp(line, "Y") == 0)
+        success = 1;
+    free(line);
+
+    return success;
+}
+
 /**
 * @see https://stackoverflow.com/a/1786733
 */
@@ -167,14 +188,16 @@ char* get_hashed_password(int set_password)
         {
             free(password1);
             free(password2);
-            fprintf(stderr,"Error: Passwords don't match\n");
+            fprintf(stderr,"%sError:%s Passwords don't match\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
             return NULL;
         }
         if(strcmp(password1, password2) != 0)
         {
             free(password1);
             free(password2);
-            fprintf(stderr,"Error: Passwords don't match\n");
+            fprintf(stderr,"%sError:%s Passwords don't match\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
             return NULL;
         }
         free(password2);

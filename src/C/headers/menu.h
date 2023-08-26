@@ -12,6 +12,10 @@ typedef struct
     uint8_t help;
 } options_t;
 
+/**
+* @enum MAIN_MENU_OPTIONS
+* @brief Menu options for the main menu
+*/
 typedef enum
 {
     MAIN_MENU_KEYS = 0,
@@ -19,12 +23,28 @@ typedef enum
     MAIN_MENU_DECRYPT = 2
 } MAIN_MENU_OPTIONS;
 
+/**
+* @enum MANAGE_KEYS_MENU_OPTIONS
+* @brief Menu options for the key management menu
+*/
 typedef enum
 {
     MANAGE_KEYS_MENU_ADD = 0,
     MANAGE_KEYS_MENU_DELETE = 1,
     MANAGE_KEYS_MENU_VIEW = 2
 } MANAGE_KEYS_MENU_OPTIONS;
+
+/**
+* @enum ENCRYPT_DECRYPT_MENU_OPTIONS
+* @brief Menu options for the encryption menu
+*/
+typedef enum
+{
+    ENCRYPT_DECRYPT_MENU_FILE = 0,
+    ENCRYPT_DECRYPT_MENU_FILE_GHOST = 1,
+    ENCRYPT_DECRYPT_MENU_DIR = 2,
+    ENCRYPT_DECRYPT_MENU_DIR_GHOST = 3
+} ENCRYPT_DECRYPT_MENU_OPTIONS;
 
 static const char* main_menu_items[] = {
     "1. Manage Keys",
@@ -37,7 +57,7 @@ static const char* key_gen_menu_items[] = {
     "1. 256-bits",
     "2. 512-bits",
     "3. 1024-bits",
-    "4. 2048-bits",
+    "4. 2048-bits"
 };
 static const size_t num_key_gen_menu_items = sizeof(key_gen_menu_items) / sizeof(char*);
 
@@ -47,6 +67,14 @@ static const char* manage_keys_menu_items[] = {
     "3. View Keys"
 };
 static const size_t num_manage_keys_menu_items = sizeof(manage_keys_menu_items) / sizeof(char*);
+
+static const char* encrypt_decrypt_menu_items[] = {
+    "1. Single file",
+    "2. Single file (Ghost Mode)",
+    "3. Directory",
+    "4. Directory (Ghost Mode)"
+};
+static const size_t num_encrypt_decrypt_menu_items = sizeof(encrypt_decrypt_menu_items) / sizeof(char*);
 
 /**
 * @brief Prints out the main menu
@@ -62,4 +90,9 @@ void print_key_gen_menu(void);
 * @brief Prints out the key management menu
 */
 void print_manage_keys_menu(void);
+
+/**
+* @brief Prints out the encrypt/decrypt menu
+*/
+void print_encrypt_decrypt_menu(void);
 options_t parse_args(int argc, char** argv);

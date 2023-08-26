@@ -4,6 +4,7 @@
 
 #include <openssl/rand.h>
 
+#include "globals.h"
 #include "file_handling.h"
 #include "utils.h"
 
@@ -30,7 +31,8 @@ char* get_random_hexstr(size_t size)
 
     if(rc != 1)
     {
-        printf("Error: exceeded the max tries to get random bytes\n");
+        fprintf(stderr, "%sError:%s Exceeded the max tries to get random "
+            "bytes\n", colors[COLOR_ERROR], colors[COLOR_RESET]);
         exit(rc);
     }
 
