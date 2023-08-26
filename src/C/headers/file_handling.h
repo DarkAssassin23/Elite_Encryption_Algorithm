@@ -11,6 +11,14 @@
 char* get_output_filename(const char* filename, int encrypting);
 
 /**
+* @brief Prompt the user for the name of the file they would like to encrypt
+* @param[in] encrypting If this file will be encrypted
+* @return The name of the file to encrypt/decrypt
+* @note Return value must be freed
+*/
+char* get_input_filename(int encrypting);
+
+/**
 * @brief Load in the keys for encryption form they key file
 * @param[in] filename The name of the file to load the keys from
 * @param[out] total_keys The number of keys loaded in from the file
@@ -28,11 +36,12 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len);
 int file_exists(const char* filename);
 
 /**
-* @brief Check if the given file is a keys file
-* @param[in] filename The file to check if it is a keys file
-* @return If the given file is a keys file
+* @brief Check if the given file is of the given file extention
+* @param[in] filename The file to check
+* @param[in] extention The extention to check for
+* @return If the given file is of the extention type
 */
-int is_keys_file(const char* filename);
+int is_of_filetype(const char* filename, const char* extention);
 
 /**
 * @brief Checks to see if any keys files exist

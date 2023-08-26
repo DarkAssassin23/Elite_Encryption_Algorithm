@@ -40,3 +40,11 @@ int validate_keys(const char** keys, int num_keys);
 * @return The length of the keys
 */
 size_t find_key_len(const char* keys_string);
+
+/**
+* @brief Load in the users preferred keys from a keys file
+* @param[out] num_keys The number of keys read in
+* @return List of keys
+* @note List of keys must be freed
+*/
+char** load_keys(int* num_keys);

@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include "globals.h"
 #include "utils.h"
 #include "decrypt.h"
 #include "file_handling.h"
@@ -12,19 +13,21 @@
 char* get_output_filename(const char* filename, int encrypting)
 {
     char* output_filename = NULL;
-    char extention[] = ".eea";
 
     if(encrypting)
     {
-        output_filename = malloc(strlen(filename) + sizeof(extention) + 1);
+        output_filename = malloc(strlen(filename) + 
+                                    sizeof(EEA_FILE_EXTENTION) + 1);
         if(output_filename == NULL)
             return NULL;
 
-        sprintf(output_filename, "%s%s", filename, extention);
+        sprintf(output_filename, "%s%s", filename, EEA_FILE_EXTENTION);
         return output_filename;
     }
 
-    size_t output_filename_len = strlen(filename) - sizeof(extention) + 1;
+    size_t output_filename_len = strlen(filename) - 
+                                        sizeof(EEA_FILE_EXTENTION) + 1;
+
     output_filename = malloc(output_filename_len + 1);
     if(output_filename == NULL)
             return NULL;
@@ -35,10 +38,44 @@ char* get_output_filename(const char* filename, int encrypting)
     return output_filename;
 }
 
+char* get_input_filename(int encrypting)
+{
+    char* input_filename = NULL;
+    
+    printf("Enter the name of the file you would like to %s: ",
+            (encrypting) ? "encrypt" : "decrypt");
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+    line_len--;
+    if(!file_exists(line))
+    {
+        fprintf(stderr, "Error: The file, \'%s\', does not exist\n", line);
+        return NULL;
+    }
+
+    if(!encrypting)
+    {
+        if(!is_of_filetype(line, EEA_FILE_EXTENTION))
+        {
+            fprintf(stderr, "Error: The file needs to be a \'%s\' file"
+                "in order to be decrypted\n", EEA_FILE_EXTENTION);
+            return NULL;
+        }
+    }
+
+    input_filename = strdup(line);
+    free(line);
+
+    return input_filename;
+}
+
 char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
 {
     // Make sure the file exists and it is a keys file
-    if(!file_exists(filename) || !is_keys_file(filename))
+    if(!file_exists(filename) || !is_of_filetype(filename, ".keys"))
         return NULL;
 
     unsigned char* encrypted_keys_string = NULL;
@@ -102,11 +139,11 @@ int file_exists(const char* filename)
     return (access(filename, F_OK) == 0);
 }
 
-int is_keys_file(const char* filename)
+int is_of_filetype(const char* filename, const char* extention)
 {
-    const char extention[] = ".keys";
     size_t filename_len = strlen(filename);
-    if(filename_len < sizeof(extention))
+    size_t extention_len = strlen(extention);
+    if(filename_len < extention_len)
         return 0;
     
     char* cur_file_extention = strrchr(filename, '.');
@@ -127,7 +164,7 @@ int keys_file_exists(void)
     int success = 0;
     while ((dir = readdir(d)) != NULL) 
     {
-        if(is_keys_file(dir->d_name))
+        if(is_of_filetype(dir->d_name, ".keys"))
         {
             success = 1;
             break;
@@ -156,7 +193,7 @@ char** get_all_keys_files(size_t* key_files_count)
 
     while ((dir = readdir(d)) != NULL) 
     {
-        if(is_keys_file(dir->d_name))
+        if(is_of_filetype(dir->d_name, ".keys"))
         {
             size_t cur_filename_len = strlen(dir->d_name);
 

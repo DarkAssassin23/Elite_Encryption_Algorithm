@@ -162,8 +162,9 @@ int main (int argc, char** argv)
                 manage_keys();
                 break;
             case MAIN_MENU_ENCRYPT:
-                if(encrypt_file("file.txt", keys, num_keys))
-                    printf("File encrypted successfully\n");
+                do_encryption();
+                // if(encrypt_file("file.txt", keys, num_keys))
+                //     printf("File encrypted successfully\n");
                 break;
             case MAIN_MENU_DECRYPT:
                 if(decrypt_file("file.txt.eea", keys, num_keys))

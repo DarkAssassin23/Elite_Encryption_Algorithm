@@ -35,7 +35,7 @@ int prompt_for_keys_filename(char** filename)
             free(line);
             line = strdup(DEFAULT_KEYS_FILE);
         }
-        else if(!is_keys_file(line))
+        else if(!is_of_filetype(line, ".keys"))
         {
             printf("Invalid filename. It should end in .keys\n");
             free(line);

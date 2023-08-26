@@ -4,6 +4,7 @@
 
 #include <openssl/rand.h>
 
+#include "file_handling.h"
 #include "utils.h"
 
 static const int MAX_TRIES = 5;
@@ -87,4 +88,69 @@ size_t find_key_len(const char* keys_string)
 
     // No keys were found
     return -1;
+}
+
+char** load_keys(int* num_keys)
+{
+    if(!keys_file_exists())
+    {
+        printf("You don't have any keys files\n");
+        return NULL;
+    }
+    do
+    {
+        size_t num_key_files = 0;
+        char** keys_files_list = get_all_keys_files(&num_key_files);
+        if(keys_files_list == NULL)
+            return NULL;
+
+        printf("Select which keys file would you like to use:\n");
+        for(size_t f = 0; f < num_key_files; f++)
+            printf("%zu: %s\n", (f + 1), keys_files_list[f]);
+        if(num_key_files > 1)
+            printf("(1-%zu) or 'q' to quit: ", num_key_files);
+        else 
+            printf("(1) or 'q' to quit: ");
+
+        char* line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len-1] = '\0';
+        
+        if(strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
+            for(size_t f = 0; f < num_key_files; f++)
+                free(keys_files_list[f]);
+            free(keys_files_list);
+            return NULL;
+        }
+
+        int selection = 0;
+        if(strcmp(line, "") == 0)
+            selection = 1;
+        else
+            selection = strtol(line, NULL, 10);
+
+        free(line);
+        if(selection <= 0 || selection > num_key_files)
+        {
+            printf("Invalid selection.\n");
+            continue;
+        }
+
+        char** keys_decrypted = NULL;
+        size_t key_len = 0;
+        keys_decrypted = load_keys_from_file(keys_files_list[selection - 1], 
+                                                num_keys, &key_len);
+        
+        for(size_t f = 0; f < num_key_files; f++)
+            free(keys_files_list[f]);
+        free(keys_files_list);
+
+        return keys_decrypted;
+
+    } while(keys_file_exists());
+    return NULL;
 }

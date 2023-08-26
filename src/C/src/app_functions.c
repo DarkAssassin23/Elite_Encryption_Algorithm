@@ -20,7 +20,7 @@
 * @return If the keys were generated and saved successfully
 * @see HASH_TYPE enum for more info on the hash_type parameter
 */
-int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
+static int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
 {
     int success = 1;
     char** keys = generate_keys(hash_type, num_keys);
@@ -66,7 +66,7 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
 * @return Type of HASH_TYPE to use as an int, -1 for the user exiting
 * @see HASH_TYPE enum for more info
 */
-int get_hash_type_for_key_gen(void)
+static int get_hash_type_for_key_gen(void)
 {
     while(1)
     {
@@ -105,7 +105,7 @@ int get_hash_type_for_key_gen(void)
 * @brief Creates a new keys file
 * @return If new file was created
 */
-int generate_new_keys_file(void)
+static int generate_new_keys_file(void)
 {
     int hash_type = get_hash_type_for_key_gen();
     if(hash_type == -1)
@@ -132,7 +132,7 @@ int generate_new_keys_file(void)
 * @brief Remove the users keys file
 * @param[in] filename Name of the keys file to delete
 */
-void delete_keys_file(const char* filename)
+static void delete_keys_file(const char* filename)
 {
     int was_deleted = -1;
     printf("Are you sure you want to delete \'%s\'? (y/n) "
@@ -159,7 +159,7 @@ void delete_keys_file(const char* filename)
 /**
 * @brief Handle deleting keys files
 */
-void delete_keys_file_manager(void)
+static void delete_keys_file_manager(void)
 {
     if(!keys_file_exists())
     {
@@ -214,7 +214,7 @@ void delete_keys_file_manager(void)
 /**
 * @brief View keys from a keys file
 */
-void view_keys(void)
+static void view_keys(void)
 {
     if(!keys_file_exists())
     {
@@ -286,10 +286,17 @@ void view_keys(void)
     } while(keys_file_exists());
 }
 
-void manage_keys(void)
+/**
+* @brief Function to handle checking and generating a keys file if one does
+*   not currently exist
+* @return If keys file is present
+*/
+static int handle_no_keys(void)
 {
+    int success = 1;
     if(!keys_file_exists())
     {
+        success = 0;
         printf("No keys file exists.\n");
         printf("Would you like to create one? (y/n) (default: y): ");
         char* line = NULL;
@@ -300,9 +307,16 @@ void manage_keys(void)
 
         if(strcmp(line, "y") == 0 || strcmp(line, "Y") == 0 ||
             strcmp(line, "") == 0)
-            generate_new_keys_file();
+            success = generate_new_keys_file();
         free(line);
     }
+    return success;
+}
+
+void manage_keys(void)
+{
+    handle_no_keys();
+
     while(1)
     {
         print_manage_keys_menu();
@@ -341,5 +355,39 @@ void manage_keys(void)
                 printf("Invalid selection\n");
                 break;
         }
+    }
+}
+
+void do_encryption(void)
+{
+    if(!handle_no_keys())
+    {
+        // Ghost mode?
+        printf("You cannot encrypt files without having a keys file\n");
+        return;
+    }
+    while(1)
+    {
+        // Menu for files vs directories and ghost mode
+        char* filename = get_input_filename(1); // We are encrypting
+        if(filename == NULL)
+            return;
+
+        int num_keys = 0;
+        char** keys = load_keys(&num_keys);
+
+        if(keys == NULL)
+            return;
+
+        if(encrypt_file(filename, (const char**)keys, num_keys))
+            printf("%s was encrypted successfully\n", filename);
+        else
+            fprintf(stderr,"Error: Failed to encrypt %s\n", filename);
+        
+        free(filename);
+        for(int k = 0; k < num_keys; k++)
+            free(keys[k]);
+        free(keys);
+        return;
     }
 }
