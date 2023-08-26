@@ -53,6 +53,7 @@ char* get_input_filename(int encrypting)
     if(!file_exists(line))
     {
         fprintf(stderr, "Error: The file, \'%s\', does not exist\n", line);
+        free(line);
         return NULL;
     }
 
@@ -60,8 +61,9 @@ char* get_input_filename(int encrypting)
     {
         if(!is_of_filetype(line, EEA_FILE_EXTENTION))
         {
-            fprintf(stderr, "Error: The file needs to be a \'%s\' file"
+            fprintf(stderr, "Error: The file needs to be a \'%s\' file "
                 "in order to be decrypted\n", EEA_FILE_EXTENTION);
+            free(line);
             return NULL;
         }
     }

@@ -167,8 +167,9 @@ int main (int argc, char** argv)
                 //     printf("File encrypted successfully\n");
                 break;
             case MAIN_MENU_DECRYPT:
-                if(decrypt_file("file.txt.eea", keys, num_keys))
-                    printf("File decrypted successfully\n");
+                do_decryption();
+                // if(decrypt_file("file.txt.eea", keys, num_keys))
+                //     printf("File decrypted successfully\n");
                 break;
             default:
                 printf("Invalid selection\n");

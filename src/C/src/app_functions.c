@@ -391,3 +391,37 @@ void do_encryption(void)
         return;
     }
 }
+
+void do_decryption(void)
+{
+    if(!handle_no_keys())
+    {
+        // Ghost mode?
+        printf("You cannot decrypt files without having a keys file\n");
+        return;
+    }
+    while(1)
+    {
+        // Menu for files vs directories and ghost mode
+        char* filename = get_input_filename(0); // We are decrypting
+        if(filename == NULL)
+            return;
+
+        int num_keys = 0;
+        char** keys = load_keys(&num_keys);
+
+        if(keys == NULL)
+            return;
+
+        if(decrypt_file(filename, (const char**)keys, num_keys))
+            printf("%s was decrypted successfully\n", filename);
+        else
+            fprintf(stderr,"Error: Failed to decrypt %s\n", filename);
+        
+        free(filename);
+        for(int k = 0; k < num_keys; k++)
+            free(keys[k]);
+        free(keys);
+        return;
+    }
+}
