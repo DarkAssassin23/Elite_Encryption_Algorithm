@@ -22,7 +22,8 @@ typedef enum
 typedef enum
 {
     MANAGE_KEYS_MENU_ADD = 0,
-    MANAGE_KEYS_MENU_DELETE = 1
+    MANAGE_KEYS_MENU_DELETE = 1,
+    MANAGE_KEYS_MENU_VIEW = 2
 } MANAGE_KEYS_MENU_OPTIONS;
 
 static const char* main_menu_items[] = {
@@ -42,7 +43,8 @@ static const size_t num_key_gen_menu_items = sizeof(key_gen_menu_items) / sizeof
 
 static const char* manage_keys_menu_items[] = {
     "1. Add Keys",
-    "2. Delete Keys"
+    "2. Delete Keys",
+    "3. View Keys"
 };
 static const size_t num_manage_keys_menu_items = sizeof(manage_keys_menu_items) / sizeof(char*);
 

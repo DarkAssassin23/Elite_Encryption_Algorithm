@@ -30,58 +30,34 @@ int generate_new_keys(HASH_TYPE hash_type, int num_keys, const char* filename)
         return 0;
     }
 
-    // Here for testing
-    char* keys_string = keys_to_string((const char**)keys, num_keys);
-
     unsigned char* keys_encrypted = NULL;
     size_t encrypted_keys_string_len = encrypt_keys(keys, num_keys, &keys_encrypted);
+    if(keys_encrypted == NULL)
+    {
+        fprintf(stderr, "Error encrypting keys\n");
+        for(int k = 0; k < num_keys; k++)
+            free(keys[k]);
+        free(keys);
+        return 0;
+    }
 
-    // Here just for testing to make sure encrypting and decrypting the passwords works
-    // printf("Pre-encrypt:\n%s\n",keys_string);
-    // for(size_t c = 0; c < encrypted_keys_string_len; c++)
-    //     printf("%c"/*"%02hhx"*/, keys_encrypted[c]);
-    // printf("\n");
-
-    // char* keys_decrypted = NULL;
-    // size_t keys_string_len = decrypt_keys(keys_encrypted, encrypted_keys_string_len, &keys_decrypted);
-
-    // printf("post-encrypt:\n%s\n", keys_decrypted);
-    // printf("encryption and decryption %s\n", (strcmp(keys_decrypted, keys_string) == 0 ? "succeeded" : "failed"));
-    // free(keys_decrypted);
-    
-
-    // printf("Individual Keys: \n");
     for(int k = 0; k < num_keys; k++)
     {
         printf("%d: %s\n",(k+1), keys[k]);
         free(keys[k]);
     }
-    //printf("\nKeys as one string: %s\n", keys_string);
+    free(keys);
 
     if(filename == NULL)
         filename = DEFAULT_KEYS_FILE;
 
-    //if(!save_to_file(filename, (unsigned char*)keys_string, strlen(keys_string)))
     if(!save_to_file(filename, keys_encrypted, encrypted_keys_string_len))
     {
         fprintf(stderr, "Error saving keys\n");
         success = 0;
     }
 
-    free(keys);
-    free(keys_string);
     free(keys_encrypted);
-
-    char** keys_decrypted = NULL;
-    size_t key_len = 0;
-    keys_decrypted = load_keys_from_file(filename, &num_keys, &key_len);
-    for(int k = 0; k < num_keys; k++)
-    {
-        printf("%d: %s\n",(k+1), keys_decrypted[k]);
-        free(keys_decrypted[k]);
-    }
-
-    free(keys_decrypted);
     return success;
 }
 
@@ -235,6 +211,81 @@ void delete_keys_file_manager(void)
     } while(keys_file_exists());
 }
 
+/**
+* @brief View keys from a keys file
+*/
+void view_keys(void)
+{
+    if(!keys_file_exists())
+    {
+        printf("You don't have any keys files\n");
+        return;
+    }
+    do
+    {
+        size_t num_key_files = 0;
+        char** keys_files_list = get_all_keys_files(&num_key_files);
+        if(keys_files_list == NULL)
+            return;
+
+        printf("Select which keys file would you like to view:\n");
+        for(size_t f = 0; f < num_key_files; f++)
+            printf("%zu: %s\n", (f + 1), keys_files_list[f]);
+        if(num_key_files > 1)
+            printf("(1-%zu) or 'q' to quit: ", num_key_files);
+        else 
+            printf("(1) or 'q' to quit: ");
+
+        char* line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len-1] = '\0';
+        
+        if(strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
+            for(size_t f = 0; f < num_key_files; f++)
+                free(keys_files_list[f]);
+            free(keys_files_list);
+            break;
+        }
+
+        int selection = 0;
+        if(strcmp(line, "") == 0)
+            selection = 1;
+        else
+            selection = strtol(line, NULL, 10);
+
+        free(line);
+        if(selection <= 0 || selection > num_key_files)
+        {
+            printf("Invalid selection.\n");
+            continue;
+        }
+
+        char** keys_decrypted = NULL;
+        int num_keys = 0;
+        size_t key_len = 0;
+        keys_decrypted = load_keys_from_file(keys_files_list[selection - 1], 
+                                                &num_keys, &key_len);
+        printf("Keys in %s\n", keys_files_list[selection - 1]);
+        for(int k = 0; k < num_keys; k++)
+        {
+            printf("%d: %s\n",(k+1), keys_decrypted[k]);
+            free(keys_decrypted[k]);
+        }
+        free(keys_decrypted);
+        
+        for(size_t f = 0; f < num_key_files; f++)
+            free(keys_files_list[f]);
+        free(keys_files_list);
+
+        return;
+
+    } while(keys_file_exists());
+}
+
 void manage_keys(void)
 {
     if(!keys_file_exists())
@@ -282,6 +333,9 @@ void manage_keys(void)
                 break;
             case MANAGE_KEYS_MENU_DELETE:
                 delete_keys_file_manager();
+                break;
+            case MANAGE_KEYS_MENU_VIEW:
+                view_keys();
                 break;
             default:
                 printf("Invalid selection\n");
