@@ -31,7 +31,7 @@ char* get_output_filename(const char* filename, int encrypting);
 char* get_input_filename(int encrypting);
 
 /**
-* @brief Load in the keys for encryption form they key file
+* @brief Load in the keys for encryption from they key file
 * @param[in] filename The name of the file to load the keys from
 * @param[out] total_keys The number of keys loaded in from the file
 * @param[out] key_len The length of an individual key
