@@ -129,6 +129,74 @@ int prompt_for_ghost_mode_confirmation(void)
     return success;
 }
 
+int prompt_for_ghost_mode_keys(char*** keys, int* num_keys)
+{
+    int k = 0;
+    int k_size = 1;
+    size_t key_len = 0;
+    char** temp_keys = malloc(sizeof(char*) * (k + k_size));
+    if(temp_keys == NULL)
+        return 0;
+
+    printf("Enter your keys below. Type \'done\' or hit enter "
+        "when you are finished\n");
+    while(1)
+    {
+        printf("%d: ", (k + 1));
+        char* line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len-1] = '\0';
+        if(strcmp(line, "") == 0 || strcmp(line, "done") == 0)
+        {
+            free(line);
+            break;
+        }
+
+        if(k == k_size)
+        {
+            k_size += k;
+            temp_keys = realloc(temp_keys, sizeof(char*) * k_size);
+            if(temp_keys == NULL)
+                return 0;
+        }
+        
+        if(strlen(line) % 64 != 0)
+        {
+            for(int i = 0; i < k; i++)
+                free(temp_keys[i]);
+            free(temp_keys);
+            free(line);
+            return 0;
+        }
+
+        if(k == 0)
+            key_len = strlen(line);
+
+        // Not using validate keys function since we don't need to 
+        // validate previous keys we've already validated
+        int valid_hex = (line[strspn(line, "0123456789abcdefABCDEF")] == 0);
+        int valid_len = (strlen(line) == key_len);
+        if(!valid_hex || !valid_len)
+        {
+            for(int i = 0; i < k; i++)
+                free(temp_keys[i]);
+            free(temp_keys);
+            free(line);
+            return 0;
+        }
+
+        temp_keys[k] = strdup(line);
+        free(line);
+        k++;
+    }
+
+    *keys = temp_keys;
+    *num_keys = k;
+    return 1;
+}
+
 /**
 * @see https://stackoverflow.com/a/1786733
 */

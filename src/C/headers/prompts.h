@@ -22,6 +22,14 @@ int prompt_for_num_keys(void);
 int prompt_for_ghost_mode_confirmation(void);
 
 /**
+* @brief Prompt the user for the keys to use for ghost mode decryption
+* @param[out] keys The keys that the user entered
+* @param[out] num_keys The number of keys the user entered
+* @return Whether or not the keys were valid
+*/
+int prompt_for_ghost_mode_keys(char*** keys, int* num_keys);
+
+/**
 * @brief Prompt the user for a password and return the result
 * @param[in] prompt The prompt to display to the user
 * @return The password entered by the user

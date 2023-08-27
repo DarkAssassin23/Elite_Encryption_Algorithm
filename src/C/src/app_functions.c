@@ -418,8 +418,13 @@ static void decrypt_single_file_mode(int ghost_mode)
         free(filename);
         return;
     }
-    else
-        return; // need to implement
+    else if(!prompt_for_ghost_mode_keys(&keys, &num_keys))
+    {
+        fprintf(stderr, "%sError:%s Invalid key provided\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET]);
+        free(filename);
+        return;
+    }
 
     if(keys == NULL)
         return;
@@ -570,6 +575,7 @@ void do_decryption(void)
                 decrypt_single_file_mode(0); // Not using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_FILE_GHOST:
+                decrypt_single_file_mode(1); // Using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
                 return;
