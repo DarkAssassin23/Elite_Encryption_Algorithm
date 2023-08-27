@@ -138,8 +138,8 @@ int prompt_for_ghost_mode_keys(char*** keys, int* num_keys)
     if(temp_keys == NULL)
         return 0;
 
-    printf("Enter your keys below. Type \'done\' or hit enter "
-        "when you are finished\n");
+    printf("When you finish entering your keys, type \'done\' or hit enter"
+        "\nEnter your keys below:\n");
     while(1)
     {
         printf("%d: ", (k + 1));
