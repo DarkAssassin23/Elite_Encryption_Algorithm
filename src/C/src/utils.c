@@ -68,9 +68,15 @@ char* keys_to_string(const char** keys, int num_keys)
 */
 int validate_keys(const char** keys, int num_keys)
 {
+    size_t key_len = strlen(keys[0]);
+    if(key_len % 64 != 0)
+        return 0;
+
     for(int k = 0; k < num_keys; k++)
     {
-        if(keys[k][strspn(keys[k], "0123456789abcdefABCDEF")] != 0)
+        int valid_hex = (keys[k][strspn(keys[k], "0123456789abcdefABCDEF")] == 0);
+        int valid_len = (strlen(keys[k]) == key_len);
+        if(!valid_hex || !valid_len)
             return 0;
     }
     return 1;
