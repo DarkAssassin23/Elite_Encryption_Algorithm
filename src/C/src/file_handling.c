@@ -238,6 +238,55 @@ char** get_all_keys_files(size_t* key_files_count)
     return file_list;
 }
 
+int encrypt_decrypt_dir(char *basePath, const int root, int encrypting)
+{
+    struct dirent *dp;
+    DIR *dir = opendir(basePath);
+
+    if (!dir)
+        return 0;
+
+    while ((dp = readdir(dir)) != NULL)
+    {
+        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+        {
+            for (int x = 0; x < root; x++) 
+            {
+                if (x%2 == 0 || x == 0)
+                    printf("|");
+                else
+                    printf(" ");
+
+            }
+            size_t path_len = (strlen(basePath) + strlen(dp->d_name) + 2);
+            char path[path_len];
+
+            strcpy(path, basePath);
+            strcat(path, "/");
+            strcat(path, dp->d_name);
+
+            printf("|-%s", dp->d_name);
+
+            int path_file_type = get_file_type(path);
+            if(path_file_type == FILE_TYPE_DIR)
+            {
+                printf("\n");
+                encrypt_decrypt_dir(path, root + 2, encrypting);
+            }
+            else if(path_file_type == FILE_TYPE_REG && 
+                !encrypting && is_of_filetype(path, ".eea"))
+                printf(" - decrypting\n");
+            else if(path_file_type == FILE_TYPE_REG && encrypting)
+                printf(" - encrypting\n");
+            else 
+                printf(" - pass\n");
+        }
+    }
+
+    closedir(dir);
+    return 1;
+}
+
 int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_write)
 {
     FILE* fout = fopen(filename, "wb");

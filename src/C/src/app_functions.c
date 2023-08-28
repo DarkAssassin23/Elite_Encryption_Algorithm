@@ -528,6 +528,7 @@ void do_encryption(void)
                     encrypt_single_file_mode(1); // Using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
+                encrypt_decrypt_dir("test", 0, 1);
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR_GHOST:
                 return;
@@ -578,6 +579,7 @@ void do_decryption(void)
                 decrypt_single_file_mode(1); // Using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
+                encrypt_decrypt_dir("test", 0, 0);
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR_GHOST:
                 return;

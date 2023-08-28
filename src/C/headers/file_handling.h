@@ -80,6 +80,15 @@ int keys_file_exists(void);
 char** get_all_keys_files(size_t* key_files_count);
 
 /**
+ * @brief Gets all files and sub-directories of a given directory 
+ * @param[in] basePath Base path to traverse directory
+ * @param[in] root Integer representing indention for current directory
+ * @param[in] encrypting If we are encrypting files (0: no, 1: yes)
+ * @return If successful
+ */
+int encrypt_decrypt_dir(char *basePath, const int root, int encrypting);
+
+/**
 * @brief Save the cipher text to a file
 * @param[in] filename The file to save the data to
 * @param[in] data The data to be written to the file
