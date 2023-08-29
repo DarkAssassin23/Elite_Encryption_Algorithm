@@ -351,7 +351,7 @@ char*  get_dir_contents(char *basePath)
             }
         }
     }
-
+    files_list = realloc(files_list, files_list_curr_len + 1);
     closedir(dir);
     return files_list;
 }

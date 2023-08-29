@@ -116,8 +116,16 @@ void test_get_dir_contents(void)
     char dir_name[] = "test";
     char* contents = get_dir_contents(dir_name);
     contents[strlen(contents) - 1] = '\0';
-    printf("%s contents:\n%s\n", dir_name, contents);
+    //printf("%s contents:\n%s\n", dir_name, contents);
+    int arr_size = 0;
+    char** files_list = split_string(contents, "\n", &arr_size);
     free(contents);
+    for(int f = 0; f < arr_size; f++)
+    {
+        printf("file[%d] = %s\n", (f + 1), files_list[f]);
+        free(files_list[f]);
+    }
+    free(files_list);
 }
 
 int main (int argc, char** argv)

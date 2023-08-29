@@ -63,6 +63,26 @@ char* keys_to_string(const char** keys, int num_keys)
     return keys_string;
 }
 
+char** split_string(char* string, const char* delim, int* size)
+{
+    char **result = NULL;
+    int count = 0;
+    char *pch;
+
+    // split
+    pch = strtok(string, delim);
+    while (pch != NULL)
+    {
+        result = realloc(result, sizeof(char*) * (count + 1));
+        result[count] = malloc(strlen(pch) + 1);
+        strcpy(result[count], pch);
+        count++;
+        pch = strtok(NULL, delim);
+    }
+    *size = count;
+    return result;
+}
+
 /**
 * @see https://stackoverflow.com/a/8393473
 */
