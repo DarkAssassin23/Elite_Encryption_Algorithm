@@ -111,6 +111,15 @@ int test_encrypt_decrypt(void)
     return 0;
 }
 
+void test_get_dir_contents(void)
+{
+    char dir_name[] = "test";
+    char* contents = get_dir_contents(dir_name);
+    contents[strlen(contents) - 1] = '\0';
+    printf("%s contents:\n%s\n", dir_name, contents);
+    free(contents);
+}
+
 int main (int argc, char** argv)
 {
     //test_hashing();
@@ -119,6 +128,8 @@ int main (int argc, char** argv)
     //test_encrypt_decrypt();
     // int test = -1;
     // printf("test is %s\n", (test ? "true": "false"));
+    test_get_dir_contents();
+    return 0;
 
     // JUST FOR TESTING!!!
     const char* keys[] = {

@@ -287,6 +287,75 @@ int encrypt_decrypt_dir(char *basePath, const int root, int encrypting)
     return 1;
 }
 
+char*  get_dir_contents(char *basePath)
+{
+    size_t files_list_max_len = 64;
+    size_t files_list_curr_len = 0;
+    char* files_list = malloc(files_list_max_len + 1);
+    if(files_list == NULL)
+        return NULL;
+
+    struct dirent *dp;
+    DIR *dir = opendir(basePath);
+
+    if (!dir)
+        return 0;
+
+    while ((dp = readdir(dir)) != NULL)
+    {
+        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+        {
+            size_t path_len = (strlen(basePath) + strlen(dp->d_name) + 2);
+            char path[path_len];
+
+            strcpy(path, basePath);
+            strcat(path, "/");
+            strcat(path, dp->d_name);
+
+            int path_file_type = get_file_type(path);
+            if(path_file_type == FILE_TYPE_DIR)
+            {
+                char* temp = get_dir_contents(path);
+                size_t new_len = strlen(temp) + files_list_curr_len;
+                
+                if( new_len >= files_list_max_len)
+                {
+                    while(new_len >= files_list_max_len)
+                        files_list_max_len *= 2;
+
+                    files_list = realloc(files_list, files_list_max_len + 1);
+                    if( files_list == NULL)
+                        return NULL;
+                }
+
+                strcat(files_list, temp);
+                files_list_curr_len = new_len;
+                free(temp);
+            }
+            else
+            {
+                strcat(path, "\n");
+                size_t new_len = path_len + files_list_curr_len;
+                if( new_len >= files_list_max_len)
+                {
+                    while(new_len >= files_list_max_len)
+                        files_list_max_len *= 2;
+
+                    files_list = realloc(files_list, files_list_max_len + 1);
+                    if( files_list == NULL)
+                        return NULL;
+                }
+
+                strcat(files_list, path);
+                files_list_curr_len = new_len;
+            }
+        }
+    }
+
+    closedir(dir);
+    return files_list;
+}
+
 int save_to_file(const char* filename, unsigned char* data, size_t bytes_to_write)
 {
     FILE* fout = fopen(filename, "wb");
