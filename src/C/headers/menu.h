@@ -69,10 +69,10 @@ static const char* manage_keys_menu_items[] = {
 static const size_t num_manage_keys_menu_items = sizeof(manage_keys_menu_items) / sizeof(char*);
 
 static const char* encrypt_decrypt_menu_items[] = {
-    "1. Single file",
-    "2. Single file (Ghost Mode)",
-    "3. Directory",
-    "4. Directory (Ghost Mode)"
+    "single file",
+    "single file (Ghost Mode)",
+    "directory",
+    "directory (Ghost Mode)"
 };
 static const size_t num_encrypt_decrypt_menu_items = sizeof(encrypt_decrypt_menu_items) / sizeof(char*);
 
@@ -93,6 +93,7 @@ void print_manage_keys_menu(void);
 
 /**
 * @brief Prints out the encrypt/decrypt menu
+* @param[in] encrypting If the menu is for encrypting
 */
-void print_encrypt_decrypt_menu(void);
+void print_encrypt_decrypt_menu(int encrypting);
 options_t parse_args(int argc, char** argv);

@@ -717,7 +717,7 @@ void do_encryption(void)
 {
     while(1)
     {
-        print_encrypt_decrypt_menu();
+        print_encrypt_decrypt_menu(1); // Encrypting
         char* line = NULL;
         size_t line_len = 0;
         line_len = getline(&line, &line_len, stdin);
@@ -771,7 +771,7 @@ void do_decryption(void)
 {
     while(1)
     {
-        print_encrypt_decrypt_menu();
+        print_encrypt_decrypt_menu(0); // Decrypting
         char* line = NULL;
         size_t line_len = 0;
         line_len = getline(&line, &line_len, stdin);

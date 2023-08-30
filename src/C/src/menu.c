@@ -30,11 +30,13 @@ void print_manage_keys_menu(void)
     printf("(1-%zu) or 'q' to quit: ", num_manage_keys_menu_items);
 }
 
-void print_encrypt_decrypt_menu(void)
+void print_encrypt_decrypt_menu(int encrypting)
 {
     printf("Select one of the following options: \n");
     for(size_t x = 0; x < num_encrypt_decrypt_menu_items; x++)
-        printf("%s\n", encrypt_decrypt_menu_items[x]);
+        printf("%lu. %s %s\n", (x + 1), 
+            encrypting ? "Encrypt" : "Decrypt", 
+            encrypt_decrypt_menu_items[x]);
     printf("(1-%zu) or 'q' to quit (default: 1): ", num_encrypt_decrypt_menu_items);
 }
 
