@@ -370,17 +370,132 @@ static void encrypt_single_file_mode(int ghost_mode)
     }
 
     if(keys == NULL)
+    {
+        free(filename);
         return;
+    }
 
     int encryption_success = encrypt_file(filename, (const char**)keys, num_keys);
     if(encryption_success)
         printf("%s was encrypted successfully%s\n", filename, 
             (ghost_mode ? " with the following keys:" : ""));
     else
-        fprintf(stderr,"%sError:%s Failed to encrypt %s\n", filename,
-            colors[COLOR_ERROR], colors[COLOR_RESET]);
+        fprintf(stderr,"%sError:%s Failed to encrypt %s\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET], filename);
     
     free(filename);
+    for(int k = 0; k < num_keys; k++)
+    {
+        if(ghost_mode)
+            printf("%d: %s\n", (k+1), keys[k]);
+        free(keys[k]);
+    }
+    free(keys);
+    return;
+}
+
+/**
+* @brief Encrypt an entire directory and its subdirectories 
+*   based on user input
+* @param[in] ghost_mode Whether we are encrypting in ghost mode
+* @note Ghost Mode opts to use new randomly generated keys, rather
+*       than keys from a keys file
+*/
+static void encrypt_directory_mode(int ghost_mode)
+{
+    char* dir_name = get_input_dir_name(1); // We are encrypting
+    if(dir_name == NULL)
+        return;
+
+    char* contents = get_dir_contents(dir_name);
+    if(strcmp(contents, "") == 0)
+    {
+        printf("The directory \'%s\' is empty. There is nothing to do\n",
+            dir_name);
+        free(contents);
+        free(dir_name);
+        return;
+    }
+    // Replace the last newline with a null terminator
+    contents[strlen(contents) - 1] = '\0';
+
+    printf("Overwrite files in the directory? (y/n) (default: y): ");
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+    line_len--;
+    int overwrite = 1;
+    if(strcmp(line, "Y") !=0 && strcmp(line, "y") != 0 && 
+        strcmp(line, "") != 0)
+        overwrite = 0;
+    free(line);
+
+    int num_keys = 0;
+    char** keys = NULL;
+
+    if(ghost_mode)
+    {
+        int hash_type = get_hash_type_for_key_gen();
+        if(hash_type == -1)
+        {
+            free(dir_name);
+            free(contents);
+            return; 
+        }
+        
+        num_keys = prompt_for_num_keys();
+        if(num_keys == -1)
+        {
+            free(dir_name);
+            free(contents);
+            return;
+        }
+
+        keys = generate_keys(hash_type, num_keys);
+    }
+    else if(!ghost_mode && handle_no_keys())
+        keys = load_keys(&num_keys);
+    else
+    {
+        fprintf(stderr,"%sError:%s You cannot encrypt files without having "
+            "a keys file\nIf you wish to encrypt files without having a "
+            "keys file select\nthe ghost mode option\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET]);
+        free(dir_name);
+        free(contents);
+        return;
+    }
+
+    if(keys == NULL)
+    {
+        free(dir_name);
+        free(contents);
+        return;
+    }
+
+    int arr_size = 0;
+    char** files_list = split_string(contents, "\n", &arr_size);
+    free(contents);
+    for(int f = 0; f < arr_size; f++)
+    {
+        int encryption_success = encrypt_file(files_list[f], (const char**)keys, num_keys);
+        if(encryption_success)
+            printf("%s was encrypted successfully%s\n", files_list[f], 
+                (ghost_mode ? " with the following keys:" : ""));
+        else
+            fprintf(stderr,"%sError:%s Failed to encrypt %s\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET], files_list[f]);
+        
+        if(encryption_success && overwrite)
+            remove(files_list[f]);
+        
+        free(files_list[f]);
+    }
+    free(files_list);
+    
+    free(dir_name);
     for(int k = 0; k < num_keys; k++)
     {
         if(ghost_mode)
@@ -427,17 +542,128 @@ static void decrypt_single_file_mode(int ghost_mode)
     }
 
     if(keys == NULL)
+    {
+        free(filename);
         return;
+    }
 
     if(decrypt_file(filename, (const char**)keys, num_keys))
         printf("%s was decrypted successfully\n", filename);
     else
-        fprintf(stderr,"%sError:%s Failed to decrypt %s\n", filename,
-            colors[COLOR_ERROR], colors[COLOR_RESET]);
+        fprintf(stderr,"%sError:%s Failed to decrypt %s\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET], filename);
     
     free(filename);
     for(int k = 0; k < num_keys; k++)
         free(keys[k]);
+    free(keys);
+    return;
+}
+
+/**
+* @brief Decrypt an entire directory and its subdirectories 
+*   based on user input
+* @param[in] ghost_mode Whether we are decrypting in ghost mode
+* @note Ghost Mode opts to use new randomly generated keys, rather
+*       than keys from a keys file
+*/
+static void decrypt_directory_mode(int ghost_mode)
+{
+    char* dir_name = get_input_dir_name(0); // We are Decrypting
+    if(dir_name == NULL)
+        return;
+
+    char* contents = get_dir_contents(dir_name);
+    if(strcmp(contents, "") == 0)
+    {
+        printf("The directory \'%s\' is empty. There is nothing to do\n",
+            dir_name);
+        free(contents);
+        free(dir_name);
+        return;
+    }
+    // Replace the last newline with a null terminator
+    contents[strlen(contents) - 1] = '\0';
+
+    printf("Overwrite files in the directory? (y/n) (default: y): ");
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+    line_len--;
+    int overwrite = 1;
+    if(strcmp(line, "Y") !=0 && strcmp(line, "y") != 0 && 
+        strcmp(line, "") != 0)
+        overwrite = 0;
+    free(line);
+
+    int num_keys = 0;
+    char** keys = NULL;
+    int has_keys_file = handle_no_keys();
+
+    if(!ghost_mode && has_keys_file)
+        keys = load_keys(&num_keys);
+    else if(!ghost_mode && !has_keys_file)
+    {
+        fprintf(stderr,"%sError:%s You cannot decrypt files without having "
+            "a keys file\nIf you wish to decrypt files without having a "
+            "keys file select\nthe ghost mode option",
+            colors[COLOR_ERROR], colors[COLOR_RESET]);
+        free(dir_name);
+        free(contents);
+        return;
+    }
+    else if(!prompt_for_ghost_mode_keys(&keys, &num_keys))
+    {
+        fprintf(stderr, "%sError:%s Invalid key provided\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET]);
+        free(dir_name);
+        free(contents);
+        return;
+    }
+
+    if(keys == NULL)
+    {
+        free(dir_name);
+        free(contents);
+        return;
+    }
+
+    int arr_size = 0;
+    char** files_list = split_string(contents, "\n", &arr_size);
+    free(contents);
+    for(int f = 0; f < arr_size; f++)
+    {
+        int decryption_success = 0;
+        if(is_of_filetype(files_list[f], EEA_FILE_EXTENTION))
+            decryption_success = decrypt_file(files_list[f], 
+                                                (const char**)keys, 
+                                                num_keys);
+        else
+        {
+            free(files_list[f]);
+            continue;
+        }
+
+        if(decryption_success)
+            printf("%s was decrypted successfully\n", files_list[f]);
+        else
+            fprintf(stderr,"%sError:%s Failed to decrypt %s\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET], files_list[f]);
+        
+        if(decryption_success && overwrite)
+            remove(files_list[f]);
+
+        free(files_list[f]);
+    }
+    free(files_list);
+    
+    free(dir_name);
+    for(int k = 0; k < num_keys; k++)
+    {
+        free(keys[k]);
+    }
     free(keys);
     return;
 }
@@ -511,7 +737,7 @@ void do_encryption(void)
             selection = strtol(line, NULL, 10);
 
         free(line);
-        if(selection <= 0 || selection > num_manage_keys_menu_items)
+        if(selection <= 0 || selection > num_encrypt_decrypt_menu_items)
         {
             printf("Invalid selection.\n");
             continue;
@@ -528,9 +754,11 @@ void do_encryption(void)
                     encrypt_single_file_mode(1); // Using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
-                encrypt_decrypt_dir("test", 0, 1);
+                encrypt_directory_mode(0); // Not using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR_GHOST:
+                if(prompt_for_ghost_mode_confirmation())
+                    encrypt_directory_mode(1); // sing ghost mode
                 return;
             default:
                 printf("Invalid selection\n");
@@ -563,7 +791,7 @@ void do_decryption(void)
             selection = strtol(line, NULL, 10);
 
         free(line);
-        if(selection <= 0 || selection > num_manage_keys_menu_items)
+        if(selection <= 0 || selection > num_encrypt_decrypt_menu_items)
         {
             printf("Invalid selection.\n");
             continue;
@@ -579,9 +807,10 @@ void do_decryption(void)
                 decrypt_single_file_mode(1); // Using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
-                encrypt_decrypt_dir("test", 0, 0);
+                decrypt_directory_mode(0); // Not using ghost mode
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR_GHOST:
+                decrypt_directory_mode(1); // Using ghost mode
                 return;
             default:
                 printf("Invalid selection\n");

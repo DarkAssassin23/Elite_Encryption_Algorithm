@@ -31,6 +31,15 @@ char* get_output_filename(const char* filename, int encrypting);
 char* get_input_filename(int encrypting);
 
 /**
+* @brief Prompt the user for the name of the directory they would
+*   like to encrypt
+* @param[in] encrypting If this directory will be encrypted
+* @return The name of the directory to encrypt/decrypt
+* @note Return value must be freed
+*/
+char* get_input_dir_name(int encrypting);
+
+/**
 * @brief Load in the keys for encryption from they key file
 * @param[in] filename The name of the file to load the keys from
 * @param[out] total_keys The number of keys loaded in from the file
@@ -78,16 +87,6 @@ int keys_file_exists(void);
 * @note Return value must be freed
 */
 char** get_all_keys_files(size_t* key_files_count);
-
-/**
-* @brief Encrypt or decrypt all files and sub-directories of a 
-*      given directory 
-* @param[in] basePath Base path to traverse directory
-* @param[in] root Integer representing indention for current directory
-* @param[in] encrypting If we are encrypting files (0: no, 1: yes)
-* @return If successful
-*/
-int encrypt_decrypt_dir(char *basePath, const int root, int encrypting);
 
 /**
 * @brief Gets all files and sub-directories of a given directory 

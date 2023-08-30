@@ -136,8 +136,8 @@ int main (int argc, char** argv)
     //test_encrypt_decrypt();
     // int test = -1;
     // printf("test is %s\n", (test ? "true": "false"));
-    test_get_dir_contents();
-    return 0;
+    // test_get_dir_contents();
+    // return 0;
 
     // JUST FOR TESTING!!!
     const char* keys[] = {

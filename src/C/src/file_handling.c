@@ -77,6 +77,33 @@ char* get_input_filename(int encrypting)
     return input_filename;
 }
 
+char* get_input_dir_name(int encrypting)
+{
+    char* input_dir = NULL;
+    
+    printf("Enter the name of the directory you would like to %s: ",
+            (encrypting) ? "encrypt" : "decrypt");
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+    line_len--;
+
+    FILE_TYPE f_type = get_file_type(line);
+    if(f_type != FILE_TYPE_DIR)
+    {
+        fprintf(stderr, "%sError:%s The \'%s\', is not a directory\n", 
+            colors[COLOR_ERROR], colors[COLOR_RESET], line);
+        free(line);
+        return NULL;
+    }
+
+    input_dir = strdup(line);
+    free(line);
+    return input_dir;
+}
+
 char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
 {
     // Make sure the file exists and it is a keys file
@@ -236,55 +263,6 @@ char** get_all_keys_files(size_t* key_files_count)
     *key_files_count = count;
 
     return file_list;
-}
-
-int encrypt_decrypt_dir(char *basePath, const int root, int encrypting)
-{
-    struct dirent *dp;
-    DIR *dir = opendir(basePath);
-
-    if (!dir)
-        return 0;
-
-    while ((dp = readdir(dir)) != NULL)
-    {
-        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
-        {
-            for (int x = 0; x < root; x++) 
-            {
-                if (x%2 == 0 || x == 0)
-                    printf("|");
-                else
-                    printf(" ");
-
-            }
-            size_t path_len = (strlen(basePath) + strlen(dp->d_name) + 2);
-            char path[path_len];
-
-            strcpy(path, basePath);
-            strcat(path, "/");
-            strcat(path, dp->d_name);
-
-            printf("|-%s", dp->d_name);
-
-            int path_file_type = get_file_type(path);
-            if(path_file_type == FILE_TYPE_DIR)
-            {
-                printf("\n");
-                encrypt_decrypt_dir(path, root + 2, encrypting);
-            }
-            else if(path_file_type == FILE_TYPE_REG && 
-                !encrypting && is_of_filetype(path, ".eea"))
-                printf(" - decrypting\n");
-            else if(path_file_type == FILE_TYPE_REG && encrypting)
-                printf(" - encrypting\n");
-            else 
-                printf(" - pass\n");
-        }
-    }
-
-    closedir(dir);
-    return 1;
 }
 
 char*  get_dir_contents(char *basePath)
