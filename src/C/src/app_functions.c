@@ -10,6 +10,7 @@
 #include "decrypt.h"
 #include "prompts.h"
 #include "file_handling.h"
+#include "thread_functions.h"
 #include "app_functions.h"
 
 /**
@@ -478,24 +479,14 @@ static void encrypt_directory_mode(int ghost_mode)
     int arr_size = 0;
     char** files_list = split_string(contents, "\n", &arr_size);
     free(contents);
-    for(int f = 0; f < arr_size; f++)
-    {
-        int encryption_success = encrypt_file(files_list[f], (const char**)keys, num_keys);
-        if(encryption_success)
-            printf("%s was encrypted successfully%s\n", files_list[f], 
-                (ghost_mode ? " with the following keys:" : ""));
-        else
-            fprintf(stderr,"%sError:%s Failed to encrypt %s\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET], files_list[f]);
-        
-        if(encryption_success && overwrite)
-            remove(files_list[f]);
-        
-        free(files_list[f]);
-    }
-    free(files_list);
+    start_dir_encrypt_threads(files_list, arr_size,
+                                (const char**)keys, num_keys,
+                                overwrite, 1);
     
     free(dir_name);
+    if(ghost_mode)
+        printf("Your files were encrypted with the following keys:\n");
+
     for(int k = 0; k < num_keys; k++)
     {
         if(ghost_mode)
@@ -633,31 +624,9 @@ static void decrypt_directory_mode(int ghost_mode)
     int arr_size = 0;
     char** files_list = split_string(contents, "\n", &arr_size);
     free(contents);
-    for(int f = 0; f < arr_size; f++)
-    {
-        int decryption_success = 0;
-        if(is_of_filetype(files_list[f], EEA_FILE_EXTENTION))
-            decryption_success = decrypt_file(files_list[f], 
-                                                (const char**)keys, 
-                                                num_keys);
-        else
-        {
-            free(files_list[f]);
-            continue;
-        }
-
-        if(decryption_success)
-            printf("%s was decrypted successfully\n", files_list[f]);
-        else
-            fprintf(stderr,"%sError:%s Failed to decrypt %s\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET], files_list[f]);
-        
-        if(decryption_success && overwrite)
-            remove(files_list[f]);
-
-        free(files_list[f]);
-    }
-    free(files_list);
+    start_dir_decrypt_threads(files_list, arr_size, 
+                                (const char**)keys, num_keys, 
+                                overwrite, 1);
     
     free(dir_name);
     for(int k = 0; k < num_keys; k++)
