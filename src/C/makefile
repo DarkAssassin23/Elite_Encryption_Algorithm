@@ -2,8 +2,8 @@ TARGET = eea
 
 CC = gcc
 CFLAGS = -Wall -g
-LIBS = -lcrypto #-L logger/libs/debug/static -lfunclogd
-INCLUDES = -I headers/ #-I logger/
+LIBS = -lcrypto -lpthread
+INCLUDES = -I headers/
 
 OBJDIR = obj
 

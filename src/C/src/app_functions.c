@@ -481,7 +481,7 @@ static void encrypt_directory_mode(int ghost_mode)
     free(contents);
     start_dir_encrypt_threads(files_list, arr_size,
                                 (const char**)keys, num_keys,
-                                overwrite, 1);
+                                overwrite, 2/*1*/);
     
     free(dir_name);
     if(ghost_mode)
@@ -626,7 +626,7 @@ static void decrypt_directory_mode(int ghost_mode)
     free(contents);
     start_dir_decrypt_threads(files_list, arr_size, 
                                 (const char**)keys, num_keys, 
-                                overwrite, 1);
+                                overwrite, 2/*1*/);
     
     free(dir_name);
     for(int k = 0; k < num_keys; k++)
