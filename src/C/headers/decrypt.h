@@ -20,6 +20,9 @@ size_t decrypt(unsigned char* data, size_t data_len,
 * @param[out] keys_string The string containing all the keys decrypted
 * @note keys_string must be freed
 * @return Length of keys string
+* @attention This function assumes the password entered is the same as 
+*    the one used to encrypt the keys. i.e. the keys you get back could be
+*    bogus or invalid.
 */
 size_t decrypt_keys(unsigned char* encrypted_string, size_t encrypted_size,
                     char** keys_string);

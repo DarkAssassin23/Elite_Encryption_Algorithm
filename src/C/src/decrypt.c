@@ -126,8 +126,6 @@ size_t decrypt(unsigned char* data, size_t data_len,
     return plain_text_size;
 }
 
-// Currently assumes the password was the same as the one used to encrypt
-// We'll need to ensure the keys are valid before using them
 size_t decrypt_keys(unsigned char* encrypted_string, size_t encrypted_size,
                     char** keys_string)
 {
