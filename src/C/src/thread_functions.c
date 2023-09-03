@@ -42,9 +42,10 @@ static void encrypt_list_of_files(char** files_list, int start, int end,
     {
         int encryption_success = encrypt_file(files_list[f], keys, num_keys);
         if(encryption_success)
-            printf("%s was encrypted successfully\n", files_list[f]);
+            fprintf(stdout, "%sEncryption success:%s %s\n", 
+                colors[COLOR_SUCCESS], colors[COLOR_RESET], files_list[f]);
         else
-            fprintf(stderr,"%sError:%s Failed to encrypt %s\n",
+            fprintf(stderr, "%sEncryption failed:%s  %s\n",
                 colors[COLOR_ERROR], colors[COLOR_RESET], files_list[f]);
         
         if(encryption_success && overwrite)
@@ -82,9 +83,10 @@ static void decrypt_list_of_files(char** files_list, int start, int end,
         }
 
         if(decryption_success)
-            printf("%s was decrypted successfully\n", files_list[f]);
+            fprintf(stdout, "%sDecryption success:%s %s\n", 
+                colors[COLOR_SUCCESS], colors[COLOR_RESET], files_list[f]);
         else
-            fprintf(stderr,"%sError:%s Failed to decrypt %s\n",
+            fprintf(stderr, "%sDecryption failed:%s  %s\n",
                 colors[COLOR_ERROR], colors[COLOR_RESET], files_list[f]);
         
         if(decryption_success && overwrite)
@@ -133,6 +135,8 @@ void init_threads(char** files_list, int num_files,
                     const char** keys, int num_keys, 
                     int overwrite, int threads, int encrypting)
 {
+    printf("Running in %s mode with %d threads\n", 
+        (encrypting ? "encryption" : "decryption"), threads);
     int files_per_thread = num_files / threads;
     int leftover = num_files % threads;
     int start = 0;

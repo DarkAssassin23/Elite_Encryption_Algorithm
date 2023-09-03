@@ -194,6 +194,7 @@ int main (int argc, char** argv)
                 printf("Invalid selection\n");
                 break;
         }
+        printf("\n");
     }
 
     // options_t options = parse_args(argc, argv);

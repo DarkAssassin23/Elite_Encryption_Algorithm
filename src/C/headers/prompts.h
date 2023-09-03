@@ -15,6 +15,13 @@ int prompt_for_keys_filename(char** filename);
 int prompt_for_num_keys(void);
 
 /**
+* @brief Prompt for the number of threads to use when encrypting
+*   or decrypting a directory
+* @return The number of threads to use
+*/
+int prompt_for_num_threads(void);
+
+/**
 * @brief Warn the user they are about to use ghost mode and ask if they
 *       wish to proceed
 * @return Whether or not to proceed with ghost mode

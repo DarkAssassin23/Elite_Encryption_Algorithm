@@ -378,10 +378,11 @@ static void encrypt_single_file_mode(int ghost_mode)
 
     int encryption_success = encrypt_file(filename, (const char**)keys, num_keys);
     if(encryption_success)
-        printf("%s was encrypted successfully%s\n", filename, 
-            (ghost_mode ? " with the following keys:" : ""));
+        fprintf(stdout, "%sEncryption success:%s %s\n%s", 
+            colors[COLOR_SUCCESS], colors[COLOR_RESET], filename,
+            (ghost_mode ? "Encrypted with the following keys:\n" : ""));
     else
-        fprintf(stderr,"%sError:%s Failed to encrypt %s\n",
+        fprintf(stderr, "%sEncryption failed:%s  %s\n",
             colors[COLOR_ERROR], colors[COLOR_RESET], filename);
     
     free(filename);
@@ -433,6 +434,8 @@ static void encrypt_directory_mode(int ghost_mode)
         overwrite = 0;
     free(line);
 
+    int threads = prompt_for_num_threads();
+
     int num_keys = 0;
     char** keys = NULL;
 
@@ -481,7 +484,7 @@ static void encrypt_directory_mode(int ghost_mode)
     free(contents);
     start_dir_encrypt_threads(files_list, arr_size,
                                 (const char**)keys, num_keys,
-                                overwrite, 2/*1*/);
+                                overwrite, threads);
     
     free(dir_name);
     if(ghost_mode)
@@ -539,9 +542,10 @@ static void decrypt_single_file_mode(int ghost_mode)
     }
 
     if(decrypt_file(filename, (const char**)keys, num_keys))
-        printf("%s was decrypted successfully\n", filename);
+        fprintf(stdout, "%sDecryption success:%s %s\n", 
+            colors[COLOR_SUCCESS], colors[COLOR_RESET], filename);
     else
-        fprintf(stderr,"%sError:%s Failed to decrypt %s\n",
+        fprintf(stderr, "%sDecryption failed:%s  %s\n",
             colors[COLOR_ERROR], colors[COLOR_RESET], filename);
     
     free(filename);
@@ -589,6 +593,8 @@ static void decrypt_directory_mode(int ghost_mode)
         overwrite = 0;
     free(line);
 
+    int threads = prompt_for_num_threads();
+
     int num_keys = 0;
     char** keys = NULL;
     int has_keys_file = handle_no_keys();
@@ -626,7 +632,7 @@ static void decrypt_directory_mode(int ghost_mode)
     free(contents);
     start_dir_decrypt_threads(files_list, arr_size, 
                                 (const char**)keys, num_keys, 
-                                overwrite, 2/*1*/);
+                                overwrite, threads);
     
     free(dir_name);
     for(int k = 0; k < num_keys; k++)

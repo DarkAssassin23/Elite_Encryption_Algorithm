@@ -108,6 +108,35 @@ int prompt_for_num_keys(void)
     }
 }
 
+int prompt_for_num_threads(void)
+{
+    printf("Enter the number of threads to use (default: 1): ");
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+
+    int num_threads = 0;
+    int is_negative = 0;
+
+    if(strcmp(line, "") == 0)
+        num_threads = 1;
+    else
+    {
+        num_threads = strtol(line, NULL, 10);
+        is_negative = (line[0] == '-');
+    }
+
+    // Make sure number of threads is greater than 1 and 
+    // protect against integer underflows and overflows
+    if(num_threads <= 0 || is_negative)
+        num_threads = 1;
+
+    free(line);
+    return num_threads;
+}
+
 int prompt_for_ghost_mode_confirmation(void)
 {
     int success = 0;
