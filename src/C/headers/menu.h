@@ -1,16 +1,4 @@
 #pragma once
-#include <stdint.h> // uintx_t
-
-typedef struct
-{
-    uint8_t key;
-    uint8_t verbose;
-    uint8_t encrypt_mode;
-    uint8_t decrypt_mode;
-    uint8_t input_file;
-    uint8_t output_file;
-    uint8_t help;
-} options_t;
 
 /**
 * @enum MAIN_MENU_OPTIONS
@@ -96,4 +84,3 @@ void print_manage_keys_menu(void);
 * @param[in] encrypting If the menu is for encrypting
 */
 void print_encrypt_decrypt_menu(int encrypting);
-options_t parse_args(int argc, char** argv);
