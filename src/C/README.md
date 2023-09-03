@@ -32,3 +32,8 @@ pacman -S install openssl openssl-devel
 ```bash
 pacman -S install openssl openssl-devel
 ```
+> **Note**:
+> This implementation has been built and tested against 
+> [MSYS2](https://www.msys2.org) **NOT** Visual Studio. It is advised
+> that you either use MSYS2 or Windows Subsystem for Linux (WSL), and 
+> follow the Linux instructions, instead. 
