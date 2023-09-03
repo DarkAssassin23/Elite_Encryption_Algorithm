@@ -7,12 +7,7 @@ static const char EEA_FILE_EXTENTION[] = ".eea";
 // Selection 2 (512-bits) in the menu
 static const int DEFAULT_KEY_SELECTION = 2;
 static const int DEFAULT_NUM_KEYS = 3;
-static const char* colors[] = {
-    "\x1B[0m",
-    "\x1B[32m",
-    "\x1B[33m",
-    "\x1B[31m",
-};
+extern char* colors[];
 
 /**
 * @enum COLOR_OPTIONS
