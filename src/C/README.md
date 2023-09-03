@@ -22,7 +22,7 @@ apt install libssl-dev
 ```
 #### Red Hat-based
 ```bash
-dnf install openssl openssl-dev
+dnf install openssl
 ```
 #### Arch-based
 ```bash
