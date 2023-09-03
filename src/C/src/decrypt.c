@@ -103,7 +103,7 @@ size_t decrypt(unsigned char* data, size_t data_len,
     if(temp == NULL)
         return 0;
 
-    unsigned char *key_block = malloc(key_len);
+    unsigned char *key_block = malloc(key_len + 1);
     for(int k = num_keys-1; k >= 0; k--)
     {
         // Set the data to decrypt to the result from the previous 
@@ -141,7 +141,7 @@ size_t decrypt_keys(unsigned char* encrypted_string, size_t encrypted_size,
         return 0;
     memcpy(decrypted_keys, encrypted_string, encrypted_size);
     decrypted_keys[encrypted_size] = 0;
-    size_t decrypted_keys_len = encrypted_size + 1;
+    size_t decrypted_keys_len = encrypted_size;
     for(int x = 0; x < ROUNDS; x++)
     {
         unsigned char* unchanged = decrypted_keys;

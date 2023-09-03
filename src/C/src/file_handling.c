@@ -269,7 +269,7 @@ char*  get_dir_contents(char *basePath)
 {
     size_t files_list_max_len = 64;
     size_t files_list_curr_len = 0;
-    char* files_list = malloc(files_list_max_len + 1);
+    char* files_list = calloc((files_list_max_len + 1), sizeof(char));
     if(files_list == NULL)
         return NULL;
 
