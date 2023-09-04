@@ -8,6 +8,11 @@ INCLUDES = -I headers/
 OBJDIR = obj
 
 all: $(TARGET)
+debug: CFLAGS = -Wall -g
+debug: $(TARGET)
+
+release: CFLAGS = -O2
+release: $(TARGET)
 
 SRCS = $(wildcard src/*.c)
 HEADERS = $(wildcard headers/*.h)
