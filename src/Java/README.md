@@ -9,9 +9,10 @@ on it.
 _______________
 Building the App
 --------
-**NOTE:** This assumes you already have Java installed and configured to be able to 
-compile and run Java apps from the command line. If you don't, you will get errors
-when running the makefile.
+> [!NOTE]
+> This assumes you already have Java installed and configured to be able to 
+> compile and run Java apps from the command line. If you don't, you will get errors
+> when running the makefile.
 
 Use the included makefile in order to build the .jar file to run the application.
 
