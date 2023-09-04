@@ -1,0 +1,25 @@
+#include "version.h"
+
+1 VERSIONINFO
+FILEVERSION     MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION, BUILD_VERSION
+PRODUCTVERSION  MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION, BUILD_VERSION
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName", "Dark Assassins Inc."
+      VALUE "FileDescription", "Elite Encryption"
+      VALUE "FileVersion", APP_VERSION_STRING 
+      VALUE "InternalName", "EEA"
+      VALUE "LegalCopyright", COPYRIGHT_STRING "\0"
+      VALUE "OriginalFilename", WIN_FILENAME
+      VALUE "ProductName", "Elite Encryption"
+      VALUE "ProductVersion", APP_VERSION_STRING
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1252
+  END
+END
