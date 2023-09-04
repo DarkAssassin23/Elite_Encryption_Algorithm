@@ -15,7 +15,7 @@ that allows you to generate keys, encrypt, and decrypt data. If you want a
 breakdown of how the algorithm works and how keys are generated, check out my 
 [blog post](https://chiefwithcolorfulshoes.com/blog/Elite_Encryption_Algorithm/) 
 
-> **Warning**:
+> [!WARNING]
 > This implementation encrypts your keys via password. There are some
 > checks to help make sure you enter your password correctly, but it is not 
 > full-proof.
@@ -45,7 +45,7 @@ pacman -S install openssl openssl-devel
 ```bash
 pacman -S install openssl openssl-devel
 ```
-> **Note**:
+> [!NOTE]
 > This implementation has been built and tested against 
 > [MSYS2](https://www.msys2.org) **NOT** Visual Studio. It is advised
 > that you either use MSYS2 or Windows Subsystem for Linux (WSL), and 
