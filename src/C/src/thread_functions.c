@@ -135,8 +135,6 @@ void init_threads(char** files_list, int num_files,
                     const char** keys, int num_keys, 
                     int overwrite, int threads, int encrypting)
 {
-    printf("Running in %s mode with %d threads\n", 
-        (encrypting ? "encryption" : "decryption"), threads);
     int files_per_thread = num_files / threads;
     int leftover = num_files % threads;
     int start = 0;
