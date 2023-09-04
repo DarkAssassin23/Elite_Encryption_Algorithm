@@ -37,6 +37,13 @@ int prompt_for_ghost_mode_confirmation(void);
 int prompt_for_ghost_mode_keys(char*** keys, int* num_keys);
 
 /**
+* @brief Prompt the user if they want to overwrite their file(s)
+* @param[in] is_single_file The prompt for overwrite is for a single file
+* @return Whether or not to overwrite the file(s)
+*/
+int prompt_for_overwrite(int is_single_file);
+
+/**
 * @brief Prompt the user for a password and return the result
 * @param[in] prompt The prompt to display to the user
 * @return The password entered by the user

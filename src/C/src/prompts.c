@@ -226,6 +226,27 @@ int prompt_for_ghost_mode_keys(char*** keys, int* num_keys)
     return 1;
 }
 
+int prompt_for_overwrite(int is_single_file)
+{
+    printf("Overwrite %s? (y/n) (default: y): ",
+        (is_single_file) ? "the file" : "files in the directory");
+    char* line = NULL;
+    size_t line_len = 0;
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len-1] = '\0';
+    line_len--;
+
+    int overwrite = 1;
+    if(strcmp(line, "Y") !=0 && strcmp(line, "y") != 0 && 
+        strcmp(line, "") != 0)
+        overwrite = 0;
+    
+    free(line);
+
+    return overwrite;
+}
+
 /**
 * @see https://stackoverflow.com/a/1786733
 */

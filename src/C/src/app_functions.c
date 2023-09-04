@@ -337,6 +337,8 @@ static void encrypt_single_file_mode(int ghost_mode)
         return;
     }
 
+    int overwrite = prompt_for_overwrite(1); // single file
+
     int num_keys = 0;
     char** keys = NULL;
 
@@ -384,6 +386,9 @@ static void encrypt_single_file_mode(int ghost_mode)
     else
         fprintf(stderr, "%sEncryption failed:%s  %s\n",
             colors[COLOR_ERROR], colors[COLOR_RESET], filename);
+
+    if(encryption_success && overwrite)
+        remove(filename);
     
     free(filename);
     for(int k = 0; k < num_keys; k++)
@@ -421,19 +426,7 @@ static void encrypt_directory_mode(int ghost_mode)
     // Replace the last newline with a null terminator
     contents[strlen(contents) - 1] = '\0';
 
-    printf("Overwrite files in the directory? (y/n) (default: y): ");
-    char* line = NULL;
-    size_t line_len = 0;
-    line_len = getline(&line, &line_len, stdin);
-    // Replace new line with null terminator
-    line[line_len-1] = '\0';
-    line_len--;
-    int overwrite = 1;
-    if(strcmp(line, "Y") !=0 && strcmp(line, "y") != 0 && 
-        strcmp(line, "") != 0)
-        overwrite = 0;
-    free(line);
-
+    int overwrite = prompt_for_overwrite(0); // not single file
     int threads = prompt_for_num_threads();
 
     int num_keys = 0;
@@ -512,6 +505,8 @@ static void decrypt_single_file_mode(int ghost_mode)
     if(filename == NULL)
         return;
 
+    int overwrite = prompt_for_overwrite(1); // single file
+
     int num_keys = 0;
     char** keys = NULL;
     int has_keys_file = handle_no_keys();
@@ -541,12 +536,16 @@ static void decrypt_single_file_mode(int ghost_mode)
         return;
     }
 
-    if(decrypt_file(filename, (const char**)keys, num_keys))
+    int decryption_success = decrypt_file(filename, (const char**)keys, num_keys);
+    if(decryption_success)
         fprintf(stdout, "%sDecryption success:%s %s\n", 
             colors[COLOR_SUCCESS], colors[COLOR_RESET], filename);
     else
         fprintf(stderr, "%sDecryption failed:%s  %s\n",
             colors[COLOR_ERROR], colors[COLOR_RESET], filename);
+
+    if(decryption_success && overwrite)
+        remove(filename);
     
     free(filename);
     for(int k = 0; k < num_keys; k++)
@@ -580,18 +579,7 @@ static void decrypt_directory_mode(int ghost_mode)
     // Replace the last newline with a null terminator
     contents[strlen(contents) - 1] = '\0';
 
-    printf("Overwrite files in the directory? (y/n) (default: y): ");
-    char* line = NULL;
-    size_t line_len = 0;
-    line_len = getline(&line, &line_len, stdin);
-    // Replace new line with null terminator
-    line[line_len-1] = '\0';
-    line_len--;
-    int overwrite = 1;
-    if(strcmp(line, "Y") !=0 && strcmp(line, "y") != 0 && 
-        strcmp(line, "") != 0)
-        overwrite = 0;
-    free(line);
+    int overwrite = prompt_for_overwrite(0); // not single file
 
     int threads = prompt_for_num_threads();
 
