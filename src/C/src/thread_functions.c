@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <pthread.h>
 
 #include "globals.h"
@@ -23,6 +24,9 @@ typedef struct
     int overwrite;
     int encrypting;
 } thread_data_t;
+
+static volatile int running_threads = 0;
+static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /**
 * @brief Encrypt all files in the provided list
@@ -50,9 +54,12 @@ static void encrypt_list_of_files(char** files_list, int start, int end,
         
         if(encryption_success && overwrite)
             remove(files_list[f]);
-        
+
         free(files_list[f]);
     }
+    pthread_mutex_lock(&running_mutex);
+    running_threads--;
+    pthread_mutex_unlock(&running_mutex);
 }
 
 /**
@@ -94,6 +101,9 @@ static void decrypt_list_of_files(char** files_list, int start, int end,
 
         free(files_list[f]);
     }
+    pthread_mutex_lock(&running_mutex);
+    running_threads--;
+    pthread_mutex_unlock(&running_mutex);
 }
 
 /**
@@ -103,6 +113,9 @@ static void decrypt_list_of_files(char** files_list, int start, int end,
 static void* start_thread(void *args)
 {
     thread_data_t* data = (thread_data_t*)args;
+    pthread_mutex_lock(&running_mutex);
+    running_threads++;
+    pthread_mutex_unlock(&running_mutex);
     if(data->encrypting)
         encrypt_list_of_files(data->files_list, 
                                 data->start,
@@ -162,8 +175,21 @@ void init_threads(char** files_list, int num_files,
         start = end;
     }
 
+    // Make sure all threads finish running before returning
+    // Fixes issue on Windows where the function returns, and frees 
+    // the file_list before the threads finish causing them to crash
+    struct timespec ts;
+
+    // Sleep for a quarter second
+    ts.tv_sec = 250 / 1000;
+    ts.tv_nsec = (250 % 1000) * 1000000;
+
+    while(running_threads > 0)
+        nanosleep(&ts, &ts);
+
     for(int t = 0; t < threads; t++)
         pthread_join(threadPool[t], NULL);
+
 }
 
 void start_dir_encrypt_threads(char** files_list, int num_files,
