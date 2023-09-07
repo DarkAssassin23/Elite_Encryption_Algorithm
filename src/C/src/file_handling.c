@@ -147,7 +147,9 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
         {
             fprintf(stderr, "%sError:%s Mallocing memory for keys failed. "
                 "Aborting...", colors[COLOR_ERROR], colors[COLOR_RESET]);
-            exit(EXIT_FAILURE);
+            free(keys_string);
+            return NULL;
+            // exit(EXIT_FAILURE);
         }
         strncpy(key, &keys_string[index], key_len);
         key[key_len] = '\0';
@@ -162,8 +164,11 @@ char** load_keys_from_file(const char* filename, int* total_keys, size_t* len)
         fprintf(stderr,"%sError:%s Invalid keys detected\n"
             "Make sure you entered your password correctly\n",
             colors[COLOR_ERROR], colors[COLOR_RESET]);
-
-        exit(EXIT_FAILURE);
+        for(int k = 0; k < num_keys; k++)
+            free(keys[k]);
+        free(keys);
+        return NULL;
+        //exit(EXIT_FAILURE);
     }
     return keys;
 }

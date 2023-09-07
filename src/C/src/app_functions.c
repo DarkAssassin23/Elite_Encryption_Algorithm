@@ -273,6 +273,16 @@ static void view_keys(void)
         size_t key_len = 0;
         keys_decrypted = load_keys_from_file(keys_files_list[selection - 1], 
                                                 &num_keys, &key_len);
+
+        if(keys_decrypted == NULL)
+        {
+            for(size_t f = 0; f < num_key_files; f++)
+                free(keys_files_list[f]);
+            free(keys_files_list);
+            printf("Aborting...\n");
+            return;
+        }
+
         printf("Keys in %s\n", keys_files_list[selection - 1]);
         for(int k = 0; k < num_keys; k++)
         {
