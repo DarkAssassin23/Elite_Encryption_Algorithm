@@ -69,7 +69,6 @@ public struct Keygen {
         var keys: [String] = [String](repeating: "", count: num)
         for x in (0...num - 1) {
             var currSize: Int = 0
-            var loops: Int = 0
             var key: String = ""
             while currSize < size {
                 guard let str = try? genRandBytes() else {
@@ -86,7 +85,6 @@ public struct Keygen {
                     key += hash.description.split(separator: " ").last!
                     currSize += 256
                 }
-                loops += 1
             }
             keys[x] = key
         }
