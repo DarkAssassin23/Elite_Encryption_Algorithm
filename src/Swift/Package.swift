@@ -1,9 +1,12 @@
-// swift-tools-version:5.10
+// swift-tools-version:5.4
 
 import PackageDescription
 
 let package = Package(
     name: "eea",
+    platforms: [
+        .macOS(.v10_15),
+    ],
     products: [
         .executable(name: "EEA", targets: ["EEA"])
     ],
