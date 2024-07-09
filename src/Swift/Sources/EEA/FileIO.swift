@@ -1,4 +1,4 @@
-import Foundation  // Data, URL
+import Foundation
 
 enum FileIOError: Error {
     case readFailed(String)
@@ -6,6 +6,7 @@ enum FileIOError: Error {
     case noData(String)
 }
 
+/// Class to handle file reads and writes
 public struct FileIO {
     /// Read the contents of the file and return the raw data
     /// - Parameters
