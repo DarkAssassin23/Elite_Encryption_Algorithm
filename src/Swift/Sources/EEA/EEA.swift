@@ -36,7 +36,7 @@ enum EEAError: Error {
 
 /// A class to handle encrypting and decrypting data using the
 /// Elite Encryption Algorithm
-public class EEA {
+public struct EEA {
     private let io: FileIO
     private let minSize: Int
 

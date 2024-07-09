@@ -6,7 +6,7 @@ enum FileIOError: Error {
     case noData(String)
 }
 
-public class FileIO {
+public struct FileIO {
     /// Read the contents of the file and return the raw data
     /// - Parameters
     ///   - filename: The name of the file to read the data from
