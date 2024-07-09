@@ -182,7 +182,7 @@ public struct EEA {
     /// > Note: If outFile is `nil` the file will be overwritten.
     ///   I.e. The `inFile` file will be deleted
     ///
-    /// - Returns: If the file was successfuly encrypted
+    /// - Returns: If the file was successfully encrypted
     public func encryptFile(
         inFile: String, keys: [String],
         outFile: String? = nil
@@ -349,7 +349,7 @@ public struct EEA {
     /// > Note: If outFile is `nil` the file will be overwritten.
     ///   I.e. The `.eea` file will be deleted
     ///
-    /// - Returns: If the file was successfuly decrypted
+    /// - Returns: If the file was successfully decrypted
     public func decryptFile(
         inFile: String, keys: [String],
         outFile: String? = nil
