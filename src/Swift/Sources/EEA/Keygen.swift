@@ -66,30 +66,30 @@ public struct Keygen {
             )
         }
 
-        do {
-            var keys: [String] = [String](repeating: "", count: num)
-            for x in (0...num - 1) {
-                var currSize: Int = 0
-                var loops: Int = 0
-                var key: String = ""
-                while currSize < size {
-                    let str = try genRandBytes()
-                    if size - currSize > 256 {
-                        let hash = SHA512.hash(data: Data(str.utf8))
-                        key += hash.description.split(separator: " ").last!
-                        currSize += 512
-                    } else {
-                        let hash = SHA256.hash(data: Data(str.utf8))
-                        key += hash.description.split(separator: " ").last!
-                        currSize += 256
-                    }
-                    loops += 1
+        var keys: [String] = [String](repeating: "", count: num)
+        for x in (0...num - 1) {
+            var currSize: Int = 0
+            var loops: Int = 0
+            var key: String = ""
+            while currSize < size {
+                guard let str = try? genRandBytes() else {
+                    throw KeygenError.randomBytes(
+                        "Generating random bytes failed.")
                 }
-                keys[x] = key
+
+                if size - currSize > 256 {
+                    let hash = SHA512.hash(data: Data(str.utf8))
+                    key += hash.description.split(separator: " ").last!
+                    currSize += 512
+                } else {
+                    let hash = SHA256.hash(data: Data(str.utf8))
+                    key += hash.description.split(separator: " ").last!
+                    currSize += 256
+                }
+                loops += 1
             }
-            return keys
-        } catch (let e) {
-            throw e
+            keys[x] = key
         }
+        return keys
     }
 }
