@@ -41,4 +41,17 @@ public struct FileIO {
                 "Error: Failed to write to the file \(filename).")
         }
     }
+
+    /// Delete the specified file
+    /// - Parameter filename: The file to be deleted
+    /// - Returns: True if the file was deleted successfully
+    public func deleteFile(filename: String) -> Bool {
+        do {
+            let fileManager = FileManager.default
+            try fileManager.removeItem(atPath: filename)
+            return true
+        } catch {
+            return false
+        }
+    }
 }

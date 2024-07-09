@@ -179,6 +179,9 @@ public struct EEA {
     ///   - keys: List of keys to be used for encryption
     ///   - outFile: File the cipher text should be written too
     ///              (default: the input file with an '.eea' extention)
+    /// > Note: If outFile is `nil` the file will be overwritten.
+    ///   I.e. The `inFile` file will be deleted
+    ///
     /// - Returns: If the file was successfuly encrypted
     public func encryptFile(
         inFile: String, keys: [String],
@@ -192,6 +195,7 @@ public struct EEA {
             guard let outFile = outFile else {
                 let outFile = inFile + ".eea"
                 let ret = try io.writeFile(cipherText, filename: outFile)
+                _ = io.deleteFile(filename: inFile)
                 return ret
             }
             if !outFile.hasSuffix(".eea") {
@@ -341,7 +345,10 @@ public struct EEA {
     ///   - inFile: Name of the file to be decrypted
     ///   - keys: List of keys to be used for decryption
     ///   - outFile: File the plain text should be written too
-    ///              (default: the input file minus the '.eea' extention)
+    ///              (default: the input file minus the `.eea` extention)
+    /// > Note: If outFile is `nil` the file will be overwritten.
+    ///   I.e. The `.eea` file will be deleted
+    ///
     /// - Returns: If the file was successfuly decrypted
     public func decryptFile(
         inFile: String, keys: [String],
@@ -361,6 +368,7 @@ public struct EEA {
                 let index = inFile.lastIndex(of: ".")!
                 let outFile = String(inFile[inFile.startIndex..<index])
                 let ret = try io.writeFile(plainText, filename: outFile)
+                _ = io.deleteFile(filename: inFile)
                 return ret
             }
 
