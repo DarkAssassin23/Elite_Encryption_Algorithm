@@ -1,5 +1,10 @@
-import Crypto
 import Foundation
+
+#if (!os(macOS) && !os(iOS) && !os(watchOS) && !os(tvOS))
+    import Crypto
+#else
+    import CryptoKit
+#endif
 
 enum KeygenError: Error {
     case randomBytes(String)
@@ -28,12 +33,12 @@ public struct Keygen {
     /// - Returns: Random data encoded in a base64 string
     private func genRandBytes() throws -> String {
         #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
-            var bytes = Data(count: SHA256.byteCount)
-            let result = SecRandomCopyBytes(
+            var bytes = [UInt8](repeating: 0, count: SHA256.byteCount)
+            let status = SecRandomCopyBytes(
                 kSecRandomDefault, bytes.count, &bytes)
 
-            if result == errSecSuccess {
-                return bytes.base64EncodedString()
+            if status == errSecSuccess {
+                return Data(bytes).base64EncodedString()
             } else {
                 throw KeygenError.randomBytes(
                     "Generating random bytes failed.")
