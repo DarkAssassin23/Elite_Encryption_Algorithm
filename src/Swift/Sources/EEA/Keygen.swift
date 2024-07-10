@@ -1,10 +1,5 @@
+import Crypto
 import Foundation
-
-#if (!os(macOS) && !os(iOS) && !os(watchOS) && !os(tvOS))
-    import Crypto
-#else
-    import CryptoKit
-#endif
 
 enum KeygenError: Error {
     case randomBytes(String)
