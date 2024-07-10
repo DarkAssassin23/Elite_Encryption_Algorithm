@@ -50,7 +50,7 @@ public struct EEA {
     /// If a key is not valid, an exception will be thrown
     /// - Parameter keys: The keys to check the validity of
     private func keyCheck(_ keys: [String]) throws {
-        guard let size = keys.first?.length else {
+        guard let size = keys.first?.count else {
             throw KeyError.noKeys(
                 "Error: No keys were provided"
             )
@@ -87,11 +87,11 @@ public struct EEA {
     /// - Returns: The encrypted cipher text
     private func encryptOnce(data: [UInt8], key: String) -> [UInt8] {
         var keyData = Array(key.utf8)
-        var prevBlock: [UInt8] = [UInt8](repeating: 0, count: key.length)
+        var prevBlock: [UInt8] = [UInt8](repeating: 0, count: key.count)
         var plainText: [UInt8] = data
 
         // Add padding to the data if needed
-        while plainText.count % key.length != 0 {
+        while plainText.count % key.count != 0 {
             plainText.append(0)
         }
         var cipher: [UInt8] = [UInt8](repeating: 0, count: plainText.count)
@@ -297,7 +297,7 @@ public struct EEA {
 
             let decoded = try decode(data: text)
             var plainText: [UInt8] = decoded
-            if plainText.count % keys[0].length != 0 {
+            if plainText.count % keys[0].count != 0 {
                 print("Error: Size of the data doesn't match the key length.")
                 return nil
             }
@@ -328,7 +328,7 @@ public struct EEA {
     ///   - keys: The keys to be used for decryption
     /// - Returns: The data decrypted
     public func decrypt(data: [UInt8], keys: [String]) throws -> [UInt8] {
-        if data.count % keys[0].length != 0 {
+        if data.count % keys[0].count != 0 {
             throw EEAError.badKeyLen(
                 "Size of the data doesn't match the key length."
             )
