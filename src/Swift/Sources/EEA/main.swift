@@ -6,7 +6,7 @@ func basicTest() -> Bool {
     let keygen = Keygen()
     var passed: Bool = true
 
-    guard let keys = try? keygen.genUserKeys() else {
+    guard let keys = try? keygen.genKeys() else {
         return false
     }
 
@@ -34,7 +34,18 @@ func basicTest() -> Bool {
 }
 
 func main() {
-    print(basicTest() ? "Success!" : "Fail...")
+    //print(basicTest() ? "Success!" : "Fail...")
+    let userIn = UserInput()
+    while true {
+        let ret = userIn.mainMenu()
+        if ret == -1 {
+            break
+        } else if ret == 0 {
+            print("Invalid selection.")
+        } else {
+            userIn.submenu(menu: ret)
+        }
+    }
 }
 
 main()
