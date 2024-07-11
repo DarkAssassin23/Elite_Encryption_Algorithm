@@ -1,9 +1,13 @@
-func main() {
+import Crypto
+
+func basicTest() -> Bool {
     let crypto = EEA()
     let io = FileIO()
     let keygen = Keygen()
-    guard let keys = try? keygen.genKeys(size: 256) else {
-        return
+    var passed: Bool = true
+
+    guard let keys = try? keygen.genUserKeys() else {
+        return false
     }
 
     for i in (0...keys.count - 1) {
@@ -16,13 +20,21 @@ func main() {
     _ = try? crypto.encryptFile(inFile: "output.txt", keys: keys)
     _ = try? crypto.decryptFile(inFile: "output.txt.eea", keys: keys)
     let tmp = try? io.readFile("output.txt")
-    print("Decrypt success: \(tmp == data)")
+    passed = passed && (tmp == data)
+    print("Decrypt success: \(passed)")
 
     var tmpStr: String? = crypto.encryptText(text: ogString, keys: keys)
     print(tmpStr ?? "N/A")
     tmpStr = crypto.decryptText(text: tmpStr ?? "", keys: keys)
     print(tmpStr ?? "N/A")
-    print("Decrypt success: \(tmpStr == ogString)")
+    passed = passed && (tmpStr == ogString)
+    print("Decrypt success: \(passed)")
+
+    return passed
+}
+
+func main() {
+    print(basicTest() ? "Success!" : "Fail...")
 }
 
 main()

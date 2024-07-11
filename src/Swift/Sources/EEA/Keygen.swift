@@ -90,4 +90,19 @@ public struct Keygen {
         }
         return keys
     }
+
+    /// Prompt the user for the size and number of keys to generate for EEA
+    /// - Returns: List of keys to be used for EEA
+    public func genUserKeys() throws -> [String] {
+        let userIn = UserInput()
+        let size: Int = userIn.getDesiredKeySize()
+        let num: Int = userIn.getDesiredNumKeys()
+
+        do {
+            let keys = try genKeys(size: size, num: num)
+            return keys
+        } catch (let e) {
+            throw e
+        }
+    }
 }
