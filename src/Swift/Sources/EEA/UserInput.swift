@@ -4,6 +4,7 @@ public struct UserInput {
     private let keyMenuOpts: [String]
     private let keygen: Keygen
     private let fileIO: FileIO
+    private let defaultKeysFile: String
     enum MenuOpts: UInt8 {
         case keys = 1
         case encrypt = 2
@@ -22,6 +23,7 @@ public struct UserInput {
         self.keyMenuOpts = ["Add Keys", "Delete Keys", "View Keys"]
         self.keygen = Keygen()
         self.fileIO = FileIO()
+        self.defaultKeysFile = "keys.keys"
     }
 
     /// Print out the menu
@@ -64,6 +66,7 @@ public struct UserInput {
 
     /// Create new keys for the user
     private func addKeys() {
+        var keys: [String] = []
         let size: Int = getDesiredKeySize()
         if size == 0 {
             return
@@ -75,12 +78,55 @@ public struct UserInput {
         }
 
         do {
-            let keys = try keygen.genKeys(size: size, num: num)
-            for i in (0..<keys.count) {
-                print("\(i + 1). \(keys[i])")
-            }
+            let k = try keygen.genKeys(size: size, num: num)
+            keys = k
         } catch (let e) {
             print("An error occured trying to generate your keys:\n\(e)")
+            return
+        }
+
+        while true {
+            print("Enter a filename to save your kesy to. It should in in .keys")
+            print("Filename or 'q' to quit (default: \(defaultKeysFile)) ",
+                  terminator: "")
+            var filename: String
+            let input = readLine()
+
+            if input == "" {
+                filename = defaultKeysFile
+            } else if input!.hasSuffix(".keys") {
+                filename = input!
+            } else if input == "q" {
+                return
+            } else {
+                print("Invalid filename. It should end in .keys")
+                continue
+            }
+
+            if fileIO.doesExist(filename: filename) {
+                print("WARNING the file '\(filename)' already exists.")
+                print("Are you sure you want to override it? (y/n)",
+                      "(default: n): ", terminator: "")
+                guard let input = readLine() else {
+                    continue
+                }
+                if input != "y" {
+                    continue
+                }
+            }
+            var data:[UInt8] = []
+            for key in keys {
+                data.append(contentsOf: Array(key.utf8))
+                data.append(contentsOf: Array("\n".utf8))
+            }
+            // TODO: Encrypt data before writing it to the file
+            do {
+                _ = try fileIO.writeFile(data, filename: filename)
+                printKeys(keys: keys)
+            } catch (let e) {
+                print("The following error occured when saving your keys:\(e)")
+            }
+            return
         }
     }
 
@@ -129,7 +175,7 @@ public struct UserInput {
             }
             print("\(keySizes.count + 1). Other")
             print(
-                "(1-\(keySizes.count + 1)) or 'q' to quit ",
+                "(1-\(keySizes.count + 1)) or 'q' to quit",
                 "(default: \(defaultSelection)): ",
                 terminator: "")
 
@@ -161,7 +207,7 @@ public struct UserInput {
         var num: Int = 0
         repeat {
             print(
-                "Enter the number of keys to generate, or 'q' to quit ",
+                "Enter the number of keys to generate, or 'q' to quit",
                 "(default: \(defaultSelection)): ",
                 terminator: "")
             let input = readLine()

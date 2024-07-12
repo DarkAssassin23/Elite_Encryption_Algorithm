@@ -10,9 +10,7 @@ func basicTest() -> Bool {
         return false
     }
 
-    for i in (0...keys.count - 1) {
-        print("\(i + 1). \(keys[i])")
-    }
+    printKeys(keys: keys)
     let ogString: String = "This is a test string.\nIt will be encrypted."
 
     let data: [UInt8] = Array(ogString.utf8)

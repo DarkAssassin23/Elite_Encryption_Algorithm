@@ -8,6 +8,8 @@ enum FileIOError: Error {
 
 /// Class to handle file reads and writes
 public struct FileIO {
+    private let fileManager = FileManager.default
+
     /// Read the contents of the file and return the raw data
     /// - Parameters
     ///   - filename: The name of the file to read the data from
@@ -47,11 +49,17 @@ public struct FileIO {
     /// - Returns: True if the file was deleted successfully
     public func deleteFile(filename: String) -> Bool {
         do {
-            let fileManager = FileManager.default
             try fileManager.removeItem(atPath: filename)
             return true
         } catch {
             return false
         }
+    }
+
+    /// Check if the given file exists
+    /// - Parameter filename: The name of the file to check
+    /// - Returns: If the given file exists
+    public func doesExist(filename: String) -> Bool {
+        return fileManager.fileExists(atPath: filename)
     }
 }
