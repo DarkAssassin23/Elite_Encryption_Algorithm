@@ -102,16 +102,17 @@ public struct UserInput {
                 continue
             }
             selection = choice
-        }
-        guard let choice = KeyOpts(rawValue: UInt8(selection)) else {
-            return
-        }
-        switch choice {
-        case KeyOpts.add:
-            addKeys()
-            break
-        default:
-            break
+            guard let choice = KeyOpts(rawValue: UInt8(selection)) else {
+                return
+            }
+            switch choice {
+            case KeyOpts.add:
+                addKeys()
+                break
+            default:
+                break
+            }
+            selection = 0
         }
     }
 
