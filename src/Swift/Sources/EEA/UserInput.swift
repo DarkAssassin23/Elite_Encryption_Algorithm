@@ -138,6 +138,7 @@ public struct UserInput {
                 if input == "q" {
                     break
                 }
+                print("Using default selction of \(defaultSelection)")
                 return keySizes[defaultSelection - 1]
             }
             if choice < 1 || choice > keySizes.count + 1 {
@@ -168,6 +169,7 @@ public struct UserInput {
                 if input == "q" {
                     break
                 }
+                print("Using default value of \(defaultSelection)")
                 return defaultSelection
             }
             if n < 1 {
