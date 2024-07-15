@@ -1,7 +1,12 @@
+import Crypto
+import Foundation
+
+/// Class to handle the user input portions of the program
 public struct UserInput {
     private let keySizes: [Int]
     private let mainMenuOpts: [String]
     private let keyMenuOpts: [String]
+    private let eea: EEA
     private let keygen: Keygen
     private let fileIO: FileIO
     private let defaultKeysFile: String
@@ -17,15 +22,24 @@ public struct UserInput {
         case view = 3
     }
 
+    enum PasswordError: Error {
+        case nilPassword(String)
+        case passwordMismatch(String)
+    }
+
     public init() {
         self.keySizes = [256, 512, 1024, 2048]
         self.mainMenuOpts = ["Manage Keys", "Encrypt", "Decrypt"]
         self.keyMenuOpts = ["Add Keys", "Delete Keys", "View Keys"]
+        self.eea = EEA()
         self.keygen = Keygen()
         self.fileIO = FileIO()
         self.defaultKeysFile = "keys.keys"
     }
 
+    /*============================================*/
+    /*                  Private                   */
+    /*============================================*/
     /// Print out the menu
     /// - Parameter menu: The list of menu options
     private func printMenu(menu: [String]) {
@@ -34,6 +48,30 @@ public struct UserInput {
             print("\(i + 1). \(menu[i])")
         }
         print("(1-\(menu.count)) or 'q' to quit: ", terminator: "")
+    }
+
+    /// Prompt the user for their password or to set one up
+    /// - Parameter setup: Is the password being set up for the first time
+    /// - Returns: The hash of the entered password
+    private func getPassword(setup: Bool = true) throws -> String {
+        guard let p1 = getpass("Enter your password for they keys file: ")
+        else {
+            throw PasswordError.nilPassword("Error: nil received for password")
+        }
+        let password = String(cString: p1)
+        if setup {
+            guard let p2 = getpass("Re-type password: ") else {
+                throw PasswordError.nilPassword(
+                    "Error: nil received for password")
+            }
+            let reenter = String(cString: p2)
+            if password != reenter {
+                throw PasswordError.passwordMismatch(
+                    "Error: Passwords do not match")
+            }
+        }
+        let hash = SHA512.hash(data: Data(password.utf8))
+        return String(hash.description.split(separator: " ").last!)
     }
 
     /// Prompt for a key size that is not one of the pre-sets found in
@@ -86,9 +124,11 @@ public struct UserInput {
         }
 
         while true {
-            print("Enter a filename to save your kesy to. It should in in .keys")
-            print("Filename or 'q' to quit (default: \(defaultKeysFile)) ",
-                  terminator: "")
+            print(
+                "Enter a filename to save your kesy to. It should in in .keys")
+            print(
+                "Filename or 'q' to quit (default: \(defaultKeysFile)) ",
+                terminator: "")
             var filename: String
             let input = readLine()
 
@@ -105,8 +145,9 @@ public struct UserInput {
 
             if fileIO.doesExist(filename: filename) {
                 print("WARNING the file '\(filename)' already exists.")
-                print("Are you sure you want to override it? (y/n)",
-                      "(default: n): ", terminator: "")
+                print(
+                    "Are you sure you want to override it? (y/n)",
+                    "(default: n): ", terminator: "")
                 guard let input = readLine() else {
                     continue
                 }
@@ -114,17 +155,28 @@ public struct UserInput {
                     continue
                 }
             }
-            var data:[UInt8] = []
-            for key in keys {
-                data.append(contentsOf: Array(key.utf8))
-                data.append(contentsOf: Array("\n".utf8))
-            }
-            // TODO: Encrypt data before writing it to the file
+
             do {
-                _ = try fileIO.writeFile(data, filename: filename)
+                let password = try getPassword()
+                var salt = try genRandBytes(
+                    count: keys[0].count / 2, encode: false)
+                salt += "\n"
+
+                var data: [UInt8] = Array(salt.utf8)
+                for key in keys {
+                    data.append(contentsOf: Array(key.utf8))
+                    data.append(contentsOf: Array("\n".utf8))
+                }
+
+                let encryptedKeys: String = try eea.encode(
+                    data: eea.encrypt(data: data, keys: [password]))
+                _ = try fileIO.writeFile(
+                    Array(encryptedKeys.utf8),
+                    filename: filename)
                 printKeys(keys: keys)
             } catch (let e) {
-                print("The following error occured when saving your keys:\(e)")
+                print("The following error occured when saving your keys:")
+                print(e)
             }
             return
         }
@@ -162,6 +214,9 @@ public struct UserInput {
         }
     }
 
+    /*============================================*/
+    /*                  Public                    */
+    /*============================================*/
     /// Prompt the user for how big the keys they want to generate should be
     /// - Returns: The size each key should be
     public func getDesiredKeySize() -> Int {
