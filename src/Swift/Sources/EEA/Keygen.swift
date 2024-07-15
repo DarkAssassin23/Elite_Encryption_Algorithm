@@ -6,50 +6,8 @@ enum KeygenError: Error {
     case keySize(String)
 }
 
-#if (!os(macOS) && !os(iOS) && !os(watchOS) && !os(tvOS))
-    extension Data {
-        /// Returns random data
-        ///
-        /// - Parameter length: Length of the data in bytes.
-        /// - Returns: Generated data of the specified length.
-        static func random(length: Int) throws -> Data {
-            return Data(
-                (0..<length).map { _ in
-                    UInt8.random(in: UInt8.min...UInt8.max)
-                })
-        }
-    }
-#endif
-
 /// Class to handle the generation of keys
 public struct Keygen {
-
-    /// Generate random data to and return the result as a base64 string
-    /// - Returns: Random data encoded in a base64 string
-    private func genRandBytes() throws -> String {
-        #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
-            var bytes = [UInt8](repeating: 0, count: SHA256.byteCount)
-            let status = SecRandomCopyBytes(
-                kSecRandomDefault, bytes.count, &bytes)
-
-            if status == errSecSuccess {
-                return Data(bytes).base64EncodedString()
-            } else {
-                throw KeygenError.randomBytes(
-                    "Generating random bytes failed.")
-            }
-        #else
-            guard
-                let dataStr = try? Data.random(length: SHA256.byteCount)
-                    .base64EncodedString()
-            else {
-                throw KeygenError.randomBytes(
-                    "Generating random bytes failed.")
-            }
-            return dataStr
-        #endif
-    }
-
     /// Generate a set of keys for EEA
     /// - Parameters:
     ///   - size: The hash size of the keys to generate (e.g. 256 = SHA256)
