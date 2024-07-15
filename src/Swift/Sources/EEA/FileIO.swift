@@ -62,4 +62,21 @@ public struct FileIO {
     public func doesExist(filename: String) -> Bool {
         return fileManager.fileExists(atPath: filename)
     }
+
+    /// Return a list of all the files with a given extension
+    /// - Parameter ext: The file extension of files to look for
+    /// - Returns: A list of files with the given extension
+    public func getFilesOfType(ext: String) -> [String] {
+        guard let conts = try? fileManager.contentsOfDirectory(atPath: ".")
+        else {
+            return []
+        }
+        var files: [String] = []
+        for f in conts {
+            if f.hasSuffix(ext) {
+                files.append(f)
+            }
+        }
+        return files
+    }
 }

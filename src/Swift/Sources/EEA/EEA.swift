@@ -49,7 +49,7 @@ public struct EEA {
     ///
     /// If a key is not valid, an exception will be thrown
     /// - Parameter keys: The keys to check the validity of
-    private func keyCheck(_ keys: [String]) throws {
+    public func keyCheck(_ keys: [String]) throws {
         guard let size = keys.first?.count else {
             throw KeyError.noKeys(
                 "Error: No keys were provided"
@@ -277,7 +277,7 @@ public struct EEA {
     /// Given an encrypted cipher text, decode it from base64
     /// - Parameter data: Cipher text to be decoded
     /// - Returns: The cipher texted decoded from base64
-    private func decode(data: String) throws -> [UInt8] {
+    public func decode(data: String) throws -> [UInt8] {
         guard let decoded = data.fromBase64() else {
             throw Base64Error.decodeFailed(
                 "Decoding the data from base64 failed."

@@ -2,7 +2,7 @@ import Crypto
 import Foundation
 
 /// Class to handle the user input portions of the program
-public struct UserInput {
+public class UserInput {
     private let keySizes: [Int]
     private let mainMenuOpts: [String]
     private let keyMenuOpts: [String]
@@ -10,6 +10,9 @@ public struct UserInput {
     private let keygen: Keygen
     private let fileIO: FileIO
     private let defaultKeysFile: String
+    private let rounds: UInt8
+
+    private var hasKeys: Bool
     enum MenuOpts: UInt8 {
         case keys = 1
         case encrypt = 2
@@ -35,6 +38,9 @@ public struct UserInput {
         self.keygen = Keygen()
         self.fileIO = FileIO()
         self.defaultKeysFile = "keys.keys"
+        self.rounds = 5
+
+        self.hasKeys = !fileIO.getFilesOfType(ext: ".keys").isEmpty
     }
 
     /*============================================*/
@@ -47,7 +53,11 @@ public struct UserInput {
         for i in (0..<menu.count) {
             print("\(i + 1). \(menu[i])")
         }
-        print("(1-\(menu.count)) or 'q' to quit: ", terminator: "")
+        if menu.count > 1 {
+            print("(1-\(menu.count)) or 'q' to quit: ", terminator: "")
+        } else {
+            print("(1) or 'q' to quit: ", terminator: "")
+        }
     }
 
     /// Prompt the user for their password or to set one up
@@ -168,8 +178,10 @@ public struct UserInput {
                     data.append(contentsOf: Array("\n".utf8))
                 }
 
-                let encryptedKeys: String = try eea.encode(
-                    data: eea.encrypt(data: data, keys: [password]))
+                for _ in (0..<rounds) {
+                    data = try eea.encrypt(data: data, keys: [password])
+                }
+                let encryptedKeys = try eea.encode(data: data)
                 _ = try fileIO.writeFile(
                     Array(encryptedKeys.utf8),
                     filename: filename)
@@ -178,12 +190,92 @@ public struct UserInput {
                 print("The following error occured when saving your keys:")
                 print(e)
             }
+            hasKeys = true
             return
+        }
+    }
+
+    /// List the keys files and print out the keys for the user selects
+    private func viewKeys() {
+        let keyFiles = fileIO.getFilesOfType(ext: ".keys")
+        if keyFiles.isEmpty {
+            print("You do not have any keys files.")
+            hasKeys = false
+            return
+        }
+        while true {
+            printMenu(menu: keyFiles)
+            let input = readLine()
+            var choice: Int
+            if let c = Int(input ?? "N/A") {
+                choice = c
+            } else {
+                if input == "q" {
+                    break
+                } else if input == "" {
+                    choice = 1
+                } else {
+                    choice = -1
+                }
+            }
+            if choice < 1 || choice > keyFiles.count {
+                print("Invalid selection.")
+                continue
+            }
+
+            do {
+                let password = try getPassword(setup: false)
+                let keysData = try fileIO.readFile(keyFiles[choice - 1])
+                guard let dataString = String(bytes: keysData, encoding: .utf8)
+                else {
+                    print("Error converting keys data")
+                    return
+                }
+
+                var cipherData = try eea.decode(data: dataString)
+                for _ in (0..<rounds) {
+                    cipherData = try eea.decrypt(
+                        data: cipherData, keys: [password])
+                }
+                let keyStr = String(bytes: cipherData, encoding: .utf8)
+                var keys = Array(
+                    keyStr!.split(separator: "\n").map { String($0) })
+
+                // Remove salt
+                keys.removeFirst()
+                try eea.keyCheck(keys)
+                printKeys(keys: keys)
+            } catch KeyError.invalidLength, KeyError.lengthMismatch, KeyError
+                .invalidKey
+            {
+                print(
+                    "Error: Invalid keys detected.",
+                    "Did you enter your password right?")
+            } catch (let e) {
+                print("The following error occured reading your keys:")
+                print(e)
+                return
+            }
+        }
+    }
+
+    private func noKeysWarning() {
+        print("No keys file exists.")
+        print(
+            "Would you like to create one? (y/n) (default: y): ",
+            terminator: "")
+        let input = readLine()
+        if input != "n" {
+            addKeys()
         }
     }
 
     /// Submenu for managing a users keys
     private func keysSubmenu() {
+        if !hasKeys {
+            noKeysWarning()
+        }
+
         var selection: Int = 0
         while selection == 0 {
             printMenu(menu: keyMenuOpts)
@@ -206,6 +298,9 @@ public struct UserInput {
             switch choice {
             case KeyOpts.add:
                 addKeys()
+                break
+            case KeyOpts.view:
+                viewKeys()
                 break
             default:
                 break
