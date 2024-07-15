@@ -48,8 +48,8 @@ public class UserInput {
     /*============================================*/
     /// Print out the menu
     /// - Parameter menu: The list of menu options
-    private func printMenu(menu: [String]) {
-        print("Select one of the following options:")
+    private func printMenu(menu: [String], msg: String? = nil) {
+        print(msg ?? "Select one of the following options:")
         for i in (0..<menu.count) {
             print("\(i + 1). \(menu[i])")
         }
@@ -204,7 +204,9 @@ public class UserInput {
             return
         }
         while true {
-            printMenu(menu: keyFiles)
+            printMenu(
+                menu: keyFiles,
+                msg: "Select which keys file you would like to view:")
             let input = readLine()
             var choice: Int
             if let c = Int(input ?? "N/A") {
@@ -259,6 +261,59 @@ public class UserInput {
         }
     }
 
+    /// List the list of keys files and ask the user which they'd like to
+    /// delete
+    private func deleteKeys() {
+        while true {
+            let keyFiles = fileIO.getFilesOfType(ext: ".keys")
+            if keyFiles.isEmpty {
+                print("You do not have any keys files.")
+                hasKeys = false
+                return
+            }
+            printMenu(
+                menu: keyFiles,
+                msg: "Select which keys file you would like to delete:")
+            let input = readLine()
+            var choice: Int
+            if let c = Int(input ?? "N/A") {
+                choice = c
+            } else {
+                if input == "q" {
+                    break
+                } else if input == "" {
+                    choice = 1
+                } else {
+                    choice = -1
+                }
+            }
+            if choice < 1 || choice > keyFiles.count {
+                print("Invalid selection.")
+                continue
+            }
+            print(
+                "Are you sure you want to delete \(keyFiles[choice - 1])?",
+                "(y/n) (default: n): ", terminator: "")
+            guard let input = readLine() else {
+                continue
+            }
+            if input != "y" {
+                continue
+            }
+
+            if fileIO.deleteFile(filename: keyFiles[choice - 1]) {
+                print("Keys file was deleted successfully.")
+                if keyFiles.count - 1 == 0 {
+                    hasKeys = false
+                    return
+                }
+            } else {
+                print("Error: Failed to delete keys file.")
+            }
+        }
+    }
+
+    /// Handle if no keys file exists when opening the keys menu
     private func noKeysWarning() {
         print("No keys file exists.")
         print(
@@ -299,10 +354,11 @@ public class UserInput {
             case KeyOpts.add:
                 addKeys()
                 break
+            case KeyOpts.del:
+                deleteKeys()
+                break
             case KeyOpts.view:
                 viewKeys()
-                break
-            default:
                 break
             }
             selection = 0
