@@ -44,6 +44,10 @@ public class UserInput {
     /*============================================*/
     /*                  Private                   */
     /*============================================*/
+
+    /*=========================*/
+    /*    Helper Functions     */
+    /*=========================*/
     /// Print out the menu
     /// - Parameter menu: The list of menu options
     private func printMenu(menu: [String], msg: String? = nil) {
@@ -110,6 +114,43 @@ public class UserInput {
         return size
     }
 
+    /// Display the menu for encrypting/decrypting
+    /// - Parameter encrypt: Is this the encryption menu
+    private func encryptDecryptMenu(encrypt: Bool) {
+        let type: String = encrypt ? "Encrypt" : "Decrypt"
+        let menu = ["\(type) file"]
+        printMenu(menu: menu)
+    }
+
+    /// Prompt the user if they would like to use Ghost Mode
+    /// - Parameter: encrypt: Is this for encryption
+    /// - Returns: Whether to use Ghost Mode
+    private func promptGhostMode(encrypt: Bool) -> Bool {
+        print(
+            "Would you like to enable Ghost Mode?",
+            "(y/n) (default: n): ", terminator: "")
+        guard let input = readLine() else {
+            return false
+        }
+        if input == "y" {
+            if encrypt {
+                print(
+                    "WARNING: You are about to encrypt the data with one time",
+                    "use keys. You will be unable to decrypt the data unless you",
+                    "manually copy down the keys after you encrypt your data")
+            }
+            return true
+        }
+        return false
+    }
+
+    /*=========================*/
+    /*  End Helper Functions   */
+    /*=========================*/
+
+    /*=========================*/
+    /*      Key Submenus       */
+    /*=========================*/
     /// Create new keys for the user
     private func addKeys() {
         var keys: [String] = []
@@ -344,6 +385,33 @@ public class UserInput {
             selection = 0
         }
     }
+    /*=========================*/
+    /*    End Key Submenus     */
+    /*=========================*/
+
+    /*=========================*/
+    /*    Encrypt Submenus     */
+    /*=========================*/
+    /// Submenu to handle encryption
+    /// - Parameter ghost: Encrypting with Ghost Mode
+    private func encryptSubmenu(ghost: Bool) {
+        encryptDecryptMenu(encrypt: true)
+    }
+    /*=========================*/
+    /*   End Encrypt Submenus  */
+    /*=========================*/
+
+    /*=========================*/
+    /*    Decrypt Submenus     */
+    /*=========================*/
+    /// Submenu to handle decryption
+    /// - Parameter ghost: Decrypting with Ghost Mode
+    private func decryptSubmenu(ghost: Bool) {
+        encryptDecryptMenu(encrypt: false)
+    }
+    /*=========================*/
+    /*   End Decrypt Submenus  */
+    /*=========================*/
 
     /*============================================*/
     /*                  Public                    */
@@ -428,6 +496,8 @@ public class UserInput {
         return (choice >= 1 && choice <= mainMenuOpts.count) ? choice : 0
     }
 
+    /// Go to the submenu the user selected
+    /// - Parameter menu: The ID of the submenu to go to
     public func submenu(menu: Int) {
         guard let choice = MenuOpts(rawValue: UInt8(menu)) else {
             return
@@ -436,7 +506,11 @@ public class UserInput {
         case MenuOpts.keys:
             keysSubmenu()
             break
-        default:
+        case MenuOpts.encrypt:
+            encryptSubmenu(ghost: promptGhostMode(encrypt: true))
+            break
+        case MenuOpts.decrypt:
+            decryptSubmenu(ghost: promptGhostMode(encrypt: false))
             break
         }
     }
