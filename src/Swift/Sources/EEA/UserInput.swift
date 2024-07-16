@@ -236,16 +236,16 @@ public class UserInput {
 
                 var cipherData = try eea.decode(data: dataString)
                 for _ in (0..<rounds) {
-                    cipherData = try eea.decrypt(
+                    cipherData = eea.decrypt(
                         data: cipherData, keys: [password])
                 }
                 let keyStr = String(bytes: cipherData, encoding: .utf8)
                 var keys = Array(
                     keyStr!.split(separator: "\n").map { String($0) })
+                try eea.keyCheck(keys)
 
                 // Remove salt
                 keys.removeFirst()
-                try eea.keyCheck(keys)
                 printKeys(keys: keys)
             } catch KeyError.invalidLength, KeyError.lengthMismatch, KeyError
                 .invalidKey

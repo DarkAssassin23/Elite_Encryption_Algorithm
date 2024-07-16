@@ -57,7 +57,8 @@ public struct EEA {
         }
         if size % minSize != 0 {
             throw KeyError.invalidLength(
-                "The provided key length, \(size), is not a multiple of \(minSize)."
+                "The provided key length, \(size),",
+                "is not a multiple of \(minSize)."
             )
         }
 
@@ -327,12 +328,7 @@ public struct EEA {
     ///   - data: Array containing the data to be decrypted
     ///   - keys: The keys to be used for decryption
     /// - Returns: The data decrypted
-    public func decrypt(data: [UInt8], keys: [String]) throws -> [UInt8] {
-        if data.count % keys[0].count != 0 {
-            throw EEAError.badKeyLen(
-                "Size of the data doesn't match the key length."
-            )
-        }
+    public func decrypt(data: [UInt8], keys: [String]) -> [UInt8] {
         var data = data
         for key in keys.reversed() {
             data = decryptOnce(data: data, key: key)
@@ -362,7 +358,7 @@ public struct EEA {
         do {
             try keyCheck(keys)
             let data = try io.readFile(inFile)
-            let plainText = try decrypt(data: data, keys: keys)
+            let plainText = decrypt(data: data, keys: keys)
             guard let outFile = outFile else {
                 // Remove .eea extension
                 let index = inFile.lastIndex(of: ".")!
