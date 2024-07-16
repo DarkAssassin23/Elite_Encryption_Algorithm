@@ -1,6 +1,7 @@
 import Crypto
 import Foundation
 
+let passwordRounds: UInt8 = 5
 extension Data {
     #if (!os(macOS) && !os(iOS) && !os(watchOS) && !os(tvOS))
         /// Returns random data
@@ -51,5 +52,38 @@ func genRandBytes(count: Int = SHA256.byteCount, encode: Bool = true) throws
 func printKeys(keys: [String]) {
     for i in (0..<keys.count) {
         print("\(i + 1). \(keys[i])")
+    }
+}
+
+/// Load the keys from the given keys file
+/// - Parameter filename: The name of the keys file to load the keys from
+/// - Returns: List of keys from the keys file
+func loadKeys(_ filename: String, _ password: String) throws -> [String] {
+    let fileIO = FileIO()
+    let eea = EEA()
+
+    let keysData = try fileIO.readFile(filename)
+    do {
+        guard let dataString = String(bytes: keysData, encoding: .utf8)
+        else {
+            print("Error converting keys data")
+            return []
+        }
+
+        var cipherData = try eea.decode(data: dataString)
+        for _ in (0..<passwordRounds) {
+            cipherData = eea.decrypt(
+                data: cipherData, keys: [password])
+        }
+        let keyStr = String(bytes: cipherData, encoding: .utf8)
+        var keys = Array(
+            keyStr!.split(separator: "\n").map { String($0) })
+        try eea.keyCheck(keys)
+
+        // Remove salt
+        keys.removeFirst()
+        return keys
+    } catch (let e) {
+        throw e
     }
 }

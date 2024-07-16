@@ -10,7 +10,6 @@ public class UserInput {
     private let keygen: Keygen
     private let fileIO: FileIO
     private let defaultKeysFile: String
-    private let rounds: UInt8
 
     private var hasKeys: Bool
     enum MenuOpts: UInt8 {
@@ -38,7 +37,6 @@ public class UserInput {
         self.keygen = Keygen()
         self.fileIO = FileIO()
         self.defaultKeysFile = "keys.keys"
-        self.rounds = 5
 
         self.hasKeys = !fileIO.getFilesOfType(ext: ".keys").isEmpty
     }
@@ -178,7 +176,7 @@ public class UserInput {
                     data.append(contentsOf: Array("\n".utf8))
                 }
 
-                for _ in (0..<rounds) {
+                for _ in (0..<passwordRounds) {
                     data = try eea.encrypt(data: data, keys: [password])
                 }
                 let encryptedKeys = try eea.encode(data: data)
@@ -227,25 +225,7 @@ public class UserInput {
 
             do {
                 let password = try getPassword(setup: false)
-                let keysData = try fileIO.readFile(keyFiles[choice - 1])
-                guard let dataString = String(bytes: keysData, encoding: .utf8)
-                else {
-                    print("Error converting keys data")
-                    return
-                }
-
-                var cipherData = try eea.decode(data: dataString)
-                for _ in (0..<rounds) {
-                    cipherData = eea.decrypt(
-                        data: cipherData, keys: [password])
-                }
-                let keyStr = String(bytes: cipherData, encoding: .utf8)
-                var keys = Array(
-                    keyStr!.split(separator: "\n").map { String($0) })
-                try eea.keyCheck(keys)
-
-                // Remove salt
-                keys.removeFirst()
+                let keys = try loadKeys(keyFiles[choice - 1], password)
                 printKeys(keys: keys)
             } catch KeyError.invalidLength, KeyError.lengthMismatch, KeyError
                 .invalidKey
