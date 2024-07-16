@@ -55,17 +55,25 @@ public class UserInput {
     /*    Helper Functions     */
     /*=========================*/
     /// Print out the menu
-    /// - Parameter menu: The list of menu options
-    private func printMenu(menu: [String], msg: String? = nil) {
+    /// - Parameters:
+    ///   - menu: The list of menu options
+    ///   - msg: The message to display for the menu
+    ///   - def: The default menu option if the user just hits enter
+    private func printMenu(menu: [String], msg: String? = nil, def: Int = -1) {
         print(msg ?? "Select one of the following options:")
         for i in (0..<menu.count) {
             print("\(i + 1). \(menu[i])")
         }
         if menu.count > 1 {
-            print("(1-\(menu.count)) or 'q' to quit: ", terminator: "")
+            print("(1-\(menu.count)) or 'q' to quit", terminator: "")
         } else {
-            print("(1) or 'q' to quit: ", terminator: "")
+            print("(1) or 'q' to quit", terminator: "")
         }
+        if def > 0 {
+            print(" (default \(def))", terminator: "")
+        }
+        print(": ", terminator: "")
+
     }
 
     /// Prompt the user for their password or to set one up
@@ -125,7 +133,7 @@ public class UserInput {
     private func encryptDecryptMenu(encrypt: Bool) {
         let type: String = encrypt ? "Encrypt" : "Decrypt"
         let menu = ["\(type) file", "\(type) directory", "\(type) text"]
-        printMenu(menu: menu)
+        printMenu(menu: menu, def: 1)
     }
 
     /// Prompt the user if they would like to use Ghost Mode
@@ -142,8 +150,9 @@ public class UserInput {
             if encrypt {
                 print(
                     "WARNING: You are about to encrypt the data with one time",
-                    "use keys. You will be unable to decrypt the data unless you",
-                    "manually copy down the keys after you encrypt your data")
+                    "use keys.\nYou will be unable to decrypt the data unless",
+                    "you manually copy down\nthe keys after you encrypt your",
+                    "data")
             }
             return true
         }
