@@ -24,6 +24,12 @@ public class UserInput {
         case view = 3
     }
 
+    enum EncryptDecryptOpts: UInt8 {
+        case file = 1
+        case dir = 2
+        case text = 3
+    }
+
     enum PasswordError: Error {
         case nilPassword(String)
         case passwordMismatch(String)
@@ -118,7 +124,7 @@ public class UserInput {
     /// - Parameter encrypt: Is this the encryption menu
     private func encryptDecryptMenu(encrypt: Bool) {
         let type: String = encrypt ? "Encrypt" : "Decrypt"
-        let menu = ["\(type) file"]
+        let menu = ["\(type) file", "\(type) directory", "\(type) text"]
         printMenu(menu: menu)
     }
 
