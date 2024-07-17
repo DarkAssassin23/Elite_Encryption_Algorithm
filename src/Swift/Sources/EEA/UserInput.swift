@@ -35,6 +35,11 @@ public class UserInput {
         case passwordMismatch(String)
     }
 
+    enum LoadKeysError: Error {
+        case noKeysFiles(String)
+        case invalid(String)
+    }
+
     public init() {
         self.keySizes = [256, 512, 1024, 2048]
         self.mainMenuOpts = ["Manage Keys", "Encrypt", "Decrypt"]
@@ -130,14 +135,14 @@ public class UserInput {
 
     /// Display the menu for encrypting/decrypting
     /// - Parameter encrypt: Is this the encryption menu
-    private func encryptDecryptMenu(encrypt: Bool) {
+    private func printEncryptDecryptMenu(encrypt: Bool) {
         let type: String = encrypt ? "Encrypt" : "Decrypt"
         let menu = ["\(type) file", "\(type) directory", "\(type) text"]
         printMenu(menu: menu, def: 1)
     }
 
     /// Prompt the user if they would like to use Ghost Mode
-    /// - Parameter: encrypt: Is this for encryption
+    /// - Parameter encrypt: Is this for encryption
     /// - Returns: Whether to use Ghost Mode
     private func promptGhostMode(encrypt: Bool) -> Bool {
         print(
@@ -159,6 +164,83 @@ public class UserInput {
         return false
     }
 
+    /// Prompt the user to enter the keys to use for Ghost Mode decryption
+    /// - Returns: The list of keys
+    private func getGhostModeKeys() throws -> [String] {
+        print("When you finish entering your keys, type 'done' or hit enter.")
+        print("Enter your keys below:")
+        var keys: [String] = []
+        while true {
+            print("\(keys.count + 1): ", terminator: "")
+            guard let value = readLine() else {
+                throw LoadKeysError.invalid("nil value detected.")
+            }
+            if value == "done" || value == "" {
+                do {
+                    try eea.keyCheck(keys)
+                    return keys
+                } catch (let e) {
+                    throw e
+                }
+            }
+            do {
+                try eea.keyCheck([value])
+                keys.append(value)
+            } catch (let e) {
+                throw e
+            }
+        }
+    }
+
+    /// Prompt the user for which keys file they would like to load in
+    /// - Parameter view: Are the keys being viewed only
+    /// - Returns: The list of keys from the file
+    private func loadKeysFromFile(view: Bool = false) throws -> [String] {
+        let type: String = view ? "view" : "use"
+        let keyFiles = fileIO.getFilesOfType(ext: ".keys")
+        if keyFiles.isEmpty {
+            hasKeys = false
+            throw LoadKeysError.noKeysFiles("You dont have any keys files.")
+        }
+        while true {
+            printMenu(
+                menu: keyFiles,
+                msg: "Select which keys file you would like to \(type):")
+            let input = readLine()
+            var choice: Int
+            if let c = Int(input ?? "N/A") {
+                choice = c
+            } else {
+                if input == "q" {
+                    break
+                } else if input == "" {
+                    choice = 1
+                } else {
+                    choice = -1
+                }
+            }
+            if choice < 1 || choice > keyFiles.count {
+                print("Invalid selection.")
+                continue
+            }
+
+            do {
+                let password = try getPassword(setup: false)
+                let keys = try loadKeys(keyFiles[choice - 1], password)
+                return keys
+            } catch KeyError.invalidLength, KeyError.lengthMismatch, KeyError
+                .invalidKey
+            {
+                var err: String = "Error: Invalid keys detected. "
+                err += "Did you enter your password right?"
+                throw LoadKeysError.invalid(err)
+            } catch (let e) {
+                throw e
+            }
+        }
+        return []
+    }
+
     /*=========================*/
     /*  End Helper Functions   */
     /*=========================*/
@@ -166,30 +248,34 @@ public class UserInput {
     /*=========================*/
     /*      Key Submenus       */
     /*=========================*/
-    /// Create new keys for the user
-    private func addKeys() {
-        var keys: [String] = []
+    private func createKeys() -> [String]? {
         let size: Int = getDesiredKeySize()
         if size == 0 {
-            return
+            return nil
         }
 
         let num: Int = getDesiredNumKeys()
         if num == 0 {
-            return
+            return nil
         }
 
         do {
             let k = try keygen.genKeys(size: size, num: num)
-            keys = k
+            return k
         } catch (let e) {
             print("An error occured trying to generate your keys:\n\(e)")
+            return nil
+        }
+    }
+    /// Create new keys for the user
+    private func addKeys() {
+        guard let keys: [String] = createKeys() else {
             return
         }
 
         while true {
             print(
-                "Enter a filename to save your kesy to. It should in in .keys")
+                "Enter a filename to save your keys to. It should in in .keys")
             print(
                 "Filename or 'q' to quit (default: \(defaultKeysFile)) ",
                 terminator: "")
@@ -251,49 +337,12 @@ public class UserInput {
 
     /// List the keys files and print out the keys for the user selects
     private func viewKeys() {
-        let keyFiles = fileIO.getFilesOfType(ext: ".keys")
-        if keyFiles.isEmpty {
-            print("You do not have any keys files.")
-            hasKeys = false
-            return
-        }
-        while true {
-            printMenu(
-                menu: keyFiles,
-                msg: "Select which keys file you would like to view:")
-            let input = readLine()
-            var choice: Int
-            if let c = Int(input ?? "N/A") {
-                choice = c
-            } else {
-                if input == "q" {
-                    break
-                } else if input == "" {
-                    choice = 1
-                } else {
-                    choice = -1
-                }
-            }
-            if choice < 1 || choice > keyFiles.count {
-                print("Invalid selection.")
-                continue
-            }
-
-            do {
-                let password = try getPassword(setup: false)
-                let keys = try loadKeys(keyFiles[choice - 1], password)
-                printKeys(keys: keys)
-            } catch KeyError.invalidLength, KeyError.lengthMismatch, KeyError
-                .invalidKey
-            {
-                print(
-                    "Error: Invalid keys detected.",
-                    "Did you enter your password right?")
-            } catch (let e) {
-                print("The following error occured reading your keys:")
-                print(e)
-                return
-            }
+        do {
+            let keys = try loadKeysFromFile(view: true)
+            printKeys(keys: keys)
+        } catch (let e) {
+            print("The following error occured when trying to view your keys:")
+            print(e)
         }
     }
 
@@ -404,29 +453,171 @@ public class UserInput {
     /*    End Key Submenus     */
     /*=========================*/
 
-    /*=========================*/
-    /*    Encrypt Submenus     */
-    /*=========================*/
-    /// Submenu to handle encryption
-    /// - Parameter ghost: Encrypting with Ghost Mode
-    private func encryptSubmenu(ghost: Bool) {
-        encryptDecryptMenu(encrypt: true)
-    }
-    /*=========================*/
-    /*   End Encrypt Submenus  */
-    /*=========================*/
+    /*=============================*/
+    /*    Encrypt/Decrypt Submenu  */
+    /*=============================*/
+    /// Handle encryption and decryption of a file
+    /// - Parameters:
+    ///   - ghost: Encrypting or decrypting with Ghost Mode
+    ///   - encrypt: Are we encrypting
+    private func encryptDecryptFile(ghost: Bool, encrypt: Bool) {
+        let type: String = encrypt ? "encrypt" : "decrypt"
+        let type2: String = encrypt ? "Encryption" : "Decryption"
 
-    /*=========================*/
-    /*    Decrypt Submenus     */
-    /*=========================*/
-    /// Submenu to handle decryption
-    /// - Parameter ghost: Decrypting with Ghost Mode
-    private func decryptSubmenu(ghost: Bool) {
-        encryptDecryptMenu(encrypt: false)
+        // File prompt
+        print(
+            "Enter the name of the file you would like to \(type): ",
+            terminator: "")
+        guard let input = readLine() else {
+            print("Error: nil value detected for the filename.")
+            return
+        }
+        if input == "" {
+            print("Error: No file specified.")
+            return
+        }
+        if !fileIO.doesExist(filename: input) {
+            print("Error: the file, '\(input)', does not exist.")
+            return
+        }
+        let filename: String = input
+
+        // Overwrite prompt
+        var overwrite: Bool = true
+        print("Overwrite the file? (y/n) (default: y): ", terminator: "")
+        guard let input = readLine() else {
+            print("Error: nil value detected")
+            return
+        }
+        if input == "n" {
+            overwrite = false
+        }
+
+        // Keys prompt
+        var keys: [String] = []
+        if ghost && encrypt {
+            guard let k = createKeys() else {
+                return
+            }
+            keys = k
+        } else if ghost {
+            do {
+                keys = try getGhostModeKeys()
+            } catch (let e) {
+                print(e)
+                return
+            }
+        } else {
+            if !hasKeys {
+                noKeysWarning()
+            }
+            // User didn't add keys
+            if !hasKeys {
+                print("Aborting...")
+                return
+            }
+            do {
+                keys = try loadKeysFromFile(view: false)
+            } catch (let e) {
+                print(
+                    "The following error occured when trying to load",
+                    "your keys:")
+                print(e)
+                return
+            }
+            // Check if user quit
+            if keys.isEmpty {
+                return
+            }
+        }
+        do {
+            if encrypt {
+                let outfile: String? = overwrite ? nil : filename + ".eea"
+                _ = try eea.encryptFile(
+                    inFile: filename, keys: keys,
+                    outFile: outfile)
+            } else {
+                if overwrite {
+                    _ = try eea.decryptFile(inFile: filename, keys: keys)
+                } else {
+                    // Remove .eea extension
+                    let index = filename.lastIndex(of: ".")!
+                    let outfile = String(filename[filename.startIndex..<index])
+                    _ = try eea.decryptFile(
+                        inFile: filename, keys: keys,
+                        outFile: outfile)
+                }
+            }
+        } catch (let e) {
+            print("\(type2) failed with the following error:")
+            print(e)
+            return
+        }
+        if ghost && encrypt {
+            print("The file was encrypted with the following keys:")
+            printKeys(keys: keys)
+        }
+        print("\(type2) success: \(filename)")
+
     }
-    /*=========================*/
-    /*   End Decrypt Submenus  */
-    /*=========================*/
+
+    /// Handle encryption and decryption of a directory
+    /// - Parameters:
+    ///   - ghost: Encrypting or decrypting with Ghost Mode
+    ///   - encrypt: Are we encrypting
+    private func encryptDecryptDir(ghost: Bool, encrypt: Bool) {
+
+    }
+
+    /// Handle encryption and decryption of text
+    /// - Parameters:
+    ///   - ghost: Encrypting or decrypting with Ghost Mode
+    ///   - encrypt: Are we encrypting
+    private func encryptDecryptText(ghost: Bool, encrypt: Bool) {
+
+    }
+
+    /// Submenu to handle encryption and decryption
+    /// - Parameters:
+    ///   - ghost: Encrypting or decrypting with Ghost Mode
+    ///   - encrypt: Are we encrypting
+    private func encryptDecryptSubmenu(ghost: Bool, encrypt: Bool) {
+        while true {
+            printEncryptDecryptMenu(encrypt: encrypt)
+            let input = readLine()
+            var choice: Int
+            if let c = Int(input ?? "N/A") {
+                choice = c
+            } else {
+                if input == "q" {
+                    return
+                } else if input == "" {
+                    choice = 1
+                } else {
+                    choice = 0
+                }
+            }
+            guard let opt = EncryptDecryptOpts(rawValue: UInt8(choice))
+            else {
+                print("Invalid selection.")
+                continue
+            }
+            switch opt {
+            case EncryptDecryptOpts.file:
+                encryptDecryptFile(ghost: ghost, encrypt: encrypt)
+                return
+            case EncryptDecryptOpts.dir:
+                encryptDecryptDir(ghost: ghost, encrypt: encrypt)
+                return
+            case EncryptDecryptOpts.text:
+                encryptDecryptText(ghost: ghost, encrypt: encrypt)
+                return
+            }
+        }
+    }
+    /*=============================*/
+    /* End Encrypt/Decrypt Submenu */
+    /*=============================*/
 
     /*============================================*/
     /*                  Public                    */
@@ -522,10 +713,12 @@ public class UserInput {
             keysSubmenu()
             break
         case MenuOpts.encrypt:
-            encryptSubmenu(ghost: promptGhostMode(encrypt: true))
+            let ghost = promptGhostMode(encrypt: true)
+            encryptDecryptSubmenu(ghost: ghost, encrypt: true)
             break
         case MenuOpts.decrypt:
-            decryptSubmenu(ghost: promptGhostMode(encrypt: false))
+            let ghost = promptGhostMode(encrypt: false)
+            encryptDecryptSubmenu(ghost: ghost, encrypt: false)
             break
         }
     }
