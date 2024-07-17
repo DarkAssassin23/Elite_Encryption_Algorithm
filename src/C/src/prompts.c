@@ -220,7 +220,11 @@ int prompt_for_ghost_mode_keys(char*** keys, int* num_keys)
         free(line);
         k++;
     }
-
+    if (k == 0) 
+    {
+        free(temp_keys);
+        temp_keys = NULL;
+    }
     *keys = temp_keys;
     *num_keys = k;
     return 1;

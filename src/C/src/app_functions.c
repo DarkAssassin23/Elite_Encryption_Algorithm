@@ -543,6 +543,7 @@ static void decrypt_single_file_mode(int ghost_mode)
     if(keys == NULL)
     {
         free(filename);
+        fprintf(stderr, "No keys were provided. Aborting...\n");
         return;
     }
 
@@ -622,6 +623,7 @@ static void decrypt_directory_mode(int ghost_mode)
     {
         free(dir_name);
         free(contents);
+        fprintf(stderr, "No keys were provided. Aborting...\n");
         return;
     }
 
