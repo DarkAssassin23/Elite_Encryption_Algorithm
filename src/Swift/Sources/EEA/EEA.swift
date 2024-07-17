@@ -190,11 +190,14 @@ public struct EEA {
         do {
             try keyCheck(keys)
             let data = try io.readFile(inFile)
-            let cipherText = try encrypt(data: data, keys: keys)
+            let cipherData = try encrypt(data: data, keys: keys)
+            let cipherText = try encode(data: cipherData)
 
             guard let outFile = outFile else {
                 let outFile = inFile + ".eea"
-                let ret = try io.writeFile(cipherText, filename: outFile)
+                let ret = try io.writeFile(
+                    Array(cipherText.utf8),
+                    filename: outFile)
                 _ = io.deleteFile(filename: inFile)
                 return ret
             }
@@ -203,7 +206,9 @@ public struct EEA {
                     "The file you are writing to should end in .eea."
                 )
             }
-            let ret = try io.writeFile(cipherText, filename: outFile)
+            let ret = try io.writeFile(
+                Array(cipherText.utf8),
+                filename: outFile)
             return ret
         } catch (let e) {
             throw e
@@ -328,11 +333,20 @@ public struct EEA {
     ///   - keys: The keys to be used for decryption
     /// - Returns: The data decrypted
     public func decrypt(data: [UInt8], keys: [String]) -> [UInt8] {
-        var data = data
-        for key in keys.reversed() {
-            data = decryptOnce(data: data, key: key)
+        var cipherText: [UInt8]
+        // Using & since it is not in base64
+        let dataStr = String(bytes: data, encoding: .utf8) ?? "&"
+
+        // Try to decode the data from base64
+        if let tmp = try? decode(data: dataStr) {
+            cipherText = tmp
+        } else {
+            cipherText = data
         }
-        return removePadding(data)
+        for key in keys.reversed() {
+            cipherText = decryptOnce(data: cipherText, key: key)
+        }
+        return removePadding(cipherText)
     }
 
     /// Decrypt the given input file with the specified keys
