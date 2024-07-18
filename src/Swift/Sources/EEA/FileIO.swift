@@ -85,8 +85,15 @@ public struct FileIO {
     /// - ref: https://stackoverflow.com/a/57640445
     public func getDirContents(path: String) -> [String] {
         let url = URL(fileURLWithPath: path)
+        var isDir: ObjCBool = false
+        if fileManager.fileExists(atPath: path, isDirectory: &isDir) {
+            if !isDir.boolValue {
+                return [url.path]
+            }
+        }
+
         var files = [String]()
-        if let enumerator = FileManager.default.enumerator(
+        if let enumerator = fileManager.enumerator(
             at: url, includingPropertiesForKeys: [.isRegularFileKey],
             options: [.skipsPackageDescendants])
         {
@@ -103,10 +110,7 @@ public struct FileIO {
                 }
             }
         }
-        // If files is empty, check if the path is a file
-        if files.isEmpty {
-            return doesExist(path: path) ? [url.path] : files
-        }
+
         return files
     }
 }
