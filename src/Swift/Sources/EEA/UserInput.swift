@@ -205,7 +205,8 @@ public class UserInput {
         while true {
             printMenu(
                 menu: keyFiles,
-                msg: "Select which keys file you would like to \(type):")
+                msg: "Select which keys file you would like to \(type):",
+                def: 1)
             let input = readLine()
             var choice: Int
             if let c = Int(input ?? "N/A") {
