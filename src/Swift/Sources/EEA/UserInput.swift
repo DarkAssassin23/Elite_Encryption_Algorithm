@@ -85,8 +85,9 @@ public class UserInput {
     /// - Parameter setup: Is the password being set up for the first time
     /// - Returns: The hash of the entered password
     private func getPassword(setup: Bool = true) throws -> String {
-        guard let p1 = getpass("Enter your password for they keys file: ")
-        else {
+        let prompt: String =
+            setup ? "Enter your password for they keys file: " : "Password: "
+        guard let p1 = getpass(prompt) else {
             throw PasswordError.nilPassword("Error: nil received for password")
         }
         let password = String(cString: p1)
