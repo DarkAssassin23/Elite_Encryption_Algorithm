@@ -456,6 +456,45 @@ public class UserInput {
     /*=============================*/
     /*    Encrypt/Decrypt Submenu  */
     /*=============================*/
+    /// Prompt the user for what keys to use for encryption or decryption
+    /// - Parameters:
+    ///   - ghost: Encrypting or decrypting with Ghost Mode
+    ///   - encrypt: Are we encrypting
+    private func keysPrompt(_ ghost: Bool, _ encrypt: Bool) -> [String]? {
+        var keys: [String] = []
+        if ghost && encrypt {
+            guard let k = createKeys() else {
+                return nil
+            }
+            keys = k
+        } else if ghost {
+            do {
+                keys = try getGhostModeKeys()
+            } catch (let e) {
+                print(e)
+                return nil
+            }
+        } else {
+            if !hasKeys {
+                noKeysWarning()
+            }
+            // User didn't add keys
+            if !hasKeys {
+                return nil
+            }
+            do {
+                keys = try loadKeysFromFile(view: false)
+            } catch (let e) {
+                print(
+                    "The following error occured when trying to load",
+                    "your keys:")
+                print(e)
+                return nil
+            }
+        }
+        return !keys.isEmpty ? keys : nil
+    }
+
     /// Handle encryption and decryption of a file
     /// - Parameters:
     ///   - ghost: Encrypting or decrypting with Ghost Mode
@@ -493,42 +532,9 @@ public class UserInput {
             overwrite = false
         }
 
-        // Keys prompt
-        var keys: [String] = []
-        if ghost && encrypt {
-            guard let k = createKeys() else {
-                return
-            }
-            keys = k
-        } else if ghost {
-            do {
-                keys = try getGhostModeKeys()
-            } catch (let e) {
-                print(e)
-                return
-            }
-        } else {
-            if !hasKeys {
-                noKeysWarning()
-            }
-            // User didn't add keys
-            if !hasKeys {
-                print("Aborting...")
-                return
-            }
-            do {
-                keys = try loadKeysFromFile(view: false)
-            } catch (let e) {
-                print(
-                    "The following error occured when trying to load",
-                    "your keys:")
-                print(e)
-                return
-            }
-            // Check if user quit
-            if keys.isEmpty {
-                return
-            }
+        guard let keys: [String] = keysPrompt(ghost, encrypt) else {
+            print("Aborting...")
+            return
         }
         do {
             if encrypt {
