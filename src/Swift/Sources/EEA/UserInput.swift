@@ -56,9 +56,9 @@ public class UserInput {
     /*                  Private                   */
     /*============================================*/
 
-    /*=========================*/
-    /*    Helper Functions     */
-    /*=========================*/
+    /*=============================*/
+    /*      Helper Functions       */
+    /*=============================*/
     /// Print out the menu
     /// - Parameters:
     ///   - menu: The list of menu options
@@ -243,13 +243,13 @@ public class UserInput {
         return []
     }
 
-    /*=========================*/
-    /*  End Helper Functions   */
-    /*=========================*/
+    /*=============================*/
+    /*     End Helper Functions    */
+    /*=============================*/
 
-    /*=========================*/
-    /*      Key Submenus       */
-    /*=========================*/
+    /*=============================*/
+    /*         Key Submenus        */
+    /*=============================*/
     private func createKeys() -> [String]? {
         let size: Int = getDesiredKeySize()
         if size == 0 {
@@ -269,6 +269,7 @@ public class UserInput {
             return nil
         }
     }
+
     /// Create new keys for the user
     private func addKeys() {
         guard let keys: [String] = createKeys() else {
@@ -451,9 +452,9 @@ public class UserInput {
             selection = 0
         }
     }
-    /*=========================*/
-    /*    End Key Submenus     */
-    /*=========================*/
+    /*=============================*/
+    /*       End Key Submenus      */
+    /*=============================*/
 
     /*=============================*/
     /*    Encrypt/Decrypt Submenu  */

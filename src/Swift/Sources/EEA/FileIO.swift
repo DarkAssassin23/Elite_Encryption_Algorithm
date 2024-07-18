@@ -11,8 +11,7 @@ public struct FileIO {
     private let fileManager = FileManager.default
 
     /// Read the contents of the file and return the raw data
-    /// - Parameters
-    ///   - filename: The name of the file to read the data from
+    /// - Parameter filename: The name of the file to read the data from
     /// - Returns: A byte array containing the raw file data
     public func readFile(_ filename: String) throws -> [UInt8] {
         do {
@@ -85,6 +84,8 @@ public struct FileIO {
     /// - ref: https://stackoverflow.com/a/57640445
     public func getDirContents(path: String) -> [String] {
         let url = URL(fileURLWithPath: path)
+
+        // Check if the path is just a single file
         var isDir: ObjCBool = false
         if fileManager.fileExists(atPath: path, isDirectory: &isDir) {
             if !isDir.boolValue {

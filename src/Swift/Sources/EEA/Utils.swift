@@ -14,14 +14,19 @@ extension Data {
                 })
         }
     #endif
-    // ref: https://stackoverflow.com/a/40089462
+    /// Convert the data to a hexadecimal string
+    /// - ref: https://stackoverflow.com/a/40089462
+    /// - Returns: The data has a hexadecimal string
     func hexString() -> String {
         return self.map { String(format: "%02hhx", $0) }.joined()
     }
 }
 
 /// Generate random data to and return the result as a base64 string
-/// - Returns: Random data encoded in a base64 string
+/// - Parameters:
+///   - count: The number of bytes to generate
+///   - encode: Should the result be encoded in base64
+/// - Returns: Random data
 func genRandBytes(count: Int = SHA256.byteCount, encode: Bool = true) throws
     -> String
 {
@@ -56,7 +61,9 @@ func printKeys(keys: [String]) {
 }
 
 /// Load the keys from the given keys file
-/// - Parameter filename: The name of the keys file to load the keys from
+/// - Parameters:
+///   - filename: The name of the keys file to load the keys from
+///   - password: The password used to decrypt the keys
 /// - Returns: List of keys from the keys file
 func loadKeys(_ filename: String, _ password: String) throws -> [String] {
     let fileIO = FileIO()
