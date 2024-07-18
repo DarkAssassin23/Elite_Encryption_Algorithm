@@ -293,7 +293,7 @@ public class UserInput {
                 continue
             }
 
-            if fileIO.doesExist(filename: filename) {
+            if fileIO.doesExist(path: filename) {
                 print("WARNING the file '\(filename)' already exists.")
                 print(
                     "Are you sure you want to override it? (y/n)",
@@ -497,13 +497,13 @@ public class UserInput {
 
     /// Prompt the user if the file(s) should be overwritten
     /// - Parameter dir: Are we overwritting a directory
-    private func shouldOverwrite(dir: Bool = false) -> Bool {
+    private func shouldOverwrite(dir: Bool = false) -> Bool? {
         let type: String = dir ? "directory contents" : "file"
         var overwrite: Bool = true
         print("Overwrite the \(type)? (y/n) (default: y): ", terminator: "")
         guard let input = readLine() else {
             print("Error: nil value detected")
-            return false
+            return nil
         }
         if input == "n" {
             overwrite = false
@@ -511,37 +511,48 @@ public class UserInput {
         return overwrite
     }
 
+    /// Prompt the user for the file or directory to encrypt/decrypt
+    /// - Parameters:
+    ///   - encrypt: Are we encrypting
+    ///   - dir: Are we working with a directory
+    private func getTarget(_ encrypt: Bool, dir: Bool = false) -> String? {
+        let type: String = encrypt ? "encrypt" : "decrypt"
+        let target: String = dir ? "directory" : "file"
+        print(
+            "Enter the name of the \(target) you would like to \(type): ",
+            terminator: "")
+        guard let input = readLine() else {
+            print("Error: nil value detected for the \(target).")
+            return nil
+        }
+        if input == "" {
+            print("Error: No \(target) specified.")
+            return nil
+        }
+        if !fileIO.doesExist(path: input) {
+            print("Error: the \(target), '\(input)', does not exist.")
+            return nil
+        }
+        return input
+    }
+
     /// Handle encryption and decryption of a file
     /// - Parameters:
     ///   - ghost: Encrypting or decrypting with Ghost Mode
     ///   - encrypt: Are we encrypting
     private func encryptDecryptFile(ghost: Bool, encrypt: Bool) {
-        let type: String = encrypt ? "encrypt" : "decrypt"
-        let type2: String = encrypt ? "Encryption" : "Decryption"
-
-        // File prompt
-        print(
-            "Enter the name of the file you would like to \(type): ",
-            terminator: "")
-        guard let input = readLine() else {
-            print("Error: nil value detected for the filename.")
+        let type: String = encrypt ? "Encryption" : "Decryption"
+        guard let filename = getTarget(encrypt) else {
             return
         }
-        if input == "" {
-            print("Error: No file specified.")
+        guard let overwrite = shouldOverwrite() else {
             return
         }
-        if !fileIO.doesExist(filename: input) {
-            print("Error: the file, '\(input)', does not exist.")
-            return
-        }
-        let filename: String = input
-
-        let overwrite = shouldOverwrite()
         guard let keys: [String] = keysPrompt(ghost, encrypt) else {
             print("Aborting...")
             return
         }
+
         do {
             if encrypt {
                 let outfile: String? = overwrite ? nil : filename + ".eea"
@@ -561,7 +572,7 @@ public class UserInput {
                 }
             }
         } catch (let e) {
-            print("\(type2) failed with the following error:")
+            print("\(type) failed with the following error:")
             print(e)
             return
         }
@@ -569,8 +580,7 @@ public class UserInput {
             print("The file was encrypted with the following keys:")
             printKeys(keys: keys)
         }
-        print("\(type2) success: \(filename)")
-
+        print("\(type) success: \(filename)")
     }
 
     /// Handle encryption and decryption of a directory

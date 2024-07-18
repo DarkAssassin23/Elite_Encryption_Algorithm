@@ -56,11 +56,11 @@ public struct FileIO {
         }
     }
 
-    /// Check if the given file exists
-    /// - Parameter filename: The name of the file to check
-    /// - Returns: If the given file exists
-    public func doesExist(filename: String) -> Bool {
-        return fileManager.fileExists(atPath: filename)
+    /// Check if the given file or directory exists
+    /// - Parameter path: The path to the file or directory to check
+    /// - Returns: If the given file or directory exists
+    public func doesExist(path: String) -> Bool {
+        return fileManager.fileExists(atPath: path)
     }
 
     /// Return a list of all the files with a given extension
