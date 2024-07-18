@@ -70,7 +70,11 @@ func loadKeys(_ filename: String, _ password: String) throws -> [String] {
             return []
         }
 
-        var cipherData = try eea.decode(data: dataString)
+        var cipherData: [UInt8] = keysData
+        let decode = try? eea.decode(data: dataString)
+        if let data = decode {
+            cipherData = data
+        }
         for _ in (0..<passwordRounds) {
             cipherData = eea.decrypt(
                 data: cipherData, keys: [password])
