@@ -629,6 +629,9 @@ public class UserInput {
                 break
             }
             text += input
+            if encrypt {
+                text += "\n"
+            }
         }
         if text.isEmpty {
             print("No text provided. Nothing to do")
