@@ -79,4 +79,34 @@ public struct FileIO {
         }
         return files
     }
+
+    /// Recursively get the contents of a directory
+    /// - Parameter path: The path to the directory to get the contents of
+    /// - ref: https://stackoverflow.com/a/57640445
+    public func getDirContents(path: String) -> [String] {
+        let url = URL(fileURLWithPath: path)
+        var files = [String]()
+        if let enumerator = FileManager.default.enumerator(
+            at: url, includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsPackageDescendants])
+        {
+            for case let fileURL as URL in enumerator {
+                do {
+                    let fileAttributes = try fileURL.resourceValues(forKeys: [
+                        .isRegularFileKey
+                    ])
+                    if fileAttributes.isRegularFile! {
+                        files.append(fileURL.path)
+                    }
+                } catch {
+                    print(error, fileURL)
+                }
+            }
+        }
+        // If files is empty, check if the path is a file
+        if files.isEmpty {
+            return doesExist(path: path) ? [url.path] : files
+        }
+        return files
+    }
 }

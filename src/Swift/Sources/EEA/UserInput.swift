@@ -515,7 +515,7 @@ public class UserInput {
     /// - Parameters:
     ///   - encrypt: Are we encrypting
     ///   - dir: Are we working with a directory
-    private func getTarget(_ encrypt: Bool, dir: Bool = false) -> String? {
+    private func getTarget(_ encrypt: Bool, dir: Bool = false) -> [String]? {
         let type: String = encrypt ? "encrypt" : "decrypt"
         let target: String = dir ? "directory" : "file"
         print(
@@ -533,19 +533,26 @@ public class UserInput {
             print("Error: the \(target), '\(input)', does not exist.")
             return nil
         }
-        return input
+
+        return fileIO.getDirContents(path: input)
     }
 
-    /// Handle encryption and decryption of a file
+    /// Handle encryption and decryption of a file or directory
+    /// > Note: Directories are encrypted or decrypted recursively
     /// - Parameters:
+    ///   - dir: Are we dealing with a directory
     ///   - ghost: Encrypting or decrypting with Ghost Mode
     ///   - encrypt: Are we encrypting
-    private func encryptDecryptFile(ghost: Bool, encrypt: Bool) {
+    private func encryptDecryptTarget(dir: Bool, ghost: Bool, encrypt: Bool) {
         let type: String = encrypt ? "Encryption" : "Decryption"
-        guard let filename = getTarget(encrypt) else {
+        guard let contents = getTarget(encrypt, dir: dir) else {
             return
         }
-        guard let overwrite = shouldOverwrite() else {
+        if contents.isEmpty {
+            print("No files found.")
+            return
+        }
+        guard let overwrite = shouldOverwrite(dir: dir) else {
             return
         }
         guard let keys: [String] = keysPrompt(ghost, encrypt) else {
@@ -553,42 +560,46 @@ public class UserInput {
             return
         }
 
-        do {
-            if encrypt {
-                let outfile: String? = overwrite ? nil : filename + ".eea"
-                _ = try eea.encryptFile(
-                    inFile: filename, keys: keys,
-                    outFile: outfile)
-            } else {
-                if overwrite {
-                    _ = try eea.decryptFile(inFile: filename, keys: keys)
-                } else {
-                    // Remove .eea extension
-                    let index = filename.lastIndex(of: ".")!
-                    let outfile = String(filename[filename.startIndex..<index])
-                    _ = try eea.decryptFile(
-                        inFile: filename, keys: keys,
-                        outFile: outfile)
-                }
-            }
-        } catch (let e) {
-            print("\(type) failed with the following error:")
-            print(e)
-            return
-        }
         if ghost && encrypt {
-            print("The file was encrypted with the following keys:")
+            print("The file(s) will be encrypted with the following keys:")
             printKeys(keys: keys)
         }
-        print("\(type) success: \(filename)")
-    }
+        for filename in contents {
+            do {
+                if encrypt {
+                    let outfile: String? = overwrite ? nil : filename + ".eea"
+                    _ = try eea.encryptFile(
+                        inFile: filename, keys: keys,
+                        outFile: outfile)
+                } else {
+                    if !filename.hasSuffix(".eea") {
+                        continue
+                    }
+                    if overwrite {
+                        _ = try eea.decryptFile(inFile: filename, keys: keys)
+                    } else {
+                        // Remove .eea extension
+                        let index = filename.lastIndex(of: ".")!
+                        let outfile = String(
+                            filename[filename.startIndex..<index])
+                        _ = try eea.decryptFile(
+                            inFile: filename, keys: keys,
+                            outFile: outfile)
+                    }
+                }
+            } catch (let e) {
+                print("\(type) failed with the following error:")
+                print(e)
+                return
+            }
 
-    /// Handle encryption and decryption of a directory
-    /// - Parameters:
-    ///   - ghost: Encrypting or decrypting with Ghost Mode
-    ///   - encrypt: Are we encrypting
-    private func encryptDecryptDir(ghost: Bool, encrypt: Bool) {
-
+            guard let name: String = URL(string: filename)?.lastPathComponent
+            else {
+                print("\(type) success: \(filename)")
+                continue
+            }
+            print("\(type) success: \(name)")
+        }
     }
 
     /// Handle encryption and decryption of text
@@ -672,10 +683,11 @@ public class UserInput {
             }
             switch opt {
             case EncryptDecryptOpts.file:
-                encryptDecryptFile(ghost: ghost, encrypt: encrypt)
+                encryptDecryptTarget(
+                    dir: false, ghost: ghost, encrypt: encrypt)
                 return
             case EncryptDecryptOpts.dir:
-                encryptDecryptDir(ghost: ghost, encrypt: encrypt)
+                encryptDecryptTarget(dir: true, ghost: ghost, encrypt: encrypt)
                 return
             case EncryptDecryptOpts.text:
                 encryptDecryptText(ghost: ghost, encrypt: encrypt)
