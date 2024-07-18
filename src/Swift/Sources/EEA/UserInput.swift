@@ -495,6 +495,22 @@ public class UserInput {
         return !keys.isEmpty ? keys : nil
     }
 
+    /// Prompt the user if the file(s) should be overwritten
+    /// - Parameter dir: Are we overwritting a directory
+    private func shouldOverwrite(dir: Bool = false) -> Bool {
+        let type: String = dir ? "directory contents" : "file"
+        var overwrite: Bool = true
+        print("Overwrite the \(type)? (y/n) (default: y): ", terminator: "")
+        guard let input = readLine() else {
+            print("Error: nil value detected")
+            return false
+        }
+        if input == "n" {
+            overwrite = false
+        }
+        return overwrite
+    }
+
     /// Handle encryption and decryption of a file
     /// - Parameters:
     ///   - ghost: Encrypting or decrypting with Ghost Mode
@@ -521,17 +537,7 @@ public class UserInput {
         }
         let filename: String = input
 
-        // Overwrite prompt
-        var overwrite: Bool = true
-        print("Overwrite the file? (y/n) (default: y): ", terminator: "")
-        guard let input = readLine() else {
-            print("Error: nil value detected")
-            return
-        }
-        if input == "n" {
-            overwrite = false
-        }
-
+        let overwrite = shouldOverwrite()
         guard let keys: [String] = keysPrompt(ghost, encrypt) else {
             print("Aborting...")
             return
