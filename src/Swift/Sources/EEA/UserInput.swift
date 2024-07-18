@@ -596,7 +596,53 @@ public class UserInput {
     ///   - ghost: Encrypting or decrypting with Ghost Mode
     ///   - encrypt: Are we encrypting
     private func encryptDecryptText(ghost: Bool, encrypt: Bool) {
+        let operation: String = encrypt ? "encrypt" : "decrypt"
+        let type: String = encrypt ? "Encryption" : "Decryption"
+        let closing: String = "</done>"
+        var text: String = String()
 
+        print("When you finish entering your text, type: \(closing)")
+        print("Enter the text you would like to \(operation):")
+        while true {
+            guard let input = readLine() else {
+                print("Error: Failed to read line. Aborting...")
+                return
+            }
+            if input.hasSuffix(closing) {
+                // Make sure there isn't any text that needs to be added
+                if input != closing {
+                    // Remove closing
+                    let index = input.lastIndex(of: "<")!
+                    text += String(input[input.startIndex..<index])
+                }
+                break
+            }
+            text += input
+        }
+        if text.isEmpty {
+            print("No text provided. Nothing to do")
+            return
+        }
+
+        guard let keys: [String] = keysPrompt(ghost, encrypt) else {
+            print("Aborting...")
+            return
+        }
+
+        guard
+            let output = encrypt
+                ? eea.encryptText(text: text, keys: keys)
+                : eea.decryptText(text: text, keys: keys)
+        else {
+            return
+        }
+
+        if ghost && encrypt {
+            print("The text was encrypted with the following keys:")
+            printKeys(keys: keys)
+        }
+        print("\(type) success!")
+        print(output)
     }
 
     /// Submenu to handle encryption and decryption
