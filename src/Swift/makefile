@@ -6,8 +6,12 @@ build:
 update: 
 	swift package update
 
+debug: build
+	@cp .build/debug/EEA ./EEAd
+
 release:
 	swift build -c release
+	@cp .build/debug/EEA .
 
 rund: build
 	@./.build/debug/EEA
