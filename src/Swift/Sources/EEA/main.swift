@@ -44,6 +44,7 @@ func main() async {
             await userIn.submenu(menu: ret)
         }
     }
+    print("goodbye.")
 }
 
 await main()
