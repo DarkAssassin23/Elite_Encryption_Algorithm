@@ -31,7 +31,7 @@ func basicTest() -> Bool {
     return passed
 }
 
-func main() {
+func main() async {
     //print(basicTest() ? "Success!" : "Fail...")
     let userIn = UserInput()
     while true {
@@ -41,9 +41,9 @@ func main() {
         } else if ret == 0 {
             print("Invalid selection.")
         } else {
-            userIn.submenu(menu: ret)
+            await userIn.submenu(menu: ret)
         }
     }
 }
 
-main()
+await main()

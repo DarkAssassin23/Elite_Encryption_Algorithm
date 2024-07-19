@@ -10,8 +10,11 @@ public class UserInput {
     private let keygen: Keygen
     private let fileIO: FileIO
     private let defaultKeysFile: String
+    private let maxJobs: Int
 
     private var hasKeys: Bool
+    private var fileQueue: [String]
+    private let queue: DispatchQueue
     enum MenuOpts: UInt8 {
         case keys = 1
         case encrypt = 2
@@ -48,8 +51,11 @@ public class UserInput {
         self.keygen = Keygen()
         self.fileIO = FileIO()
         self.defaultKeysFile = "keys.keys"
+        self.maxJobs = ProcessInfo.processInfo.processorCount
 
         self.hasKeys = !fileIO.getFilesOfType(ext: ".keys").isEmpty
+        self.fileQueue = [String]()
+        self.queue = DispatchQueue(label: "fileQueue")
     }
 
     /*============================================*/
@@ -534,6 +540,31 @@ public class UserInput {
         return overwrite
     }
 
+    /// Prompt the user for how many jobs should be run
+    /// - Returns: The number of concurrent jobs to run
+    private func getNumJobs() -> Int {
+        print(
+            "Enter the number of threads to use (default: 1): ",
+            terminator: ""
+        )
+        guard let input = readLine() else {
+            return 1
+        }
+
+        var choice: Int = 1
+        if let c = Int(input) {
+            choice = c
+        }
+        if choice < 1 {
+            choice = 1
+        }
+        if choice > maxJobs {
+            choice = maxJobs
+        }
+
+        return choice
+    }
+
     /// Prompt the user for the file or directory to encrypt/decrypt
     /// - Parameters:
     ///   - encrypt: Are we encrypting
@@ -563,18 +594,31 @@ public class UserInput {
 
     /// Perform the encryption and decryption of a list of files
     /// - Parameters:
-    ///   - files: List of files to encrypt/decrypt
     ///   - keys: List of keys to be used for encryption/decryption
     ///   - encrypt: Are we encrypting
     ///   - overwrite: Should the files be overwritten
+    /// - Returns: If all files were processed successfully
     private func encryptDecryptFiles(
-        files: [String],
         keys: [String],
         encrypt: Bool,
         overwrite: Bool
-    ) {
+    ) async -> Bool {
         let type: String = encrypt ? "Encryption" : "Decryption"
-        for filename in files {
+        while true {
+            var filename: String = String()
+            var done: Bool = false
+            queue.sync {
+                if let f = fileQueue.first {
+                    filename = f
+                    fileQueue.removeFirst()
+                } else {
+                    done = true
+                }
+            }
+            if done {
+                break
+            }
+
             do {
                 if encrypt {
                     let outfile: String? = overwrite ? nil : filename + ".eea"
@@ -605,7 +649,7 @@ public class UserInput {
             } catch (let e) {
                 print("\(type) failed with the following error:")
                 print(e)
-                return
+                return false
             }
 
             guard let name: String = URL(string: filename)?.lastPathComponent
@@ -615,6 +659,7 @@ public class UserInput {
             }
             print("\(type) success: \(name)")
         }
+        return true
     }
 
     /// Handle encryption and decryption of a file or directory
@@ -623,7 +668,9 @@ public class UserInput {
     ///   - dir: Are we dealing with a directory
     ///   - ghost: Encrypting or decrypting with Ghost Mode
     ///   - encrypt: Are we encrypting
-    private func encryptDecryptTarget(dir: Bool, ghost: Bool, encrypt: Bool) {
+    private func encryptDecryptTarget(dir: Bool, ghost: Bool, encrypt: Bool)
+        async
+    {
         guard let contents = getTarget(encrypt, dir: dir) else {
             return
         }
@@ -631,8 +678,13 @@ public class UserInput {
             print("No files found.")
             return
         }
+        fileQueue = contents
         guard let overwrite = shouldOverwrite(dir: dir) else {
             return
+        }
+        var jobs: Int = 1
+        if dir {
+            jobs = min(getNumJobs(), contents.count)
         }
         guard let keys: [String] = keysPrompt(ghost, encrypt) else {
             print("Aborting...")
@@ -643,13 +695,18 @@ public class UserInput {
             print("The file(s) will be encrypted with the following keys:")
             printKeys(keys: keys)
         }
-        encryptDecryptFiles(
-            files: contents,
-            keys: keys,
-            encrypt: encrypt,
-            overwrite: overwrite
-        )
 
+        await withTaskGroup(of: Bool.self) { group in
+            for _ in (0..<jobs) {
+                group.addTask {
+                    return await self.encryptDecryptFiles(
+                        keys: keys,
+                        encrypt: encrypt,
+                        overwrite: overwrite
+                    )
+                }
+            }
+        }
     }
 
     /// Handle encryption and decryption of text
@@ -713,7 +770,7 @@ public class UserInput {
     /// - Parameters:
     ///   - ghost: Encrypting or decrypting with Ghost Mode
     ///   - encrypt: Are we encrypting
-    private func encryptDecryptSubmenu(ghost: Bool, encrypt: Bool) {
+    private func encryptDecryptSubmenu(ghost: Bool, encrypt: Bool) async {
         while true {
             printEncryptDecryptMenu(encrypt: encrypt)
             let input = readLine()
@@ -736,14 +793,18 @@ public class UserInput {
             }
             switch opt {
             case EncryptDecryptOpts.file:
-                encryptDecryptTarget(
+                await encryptDecryptTarget(
                     dir: false,
                     ghost: ghost,
                     encrypt: encrypt
                 )
                 return
             case EncryptDecryptOpts.dir:
-                encryptDecryptTarget(dir: true, ghost: ghost, encrypt: encrypt)
+                await encryptDecryptTarget(
+                    dir: true,
+                    ghost: ghost,
+                    encrypt: encrypt
+                )
                 return
             case EncryptDecryptOpts.text:
                 encryptDecryptText(ghost: ghost, encrypt: encrypt)
@@ -842,7 +903,7 @@ public class UserInput {
 
     /// Go to the submenu the user selected
     /// - Parameter menu: The ID of the submenu to go to
-    public func submenu(menu: Int) {
+    public func submenu(menu: Int) async {
         guard let choice = MenuOpts(rawValue: UInt8(menu)) else {
             return
         }
@@ -852,11 +913,11 @@ public class UserInput {
             break
         case MenuOpts.encrypt:
             let ghost = promptGhostMode(encrypt: true)
-            encryptDecryptSubmenu(ghost: ghost, encrypt: true)
+            await encryptDecryptSubmenu(ghost: ghost, encrypt: true)
             break
         case MenuOpts.decrypt:
             let ghost = promptGhostMode(encrypt: false)
-            encryptDecryptSubmenu(ghost: ghost, encrypt: false)
+            await encryptDecryptSubmenu(ghost: ghost, encrypt: false)
             break
         }
     }
