@@ -540,34 +540,18 @@ public class UserInput {
         return fileIO.getDirContents(path: input)
     }
 
-    /// Handle encryption and decryption of a file or directory
-    /// > Note: Directories are encrypted or decrypted recursively
+    /// Perform the encryption and decryption of a list of files
     /// - Parameters:
-    ///   - dir: Are we dealing with a directory
-    ///   - ghost: Encrypting or decrypting with Ghost Mode
+    ///   - files: List of files to encrypt/decrypt
+    ///   - keys: List of keys to be used for encryption/decryption
     ///   - encrypt: Are we encrypting
-    private func encryptDecryptTarget(dir: Bool, ghost: Bool, encrypt: Bool) {
+    ///   - overwrite: Should the files be overwritten
+    private func encryptDecryptFiles(
+        files: [String], keys: [String],
+        encrypt: Bool, overwrite: Bool
+    ) {
         let type: String = encrypt ? "Encryption" : "Decryption"
-        guard let contents = getTarget(encrypt, dir: dir) else {
-            return
-        }
-        if contents.isEmpty {
-            print("No files found.")
-            return
-        }
-        guard let overwrite = shouldOverwrite(dir: dir) else {
-            return
-        }
-        guard let keys: [String] = keysPrompt(ghost, encrypt) else {
-            print("Aborting...")
-            return
-        }
-
-        if ghost && encrypt {
-            print("The file(s) will be encrypted with the following keys:")
-            printKeys(keys: keys)
-        }
-        for filename in contents {
+        for filename in files {
             do {
                 if encrypt {
                     let outfile: String? = overwrite ? nil : filename + ".eea"
@@ -603,6 +587,38 @@ public class UserInput {
             }
             print("\(type) success: \(name)")
         }
+    }
+
+    /// Handle encryption and decryption of a file or directory
+    /// > Note: Directories are encrypted or decrypted recursively
+    /// - Parameters:
+    ///   - dir: Are we dealing with a directory
+    ///   - ghost: Encrypting or decrypting with Ghost Mode
+    ///   - encrypt: Are we encrypting
+    private func encryptDecryptTarget(dir: Bool, ghost: Bool, encrypt: Bool) {
+        guard let contents = getTarget(encrypt, dir: dir) else {
+            return
+        }
+        if contents.isEmpty {
+            print("No files found.")
+            return
+        }
+        guard let overwrite = shouldOverwrite(dir: dir) else {
+            return
+        }
+        guard let keys: [String] = keysPrompt(ghost, encrypt) else {
+            print("Aborting...")
+            return
+        }
+
+        if ghost && encrypt {
+            print("The file(s) will be encrypted with the following keys:")
+            printKeys(keys: keys)
+        }
+        encryptDecryptFiles(
+            files: contents, keys: keys, encrypt: encrypt,
+            overwrite: overwrite)
+
     }
 
     /// Handle encryption and decryption of text
