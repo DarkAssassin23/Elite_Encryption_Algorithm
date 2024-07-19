@@ -53,7 +53,10 @@ public class UserInput {
         self.defaultKeysFile = "keys.keys"
         self.maxJobs = ProcessInfo.processInfo.processorCount
 
-        self.hasKeys = !fileIO.getFilesOfType(ext: ".keys").isEmpty
+        self.hasKeys = !fileIO.getFilesOfType(
+            ext: ".keys",
+            path: Globals.keysDir
+        ).isEmpty
         self.fileQueue = [String]()
         self.queue = DispatchQueue(label: "fileQueue")
     }
@@ -211,7 +214,10 @@ public class UserInput {
     /// - Returns: The list of keys from the file
     private func loadKeysFromFile(view: Bool = false) throws -> [String] {
         let type: String = view ? "view" : "use"
-        let keyFiles = fileIO.getFilesOfType(ext: ".keys")
+        let keyFiles = fileIO.getFilesOfType(
+            ext: ".keys",
+            path: Globals.keysDir
+        )
         if keyFiles.isEmpty {
             hasKeys = false
             throw LoadKeysError.noKeysFiles("You dont have any keys files.")
@@ -242,7 +248,8 @@ public class UserInput {
 
             do {
                 let password = try getPassword(setup: false)
-                let keys = try loadKeys(keyFiles[choice - 1], password)
+                let keyFile = Globals.keysDir + keyFiles[choice - 1]
+                let keys = try loadKeys(keyFile, password)
                 return keys
             } catch KeyError.invalidLength, KeyError.lengthMismatch, KeyError
                 .invalidKey
@@ -298,13 +305,13 @@ public class UserInput {
                 "Filename or 'q' to quit (default: \(defaultKeysFile)) ",
                 terminator: ""
             )
-            var filename: String
+            var filename: String = Globals.keysDir
             let input = readLine()
 
             if input == "" {
-                filename = defaultKeysFile
+                filename += defaultKeysFile
             } else if input!.hasSuffix(".keys") {
-                filename = input!
+                filename += input!
             } else if input == "q" {
                 return
             } else {
@@ -341,7 +348,7 @@ public class UserInput {
                     data.append(contentsOf: Array("\n".utf8))
                 }
 
-                for _ in (0..<passwordRounds) {
+                for _ in (0..<Globals.passwordRounds) {
                     data = try eea.encrypt(data: data, keys: [password])
                 }
                 let encryptedKeys = try eea.encode(data: data)
@@ -374,7 +381,10 @@ public class UserInput {
     /// delete
     private func deleteKeys() {
         while true {
-            let keyFiles = fileIO.getFilesOfType(ext: ".keys")
+            let keyFiles = fileIO.getFilesOfType(
+                ext: ".keys",
+                path: Globals.keysDir
+            )
             if keyFiles.isEmpty {
                 print("You do not have any keys files.")
                 hasKeys = false
@@ -413,7 +423,8 @@ public class UserInput {
                 continue
             }
 
-            if fileIO.deleteFile(filename: keyFiles[choice - 1]) {
+            let keyFile = Globals.keysDir + keyFiles[choice - 1]
+            if fileIO.deleteFile(filename: keyFile) {
                 print("Keys file was deleted successfully.")
                 if keyFiles.count - 1 == 0 {
                     hasKeys = false

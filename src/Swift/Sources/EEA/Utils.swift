@@ -1,7 +1,6 @@
 import Crypto
 import Foundation
 
-let passwordRounds: UInt8 = 5
 extension Data {
     #if (!os(macOS) && !os(iOS) && !os(watchOS) && !os(tvOS))
         /// Returns random data
@@ -66,6 +65,80 @@ func printKeys(keys: [String]) {
     }
 }
 
+/// Generate the default config file
+func generateDefaultConfig() {
+    let fileIO = FileIO()
+    let cfg: String = """
+        # Elite Encryption Algorithm (EEA) config file
+
+        # The directory to search for your '.keys' files in.
+        # NOTE: The default is the same directory as the EEA executable
+        # keysDir: ~/.eeaKeys
+
+        """
+    _ = try? fileIO.writeFile(Array(cfg.utf8), filename: Globals.cfgFile)
+}
+
+/// Create the directory to store the .keys files
+/// - Parameter path: The path to create
+func makeKeysDir(_ path: String) -> Bool {
+    print("The directory, \(path), does not exist.")
+    print("Would you like to create it? (y/n) (default: y): ", terminator: "")
+    let input = readLine()
+    if input == "n" {
+        print("Ok. Using default.")
+        return false
+    }
+
+    do {
+        print("Trying to create: \(path)")
+        try FileManager.default.createDirectory(
+            at: URL(fileURLWithPath: path),
+            withIntermediateDirectories: true
+        )
+    } catch (let e) {
+        print("The following error occured when trying to create '\(path)':")
+        print(e)
+        return false
+    }
+    print("Success!")
+    return true
+}
+
+/// Load the config file to set the directory to set environment variables
+func loadConfig() {
+    let fileIO = FileIO()
+    guard let data = try? fileIO.readFile(Globals.cfgFile) else {
+        if !fileIO.doesExist(path: Globals.cfgFile) {
+            generateDefaultConfig()
+        }
+        return
+    }
+    guard let cfg = String(bytes: data, encoding: .utf8) else {
+        return
+    }
+    for line in cfg.split(separator: "\n") {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.hasPrefix("#") || trimmed.hasPrefix("//") {
+            continue
+        } else if trimmed.hasPrefix("keysDir:") {
+            let index = trimmed.firstIndex(of: ":")!
+            let value = trimmed[trimmed.index(after: index)..<trimmed.endIndex]
+            var path = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            path = path.replacingOccurrences(
+                of: "~/",
+                with: FileManager.default.homeDirectoryForCurrentUser.path
+                    + "/"
+            )
+            if fileIO.doesExist(path: path) {
+                Globals.keysDir = path.hasSuffix("/") ? path : path + "/"
+            } else if makeKeysDir(path) {
+                Globals.keysDir = path.hasSuffix("/") ? path : path + "/"
+            }
+        }
+    }
+}
+
 /// Load the keys from the given keys file
 /// - Parameters:
 ///   - filename: The name of the keys file to load the keys from
@@ -88,7 +161,7 @@ func loadKeys(_ filename: String, _ password: String) throws -> [String] {
         if let data = decode {
             cipherData = data
         }
-        for _ in (0..<passwordRounds) {
+        for _ in (0..<Globals.passwordRounds) {
             cipherData = eea.decrypt(
                 data: cipherData,
                 keys: [password]

@@ -65,10 +65,12 @@ public struct FileIO {
     }
 
     /// Return a list of all the files with a given extension
-    /// - Parameter ext: The file extension of files to look for
+    /// - Parameters:
+    ///   - ext: The file extension of files to look for
+    ///   - path: The path to search for the files
     /// - Returns: A list of files with the given extension
-    public func getFilesOfType(ext: String) -> [String] {
-        guard let conts = try? fileManager.contentsOfDirectory(atPath: ".")
+    public func getFilesOfType(ext: String, path: String = ".") -> [String] {
+        guard let conts = try? fileManager.contentsOfDirectory(atPath: path)
         else {
             return []
         }

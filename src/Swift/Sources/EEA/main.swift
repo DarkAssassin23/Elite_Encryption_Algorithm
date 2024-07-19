@@ -33,6 +33,7 @@ func basicTest() -> Bool {
 
 func main() async {
     //print(basicTest() ? "Success!" : "Fail...")
+    loadConfig()
     let userIn = UserInput()
     while true {
         let ret = userIn.mainMenu()
