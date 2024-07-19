@@ -184,7 +184,8 @@ public struct EEA {
     ///
     /// - Returns: If the file was successfully encrypted
     public func encryptFile(
-        inFile: String, keys: [String],
+        inFile: String,
+        keys: [String],
         outFile: String? = nil
     ) throws -> Bool {
         do {
@@ -197,7 +198,8 @@ public struct EEA {
                 let outFile = inFile + ".eea"
                 let ret = try io.writeFile(
                     Array(cipherText.utf8),
-                    filename: outFile)
+                    filename: outFile
+                )
                 _ = io.deleteFile(filename: inFile)
                 return ret
             }
@@ -208,7 +210,8 @@ public struct EEA {
             }
             let ret = try io.writeFile(
                 Array(cipherText.utf8),
-                filename: outFile)
+                filename: outFile
+            )
             return ret
         } catch (let e) {
             throw e
@@ -318,7 +321,8 @@ public struct EEA {
         {
             print(e)
         } catch Base64Error.encodeFailed(let e), Base64Error.decodeFailed(
-            let e)
+            let e
+        )
         {
             print(e)
         } catch (let e) {
@@ -360,7 +364,8 @@ public struct EEA {
     ///
     /// - Returns: If the file was successfully decrypted
     public func decryptFile(
-        inFile: String, keys: [String],
+        inFile: String,
+        keys: [String],
         outFile: String? = nil
     ) throws -> Bool {
         if !inFile.hasSuffix(".eea") {

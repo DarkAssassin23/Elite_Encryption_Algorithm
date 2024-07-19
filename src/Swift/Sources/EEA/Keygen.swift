@@ -31,7 +31,8 @@ public struct Keygen {
             while currSize < size {
                 guard let str = try? genRandBytes() else {
                     throw KeygenError.randomBytes(
-                        "Generating random bytes failed.")
+                        "Generating random bytes failed."
+                    )
                 }
 
                 if size - currSize > 256 {

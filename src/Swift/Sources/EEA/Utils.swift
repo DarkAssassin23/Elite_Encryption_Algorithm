@@ -11,7 +11,8 @@ extension Data {
             return Data(
                 (0..<length).map { _ in
                     UInt8.random(in: UInt8.min...UInt8.max)
-                })
+                }
+            )
         }
     #endif
     /// Convert the data to a hexadecimal string
@@ -33,20 +34,25 @@ func genRandBytes(count: Int = SHA256.byteCount, encode: Bool = true) throws
     #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
         var bytes = [UInt8](repeating: 0, count: count)
         let status = SecRandomCopyBytes(
-            kSecRandomDefault, bytes.count, &bytes)
+            kSecRandomDefault,
+            bytes.count,
+            &bytes
+        )
 
         if status == errSecSuccess {
             return encode
                 ? Data(bytes).base64EncodedString() : Data(bytes).hexString()
         } else {
             throw KeygenError.randomBytes(
-                "Generating random bytes failed.")
+                "Generating random bytes failed."
+            )
         }
     #else
         guard let data = try? Data.random(length: count)
         else {
             throw KeygenError.randomBytes(
-                "Generating random bytes failed.")
+                "Generating random bytes failed."
+            )
         }
         return encode ? data.base64EncodedString() : data.hexString()
     #endif
@@ -84,11 +90,14 @@ func loadKeys(_ filename: String, _ password: String) throws -> [String] {
         }
         for _ in (0..<passwordRounds) {
             cipherData = eea.decrypt(
-                data: cipherData, keys: [password])
+                data: cipherData,
+                keys: [password]
+            )
         }
         let keyStr = String(bytes: cipherData, encoding: .utf8)
         var keys = Array(
-            keyStr!.split(separator: "\n").map { String($0) })
+            keyStr!.split(separator: "\n").map { String($0) }
+        )
         try eea.keyCheck(keys)
 
         // Remove salt

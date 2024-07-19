@@ -94,12 +94,14 @@ public class UserInput {
         if setup {
             guard let p2 = getpass("Re-type password: ") else {
                 throw PasswordError.nilPassword(
-                    "Error: nil received for password")
+                    "Error: nil received for password"
+                )
             }
             let reenter = String(cString: p2)
             if password != reenter {
                 throw PasswordError.passwordMismatch(
-                    "Error: Passwords do not match")
+                    "Error: Passwords do not match"
+                )
             }
         }
         let hash = SHA512.hash(data: Data(password.utf8))
@@ -114,7 +116,8 @@ public class UserInput {
         repeat {
             print(
                 "Enter the size each key should be, or 'q' to quit: ",
-                terminator: "")
+                terminator: ""
+            )
             let input = readLine()
             guard let s = Int(input ?? "N/A") else {
                 if input == "q" {
@@ -126,7 +129,8 @@ public class UserInput {
             if s < 256 || s % 256 != 0 {
                 print(
                     "The given size, \(s), is invalid.",
-                    "Size must be a multiple of 256.")
+                    "Size must be a multiple of 256."
+                )
                 continue
             }
             size = s
@@ -148,7 +152,9 @@ public class UserInput {
     private func promptGhostMode(encrypt: Bool) -> Bool {
         print(
             "Would you like to enable Ghost Mode?",
-            "(y/n) (default: n): ", terminator: "")
+            "(y/n) (default: n): ",
+            terminator: ""
+        )
         guard let input = readLine() else {
             return false
         }
@@ -158,7 +164,8 @@ public class UserInput {
                     "WARNING: You are about to encrypt the data with one time",
                     "use keys.\nYou will be unable to decrypt the data unless",
                     "you manually copy down\nthe keys after you encrypt your",
-                    "data")
+                    "data"
+                )
             }
             return true
         }
@@ -207,7 +214,8 @@ public class UserInput {
             printMenu(
                 menu: keyFiles,
                 msg: "Select which keys file you would like to \(type):",
-                def: 1)
+                def: 1
+            )
             let input = readLine()
             var choice: Int
             if let c = Int(input ?? "N/A") {
@@ -278,10 +286,12 @@ public class UserInput {
 
         while true {
             print(
-                "Enter a filename to save your keys to. It should in in .keys")
+                "Enter a filename to save your keys to. It should in in .keys"
+            )
             print(
                 "Filename or 'q' to quit (default: \(defaultKeysFile)) ",
-                terminator: "")
+                terminator: ""
+            )
             var filename: String
             let input = readLine()
 
@@ -300,7 +310,9 @@ public class UserInput {
                 print("WARNING the file '\(filename)' already exists.")
                 print(
                     "Are you sure you want to override it? (y/n)",
-                    "(default: n): ", terminator: "")
+                    "(default: n): ",
+                    terminator: ""
+                )
                 guard let input = readLine() else {
                     continue
                 }
@@ -312,7 +324,9 @@ public class UserInput {
             do {
                 let password = try getPassword()
                 var salt = try genRandBytes(
-                    count: keys[0].count / 2, encode: false)
+                    count: keys[0].count / 2,
+                    encode: false
+                )
                 salt += "\n"
 
                 var data: [UInt8] = Array(salt.utf8)
@@ -327,7 +341,8 @@ public class UserInput {
                 let encryptedKeys = try eea.encode(data: data)
                 _ = try fileIO.writeFile(
                     Array(encryptedKeys.utf8),
-                    filename: filename)
+                    filename: filename
+                )
                 printKeys(keys: keys)
             } catch (let e) {
                 print("The following error occured when saving your keys:")
@@ -361,7 +376,8 @@ public class UserInput {
             }
             printMenu(
                 menu: keyFiles,
-                msg: "Select which keys file you would like to delete:")
+                msg: "Select which keys file you would like to delete:"
+            )
             let input = readLine()
             var choice: Int
             if let c = Int(input ?? "N/A") {
@@ -381,7 +397,9 @@ public class UserInput {
             }
             print(
                 "Are you sure you want to delete \(keyFiles[choice - 1])?",
-                "(y/n) (default: n): ", terminator: "")
+                "(y/n) (default: n): ",
+                terminator: ""
+            )
             guard let input = readLine() else {
                 continue
             }
@@ -406,7 +424,8 @@ public class UserInput {
         print("No keys file exists.")
         print(
             "Would you like to create one? (y/n) (default: y): ",
-            terminator: "")
+            terminator: ""
+        )
         let input = readLine()
         if input != "n" {
             addKeys()
@@ -490,7 +509,8 @@ public class UserInput {
             } catch (let e) {
                 print(
                     "The following error occured when trying to load",
-                    "your keys:")
+                    "your keys:"
+                )
                 print(e)
                 return nil
             }
@@ -523,7 +543,8 @@ public class UserInput {
         let target: String = dir ? "directory" : "file"
         print(
             "Enter the name of the \(target) you would like to \(type): ",
-            terminator: "")
+            terminator: ""
+        )
         guard let input = readLine() else {
             print("Error: nil value detected for the \(target).")
             return nil
@@ -547,8 +568,10 @@ public class UserInput {
     ///   - encrypt: Are we encrypting
     ///   - overwrite: Should the files be overwritten
     private func encryptDecryptFiles(
-        files: [String], keys: [String],
-        encrypt: Bool, overwrite: Bool
+        files: [String],
+        keys: [String],
+        encrypt: Bool,
+        overwrite: Bool
     ) {
         let type: String = encrypt ? "Encryption" : "Decryption"
         for filename in files {
@@ -556,8 +579,10 @@ public class UserInput {
                 if encrypt {
                     let outfile: String? = overwrite ? nil : filename + ".eea"
                     _ = try eea.encryptFile(
-                        inFile: filename, keys: keys,
-                        outFile: outfile)
+                        inFile: filename,
+                        keys: keys,
+                        outFile: outfile
+                    )
                 } else {
                     if !filename.hasSuffix(".eea") {
                         continue
@@ -568,10 +593,13 @@ public class UserInput {
                         // Remove .eea extension
                         let index = filename.lastIndex(of: ".")!
                         let outfile = String(
-                            filename[filename.startIndex..<index])
+                            filename[filename.startIndex..<index]
+                        )
                         _ = try eea.decryptFile(
-                            inFile: filename, keys: keys,
-                            outFile: outfile)
+                            inFile: filename,
+                            keys: keys,
+                            outFile: outfile
+                        )
                     }
                 }
             } catch (let e) {
@@ -616,8 +644,11 @@ public class UserInput {
             printKeys(keys: keys)
         }
         encryptDecryptFiles(
-            files: contents, keys: keys, encrypt: encrypt,
-            overwrite: overwrite)
+            files: contents,
+            keys: keys,
+            encrypt: encrypt,
+            overwrite: overwrite
+        )
 
     }
 
@@ -706,7 +737,10 @@ public class UserInput {
             switch opt {
             case EncryptDecryptOpts.file:
                 encryptDecryptTarget(
-                    dir: false, ghost: ghost, encrypt: encrypt)
+                    dir: false,
+                    ghost: ghost,
+                    encrypt: encrypt
+                )
                 return
             case EncryptDecryptOpts.dir:
                 encryptDecryptTarget(dir: true, ghost: ghost, encrypt: encrypt)
@@ -739,7 +773,8 @@ public class UserInput {
             print(
                 "(1-\(keySizes.count + 1)) or 'q' to quit",
                 "(default: \(defaultSelection)): ",
-                terminator: "")
+                terminator: ""
+            )
 
             let input = readLine()
             guard let choice = Int(input ?? "N/A") else {
@@ -771,7 +806,8 @@ public class UserInput {
             print(
                 "Enter the number of keys to generate, or 'q' to quit",
                 "(default: \(defaultSelection)): ",
-                terminator: "")
+                terminator: ""
+            )
             let input = readLine()
             guard let n = Int(input ?? "N/A") else {
                 if input == "q" {

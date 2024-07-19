@@ -19,7 +19,8 @@ public struct FileIO {
             return Array(data)
         } catch {
             throw FileIOError.readFailed(
-                "Error: Reading the file \(filename) failed.")
+                "Error: Reading the file \(filename) failed."
+            )
         }
     }
 
@@ -39,7 +40,8 @@ public struct FileIO {
             return true
         } catch {
             throw FileIOError.writeFailed(
-                "Error: Failed to write to the file \(filename).")
+                "Error: Failed to write to the file \(filename)."
+            )
         }
     }
 
@@ -95,9 +97,10 @@ public struct FileIO {
 
         var files = [String]()
         if let enumerator = fileManager.enumerator(
-            at: url, includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsPackageDescendants])
-        {
+            at: url,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsPackageDescendants]
+        ) {
             for case let fileURL as URL in enumerator {
                 do {
                     let fileAttributes = try fileURL.resourceValues(forKeys: [
