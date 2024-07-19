@@ -1,0 +1,6 @@
+*eea
+!EEA/
+*.txt
+.swiftpm/
+.build
+Package.resolved
