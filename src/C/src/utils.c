@@ -104,6 +104,7 @@ int validate_keys(const char **keys, int num_keys)
     }
     return 1;
 }
+
 size_t find_key_len(const char *keys_string)
 {
     // Minimum key length

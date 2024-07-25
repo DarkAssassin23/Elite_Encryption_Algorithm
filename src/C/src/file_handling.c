@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "base64.h"
 #include "decrypt.h"
 #include "file_handling.h"
 #include "globals.h"
@@ -117,8 +119,19 @@ char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
     if (encrypted_keys_string == NULL)
         return NULL;
 
+    // Try and decode the keys
+    size_t keys_data_size = 0;
+    unsigned char *raw_keys_data = base64_decode(encrypted_keys_string,
+                                                 file_size, &keys_data_size);
+    // Keys were not encoded in base64. Revert to original data
+    if (raw_keys_data == NULL)
+    {
+        raw_keys_data = encrypted_keys_string;
+        keys_data_size = file_size;
+    }
+
     char *keys_string = NULL;
-    size_t key_string_len = decrypt_keys(encrypted_keys_string, file_size,
+    size_t key_string_len = decrypt_keys(raw_keys_data, keys_data_size,
                                          &keys_string);
 
     free(encrypted_keys_string);
