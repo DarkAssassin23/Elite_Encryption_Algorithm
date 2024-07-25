@@ -1,14 +1,14 @@
 TARGET = eea
 
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -pedantic
 LIBS = -lcrypto -lpthread
 INCLUDES = -I headers/
 
 OBJDIR = obj
 
 all: $(TARGET)
-debug: CFLAGS = -Wall -g
+debug: CFLAGS = -Wall -g -pedantic
 debug: $(TARGET)
 
 release: CFLAGS = -O2
@@ -23,17 +23,20 @@ ifeq ($(OS),Windows_NT)
 endif
 
 $(TARGET): $(OBJS) $(RES)
-	$(CC) $(OBJS) $(RES) $(LIBS) -o $@
+	@$(CC) $(OBJS) $(RES) $(LIBS) -o $@
+	@echo "Created: "$@
 
 $(OBJDIR)/%.res: %.rc
 ifeq ($(OS),Windows_NT)
 	@mkdir -p $(@D)
-	windres $(RCSDEBUG) $< -O coff -o $@
+	@windres $(RCSDEBUG) $< -O coff -o $@
+	@echo "windres  "$@
 endif
 
 $(OBJDIR)/%.o: %.c $(HEADERS)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@echo $(CC) "     "$@
 
 clean:
 	$(RM) -r $(OBJDIR) $(TARGET)
