@@ -121,6 +121,7 @@ char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
 
     // Try and decode the keys
     size_t keys_data_size = 0;
+    int decoded = 1; // Assume decode will succeed
     unsigned char *raw_keys_data = base64_decode(encrypted_keys_string,
                                                  file_size, &keys_data_size);
     // Keys were not encoded in base64. Revert to original data
@@ -128,12 +129,14 @@ char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
     {
         raw_keys_data = encrypted_keys_string;
         keys_data_size = file_size;
+        decoded = 0;
     }
 
     char *keys_string = NULL;
     size_t key_string_len = decrypt_keys(raw_keys_data, keys_data_size,
                                          &keys_string);
-
+    if (decoded)
+        free(raw_keys_data);
     free(encrypted_keys_string);
     if (keys_string == NULL)
         return NULL;
