@@ -106,6 +106,12 @@ size_t decrypt(unsigned char *data, size_t data_len,
         return 0;
 
     unsigned char *key_block = malloc(key_len + 1);
+    if (key_block == NULL)
+    {
+        free(temp);
+        return 0;
+    }
+
     for (int k = num_keys - 1; k >= 0; k--)
     {
         // Set the data to decrypt to the result from the previous
