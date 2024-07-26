@@ -1,5 +1,7 @@
 #pragma once
 
+#define MIN_KEY_LEN 64
+
 static const unsigned char PADDING = 0;
 static const int ROUNDS = 5;
 static const char DEFAULT_KEYS_FILE[] = "keys.keys";

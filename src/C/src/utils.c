@@ -8,8 +8,6 @@
 #include "globals.h"
 #include "utils.h"
 
-#define MIN_KEY_LEN 64
-
 static const int MAX_TRIES = 5;
 
 void message_digest_to_hash(unsigned char *md, char *hash, int digest_length)
