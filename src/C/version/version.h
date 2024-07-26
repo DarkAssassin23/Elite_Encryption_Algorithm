@@ -1,10 +1,10 @@
 #pragma once
-#define MAJOR_VERSION 1
+#define MAJOR_VERSION 2
 #define MINOR_VERSION 0
 #define PATCH_VERSION 0
 #define BUILD_VERSION 0
 
-#define COPYRIGHT_YEAR 2023
+#define COPYRIGHT_YEAR 2024
 
 #define STRINGIZE_NX(A) #A
 #define STRINGIZE(A) STRINGIZE_NX(A)
