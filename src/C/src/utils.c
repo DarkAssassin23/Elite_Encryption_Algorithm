@@ -8,6 +8,8 @@
 #include "globals.h"
 #include "utils.h"
 
+#define MIN_KEY_LEN 64
+
 static const int MAX_TRIES = 5;
 
 void message_digest_to_hash(unsigned char *md, char *hash, int digest_length)
@@ -91,7 +93,7 @@ char **split_string(char *string, const char *delim, int *size)
 int validate_keys(const char **keys, int num_keys)
 {
     size_t key_len = strlen(keys[0]);
-    if (key_len % 64 != 0)
+    if (key_len % MIN_KEY_LEN != 0)
         return 0;
 
     for (int k = 0; k < num_keys; k++)
@@ -108,14 +110,14 @@ int validate_keys(const char **keys, int num_keys)
 size_t find_key_len(const char *keys_string)
 {
     // Minimum key length
-    size_t key_len = 64;
+    size_t key_len = MIN_KEY_LEN;
     size_t keys_string_len = strlen(keys_string);
 
     while (key_len <= keys_string_len)
     {
         if (keys_string[key_len] == '\n' || keys_string[key_len] == '\0')
             return key_len;
-        key_len *= 2;
+        key_len += MIN_KEY_LEN;
     }
 
     // No keys were found
