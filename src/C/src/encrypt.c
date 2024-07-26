@@ -4,6 +4,7 @@
 
 #include <openssl/sha.h>
 
+#include "base64.h"
 #include "encrypt.h"
 #include "file_handling.h"
 #include "globals.h"
@@ -70,8 +71,20 @@ size_t encrypt(unsigned char *data, size_t data_len,
             prev_block[x % key_len] = key_block[x % key_len] ^ byte;
         }
     }
-    *cipher_text = temp;
-    return cipher_text_len;
+    size_t encode_len = 0;
+    int success = 1; // Assume encode success
+    unsigned char *tmp = (unsigned char *) base64_encode(temp, cipher_text_len,
+                                                         &encode_len);
+    if (tmp == NULL)
+    {
+        tmp = temp;
+        encode_len = cipher_text_len;
+        success = 0;
+    }
+    *cipher_text = tmp;
+    if (success)
+        free(temp);
+    return encode_len;
 }
 
 size_t encrypt_keys(char **keys, int num_keys,
@@ -87,12 +100,29 @@ size_t encrypt_keys(char **keys, int num_keys,
     // Add salt to harden the encryption since we are only using
     // the one key that comes from the password
     char *salt = get_random_hexstr(key_size / 2);
-    char *keys_string = keys_to_string((const char **) keys, num_keys);
-    size_t encrypted_keys_len = (key_size + 1) + strlen(keys_string);
-    unsigned char *encrypted_keys = malloc(
-        encrypted_keys_len); //(unsigned char*)strdup(keys_string);
-    if (encrypted_keys == NULL)
+    if (salt == NULL)
+    {
+        free(password_hash);
         return 0;
+    }
+
+    char *keys_string = keys_to_string((const char **) keys, num_keys);
+    if (keys_string == NULL)
+    {
+        free(password_hash);
+        free(salt);
+        return 0;
+    }
+
+    size_t encrypted_keys_len = (key_size + 1) + strlen(keys_string);
+    unsigned char *encrypted_keys = malloc(encrypted_keys_len);
+    if (encrypted_keys == NULL)
+    {
+        free(password_hash);
+        free(salt);
+        free(keys_string);
+        return 0;
+    }
 
     memcpy(encrypted_keys, salt, strlen(salt));
     encrypted_keys[key_size] = '\n';
@@ -116,9 +146,6 @@ size_t encrypt_keys(char **keys, int num_keys,
 int encrypt_file(const char *filename, const char **keys, int num_keys)
 {
     int success = 1;
-    // int num_keys = 3;
-    // char** keys = generate_keys(HASH_TYPE_SHA256, num_keys);
-
     unsigned char *data = NULL;
     size_t file_size = read_in_file(filename, &data);
     if (file_size == -1)

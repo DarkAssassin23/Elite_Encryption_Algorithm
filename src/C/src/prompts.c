@@ -190,9 +190,16 @@ int prompt_for_ghost_mode_keys(char ***keys, int *num_keys)
         if (k == k_size)
         {
             k_size += k;
-            temp_keys = realloc(temp_keys, sizeof(char *) * k_size);
-            if (temp_keys == NULL)
+            char **tmp = realloc(temp_keys, sizeof(char *) * k_size);
+            if (tmp == NULL)
+            {
+                for (int i = 0; i < k; i++)
+                    free(temp_keys[i]);
+                free(temp_keys);
+                free(line);
                 return 0;
+            }
+            temp_keys = tmp;
         }
 
         if (strlen(line) % 64 != 0)
@@ -284,9 +291,13 @@ char *get_password(const char *prompt)
     {
         if (i + 1 == password_max_len)
         {
-            password = realloc(password, password_max_len *= 2);
-            if (password == NULL)
+            char *tmp = realloc(password, password_max_len *= 2);
+            if (tmp == NULL)
+            {
+                free(password);
                 return NULL;
+            }
+            password = tmp;
         }
         password[i++] = c;
     }
@@ -308,13 +319,29 @@ char *get_hashed_password(int set_password)
     if (set_password)
     {
         password1 = get_password("Enter a password for the keys file: ");
+        if (password1 == NULL)
+        {
+            free(password_hash);
+            fprintf(stderr, "%sError:%s Password is NULL.\n",
+                    colors[COLOR_ERROR], colors[COLOR_RESET]);
+            return NULL;
+        }
         char *password2 = get_password("Re-type password: ");
+        if (password2 == NULL)
+        {
+            free(password_hash);
+            free(password1);
+            fprintf(stderr, "%sError:%s Password is NULL.\n",
+                    colors[COLOR_ERROR], colors[COLOR_RESET]);
+            return NULL;
+        }
 
         if (strlen(password1) != strlen(password2))
         {
             free(password1);
             free(password2);
-            fprintf(stderr, "%sError:%s Passwords don't match\n",
+            free(password_hash);
+            fprintf(stderr, "%sError:%s Passwords don't match.\n",
                     colors[COLOR_ERROR], colors[COLOR_RESET]);
             return NULL;
         }
@@ -322,22 +349,30 @@ char *get_hashed_password(int set_password)
         {
             free(password1);
             free(password2);
-            fprintf(stderr, "%sError:%s Passwords don't match\n",
+            free(password_hash);
+            fprintf(stderr, "%sError:%s Passwords don't match.\n",
                     colors[COLOR_ERROR], colors[COLOR_RESET]);
             return NULL;
         }
         free(password2);
     }
     else
+    {
         password1 = get_password("Password: ");
+        if (password1 == NULL)
+        {
+            free(password_hash);
+            fprintf(stderr, "%sError:%s Password is NULL.\n",
+                    colors[COLOR_ERROR], colors[COLOR_RESET]);
+            return NULL;
+        }
+    }
 
     unsigned char md[SHA512_DIGEST_LENGTH];
-
     SHA512((const unsigned char *) password1, strlen(password1), md);
     message_digest_to_hash(md, password_hash, SHA512_DIGEST_LENGTH);
 
     free(password1);
-
     if (password_hash == NULL)
         return NULL;
 

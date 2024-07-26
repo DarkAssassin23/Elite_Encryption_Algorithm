@@ -491,6 +491,17 @@ static void encrypt_directory_mode(int ghost_mode)
     int arr_size = 0;
     char **files_list = split_string(contents, "\n", &arr_size);
     free(contents);
+    if (files_list == NULL)
+    {
+        for (int k = 0; k < num_keys; k++)
+            free(keys[k]);
+        free(keys);
+        free(dir_name);
+        fprintf(stderr,
+                "%sError:%s Getting the list of individual files failed.\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
+        return;
+    }
     start_dir_encrypt_threads(files_list, arr_size, (const char **) keys,
                               num_keys, overwrite, threads);
 
@@ -638,6 +649,17 @@ static void decrypt_directory_mode(int ghost_mode)
     int arr_size = 0;
     char **files_list = split_string(contents, "\n", &arr_size);
     free(contents);
+    if (files_list == NULL)
+    {
+        for (int k = 0; k < num_keys; k++)
+            free(keys[k]);
+        free(keys);
+        free(dir_name);
+        fprintf(stderr,
+                "%sError:%s Getting the list of individual files failed.\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
+        return;
+    }
     start_dir_decrypt_threads(files_list, arr_size, (const char **) keys,
                               num_keys, overwrite, threads);
 

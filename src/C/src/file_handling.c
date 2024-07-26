@@ -119,24 +119,9 @@ char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
     if (encrypted_keys_string == NULL)
         return NULL;
 
-    // Try and decode the keys
-    size_t keys_data_size = 0;
-    int decoded = 1; // Assume decode will succeed
-    unsigned char *raw_keys_data = base64_decode(encrypted_keys_string,
-                                                 file_size, &keys_data_size);
-    // Keys were not encoded in base64. Revert to original data
-    if (raw_keys_data == NULL)
-    {
-        raw_keys_data = encrypted_keys_string;
-        keys_data_size = file_size;
-        decoded = 0;
-    }
-
     char *keys_string = NULL;
-    size_t key_string_len = decrypt_keys(raw_keys_data, keys_data_size,
+    size_t key_string_len = decrypt_keys(encrypted_keys_string, file_size,
                                          &keys_string);
-    if (decoded)
-        free(raw_keys_data);
     free(encrypted_keys_string);
     if (keys_string == NULL)
         return NULL;
@@ -169,8 +154,10 @@ char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
                     "Aborting...",
                     colors[COLOR_ERROR], colors[COLOR_RESET]);
             free(keys_string);
+            for (int x = k - 1; x >= 0; x--)
+                free(keys[x]);
+            free(keys);
             return NULL;
-            // exit(EXIT_FAILURE);
         }
         strncpy(key, &keys_string[index], key_len);
         key[key_len] = '\0';
@@ -254,7 +241,7 @@ int keys_file_exists(void)
 
 char **get_all_keys_files(size_t *key_files_count)
 {
-    char **file_list = malloc(sizeof(char *));
+    char **file_list = calloc(1, sizeof(char *));
     if (file_list == NULL)
     {
         *key_files_count = 0;
@@ -272,17 +259,15 @@ char **get_all_keys_files(size_t *key_files_count)
     {
         if (is_of_filetype(dir->d_name, ".keys"))
         {
-            size_t cur_filename_len = strlen(dir->d_name);
-
-            file_list = realloc(file_list,
-                                sizeof(file_list) + cur_filename_len + 1);
-
-            if (file_list == NULL)
+            char **tmp = realloc(file_list,
+                                 (sizeof(file_list) * count) + sizeof(char *));
+            if (tmp == NULL)
             {
                 *key_files_count = 0;
+                free(file_list);
                 return NULL;
             }
-
+            file_list = tmp;
             file_list[count] = strdup(dir->d_name);
             count++;
         }
@@ -329,9 +314,15 @@ char *get_dir_contents(char *basePath)
                     while (new_len >= files_list_max_len)
                         files_list_max_len *= 2;
 
-                    files_list = realloc(files_list, files_list_max_len + 1);
-                    if (files_list == NULL)
+                    char *tmp = realloc(files_list, files_list_max_len + 1);
+                    if (tmp == NULL)
+                    {
+                        free(files_list);
+                        free(temp);
+                        closedir(dir);
                         return NULL;
+                    }
+                    files_list = tmp;
                 }
 
                 strcat(files_list, temp);
@@ -347,9 +338,14 @@ char *get_dir_contents(char *basePath)
                     while (new_len >= files_list_max_len)
                         files_list_max_len *= 2;
 
-                    files_list = realloc(files_list, files_list_max_len + 1);
-                    if (files_list == NULL)
+                    char *tmp = realloc(files_list, files_list_max_len + 1);
+                    if (tmp == NULL)
+                    {
+                        free(files_list);
+                        closedir(dir);
                         return NULL;
+                    }
+                    files_list = tmp;
                 }
 
                 strcat(files_list, path);
@@ -357,7 +353,14 @@ char *get_dir_contents(char *basePath)
             }
         }
     }
-    files_list = realloc(files_list, files_list_curr_len + 1);
+    char *tmp = realloc(files_list, files_list_curr_len + 1);
+    if (tmp == NULL)
+    {
+        free(files_list);
+        closedir(dir);
+        return NULL;
+    }
+    files_list = tmp;
     closedir(dir);
     return files_list;
 }
@@ -392,7 +395,7 @@ size_t read_in_file(const char *filename, unsigned char **buffer)
     size_t file_size = ftell(fin);
     fseek(fin, 0, SEEK_SET);
 
-    *buffer = malloc(file_size + 1);
+    *buffer = calloc(file_size + 1, sizeof(char));
     if (*buffer == NULL)
         return -1;
 

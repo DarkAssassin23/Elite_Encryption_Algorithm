@@ -75,8 +75,21 @@ char **split_string(char *string, const char *delim, int *size)
     pch = strtok(string, delim);
     while (pch != NULL)
     {
-        result = realloc(result, sizeof(char *) * (count + 1));
+        char **tmp = realloc(result, sizeof(char *) * (count + 1));
+        if (tmp == NULL)
+        {
+            *size = count;
+            return result;
+        }
+
+        result = tmp;
         result[count] = malloc(strlen(pch) + 1);
+        if (result[count] == NULL)
+        {
+            *size = count - 1;
+            return result;
+        }
+
         strcpy(result[count], pch);
         count++;
         pch = strtok(NULL, delim);

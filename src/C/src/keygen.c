@@ -15,6 +15,11 @@ static char *get_sha256_key(void)
 
     unsigned char md[SHA256_DIGEST_LENGTH];
     char *hexstr = get_random_hexstr(SHA256_DIGEST_LENGTH);
+    if (hexstr == NULL)
+    {
+        free(hash);
+        return NULL;
+    }
 
     SHA256((const unsigned char *) hexstr, strlen(hexstr), md);
     message_digest_to_hash(md, hash, SHA256_DIGEST_LENGTH);
@@ -31,6 +36,11 @@ static char *get_sha512_key(void)
 
     unsigned char md[SHA512_DIGEST_LENGTH];
     char *hexstr = get_random_hexstr(SHA256_DIGEST_LENGTH);
+    if (hexstr == NULL)
+    {
+        free(hash);
+        return NULL;
+    }
 
     SHA512((const unsigned char *) hexstr, strlen(hexstr), md);
     message_digest_to_hash(md, hash, SHA512_DIGEST_LENGTH);
@@ -54,8 +64,21 @@ char *generate_key(HASH_TYPE hash_type)
 
     do
     {
-        key = realloc(key, ((currlen + hashlen) + 1));
+        char *tmp = realloc(key, ((currlen + hashlen) + 1));
+        if (tmp == NULL)
+        {
+            if (key != NULL)
+                free(key);
+            return NULL;
+        }
+        key = tmp;
         char *hash = get_sha512_key();
+        if (hash == NULL)
+        {
+            free(key);
+            return NULL;
+        }
+
         sprintf(&key[currlen], "%s", hash);
         currlen += hashlen;
         free(hash);
@@ -74,7 +97,16 @@ char **generate_keys(HASH_TYPE hash_type, int num_keys)
         return NULL;
 
     for (int x = 0; x < num_keys; x++)
+    {
         keys[x] = generate_key(hash_type);
+        if (keys[x] == NULL)
+        {
+            for (int i = x; i >= 0; i--)
+                free(keys[i]);
+            free(keys);
+            return NULL;
+        }
+    }
 
     return keys;
 }
