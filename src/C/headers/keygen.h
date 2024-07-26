@@ -1,7 +1,5 @@
 #pragma once
 
-#define DEFAULT_KEY_BYTES 8
-
 /**
  * @enum HASH_TYPE enum of the diffrent hash types
  * @brief Types of available hash functions
