@@ -2,6 +2,7 @@
 
 ## Table of Contents 
  * [About](#about)
+ * [Setup](#Setup)
  * [Building](#building)
  * [Usage](#usage)
  
@@ -16,6 +17,13 @@ breakdown of how the algorithm works and how keys are generated, check out my
 > checks to help make sure you enter your password correctly, but it is not 
 > full-proof.
 
+## Setup
+You first need to install Swift. For install instructions refer to the
+[offical Swift documentation](https://www.swift.org/install/).
+
+If you are on Windows, the easiest way I found to build the project is to make
+sure you are using the `x64 Visual Studio Developer Command Prompt` and
+enabling `Developer Mode` in the `Settings` under `System`.
 
 ## Building
 You can build either `release` or `debug` variants. Though, it is 
@@ -30,6 +38,9 @@ make release
 make debug
 ``` 
 The resulting executable will be placed in the root of this directory.
+
+> [!NOTE]
+> If you are on Windows, use `nmake` instead of `make`.
 
 ## Usage
 This implementation utilizes a command-line interface (CLI) to allow
