@@ -180,3 +180,27 @@ func loadKeys(_ filename: String, _ password: String) throws -> [String] {
         throw e
     }
 }
+
+#if os(Windows)
+/// Implementation of getpass for use on Windows
+/// - Parameter prompt: The password prompt to display to the user
+/// - Returns: The password
+func getpass(_ prompt: String) -> [CChar]? {
+    let star = [UInt8]("*".utf8)
+    var password: String = String()
+
+    print(prompt, terminator: "")
+    while (true) {
+        let c = _getch()
+        let ch = String(bytes: [UInt8(c)], encoding: .utf8)!
+        if ch == "\r" || ch == "\n" {
+                print()
+                break
+        } else {
+            _putch(Int32(star[0]))
+            password += ch
+        }
+    }
+    return password.cString(using: .utf8)
+}
+#endif
