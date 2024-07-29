@@ -4,16 +4,13 @@
 
 #if defined(WIN32)
 #include <windows.h>
-#elif defined(__APPLE__)
-#include <libproc.h>
-#include <sys/types.h>
-#endif
-
-#if WIN32
-#define SLASH_CH '\\'
 #else
 #include <unistd.h>
-#define SLASH_CH '/'
+#endif
+
+#if defined(__APPLE__)
+#include <libproc.h>
+#include <sys/types.h>
 #endif
 
 #include "config.h"
@@ -98,6 +95,28 @@ static char *get_home(void)
 }
 
 /**
+ * @brief Upate the path to ensure its slashes are all going the right way
+ * @param[in] path The path to updated the slashes for
+ * @return The path with the correct slashes
+ */
+static char *fix_slashes(char *path)
+{
+#if WIN32
+    char bad_slash = '/';
+#else
+    char bad_slash = '\\';
+#endif
+    char *p = path;
+    while (*p)
+    {
+        if (*p == bad_slash)
+            *p = SLASH_CH;
+        p++;
+    }
+    return path;
+}
+
+/**
  * @brief Parse the config file and set the requisite variables
  * @param[in] cfg Path to the config file
  */
@@ -135,7 +154,7 @@ static void parse_cfg(const char *cfg)
                 if (home == NULL)
                 {
                     fprintf(stderr,
-                            "%sError:%s, Failed to allocate memory for home\n",
+                            "%sError:%s Failed to allocate memory for home\n",
                             colors[COLOR_ERROR], colors[COLOR_RESET]);
                     continue;
                 }
@@ -145,13 +164,47 @@ static void parse_cfg(const char *cfg)
             else
                 strncpy(actual, path, PATH_MAX);
 
-            keys_dir = calloc(strlen(actual) + 1, sizeof(char));
+            size_t actual_len = strlen(actual);
+            if (actual[actual_len] != SLASH_CH)
+            {
+                actual[actual_len] = SLASH_CH;
+                actual_len++;
+            }
+
+            keys_dir = calloc(actual_len + 1, sizeof(char));
             if (keys_dir != NULL)
-                strcpy(keys_dir, actual);
+            {
+                strncpy(keys_dir, actual, actual_len);
+                keys_dir = fix_slashes(keys_dir);
+            }
         }
     }
     free(line);
     fclose(config);
+}
+
+/**
+ * @brief Ask the user if they would like to create the keys dir
+ * @param[in] path The path that will be created
+ * @return Whether to proceed with creating the dir
+ */
+int confirm_key_dir(const char *path)
+{
+    char *line = NULL;
+    int ret = 1;
+    size_t line_len = 0;
+
+    printf("The keys directory specified, \'%s\', does not exist\n"
+           "Would you like to create it? (y/n) (default: y): ",
+           path);
+    line_len = getline(&line, &line_len, stdin);
+    // Replace new line with null terminator
+    line[line_len - 1] = '\0';
+    if (strcmp(line, "n") == 0 || strcmp(line, "N") == 0)
+        ret = 0;
+
+    free(line);
+    return ret;
 }
 
 void load_config(void)
@@ -165,11 +218,37 @@ void load_config(void)
     if (!file_exists(cfg))
     {
         write_default_config(cfg);
-        free(cfg);
-        return;
+        goto load_config_end;
     }
     parse_cfg(cfg);
 
+    if (keys_dir == NULL)
+        goto load_config_end;
+
+    if (!file_exists(keys_dir))
+    {
+        if (!confirm_key_dir(keys_dir))
+        {
+            printf("Did not create \'%s\', using default.\n", keys_dir);
+            free(keys_dir);
+            keys_dir = NULL;
+            goto load_config_end;
+        }
+        printf("Trying to create: %s\n", keys_dir);
+
+        // Try to make the path to the keys directory
+        if (!mkdir_path(keys_dir))
+        {
+            fprintf(stderr,
+                    "%sError:%s Failed to create the directory \'%s\'\n",
+                    colors[COLOR_ERROR], colors[COLOR_RESET], keys_dir);
+            free(keys_dir);
+            keys_dir = NULL;
+        }
+        printf("Success!\n");
+    }
+
+load_config_end:
     free(cfg);
     return;
 }

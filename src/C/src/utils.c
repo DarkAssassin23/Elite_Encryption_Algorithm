@@ -219,8 +219,10 @@ char **load_keys(int *num_keys)
 
         char **keys_decrypted = NULL;
         size_t key_len = 0;
-        keys_decrypted = load_keys_from_file(keys_files_list[selection - 1],
-                                             num_keys, &key_len);
+        char *key_file = get_keys_path(keys_files_list[selection - 1]);
+        keys_decrypted = load_keys_from_file(key_file, num_keys, &key_len);
+        if (key_file != NULL)
+            free(key_file);
 
         for (size_t f = 0; f < num_key_files; f++)
             free(keys_files_list[f]);

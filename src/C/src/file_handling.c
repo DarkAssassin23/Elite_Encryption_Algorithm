@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +7,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 #include "base64.h"
 #include "decrypt.h"
@@ -110,6 +115,9 @@ char *get_input_dir_name(int encrypting)
 
 char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
 {
+    if (filename == NULL)
+        return NULL;
+
     // Make sure the file exists and it is a keys file
     if (!file_exists(filename) || !is_of_filetype(filename, ".keys"))
         return NULL;
@@ -221,7 +229,8 @@ int keys_file_exists(void)
 {
     DIR *d;
     struct dirent *dir;
-    d = opendir(".");
+    const char *key_dir = (keys_dir == NULL) ? DEFAULT_KEYS_DIR : keys_dir;
+    d = opendir(key_dir);
     if (!d)
         return 0;
 
@@ -248,10 +257,11 @@ char **get_all_keys_files(size_t *key_files_count)
         return NULL;
     }
 
+    const char *key_dir = (keys_dir == NULL) ? DEFAULT_KEYS_DIR : keys_dir;
     size_t count = *key_files_count;
     DIR *d;
     struct dirent *dir;
-    d = opendir(".");
+    d = opendir(key_dir);
     if (!d)
         return 0;
 
@@ -276,6 +286,16 @@ char **get_all_keys_files(size_t *key_files_count)
     *key_files_count = count;
 
     return file_list;
+}
+
+char *get_keys_path(const char *filename)
+{
+    const char *path = (keys_dir == NULL) ? DEFAULT_KEYS_DIR : keys_dir;
+    size_t path_size = strlen(path) + strlen(filename) + 1;
+    char full_path[path_size];
+    memset(full_path, 0, path_size);
+    snprintf(full_path, path_size, "%s%s", path, filename);
+    return strdup(full_path);
 }
 
 char *get_dir_contents(char *basePath)
@@ -368,6 +388,8 @@ char *get_dir_contents(char *basePath)
 int save_to_file(const char *filename, unsigned char *data,
                  size_t bytes_to_write)
 {
+    if (filename == NULL)
+        return 0;
     FILE *fout = fopen(filename, "wb");
     if (fout == NULL)
     {
@@ -406,4 +428,68 @@ size_t read_in_file(const char *filename, unsigned char **buffer)
     fclose(fin);
 
     return read_bytes;
+}
+
+// ref:
+// https://nachtimwald.com/2019/07/10/recursive-create-directory-in-c-revisited/
+int mkdir_path(const char *path)
+{
+    const char *p;
+    int ret = 1;
+
+    char *temp = calloc(strlen(path) + 1, sizeof(char));
+    if (temp == NULL)
+        return 0;
+
+#ifdef WIN32
+    /* Skip Windows drive letter. */
+    if ((p = (const char *) strchr(path, ':')) != NULL)
+    {
+        p++;
+    }
+    else
+    {
+#endif
+        p = path + 1;
+#ifdef WIN32
+    }
+#endif
+
+    while ((p = strchr(p, SLASH_CH)) != NULL)
+    {
+        /* Skip empty elements. Could be a Windows UNC path or
+           just multiple separators which is okay. */
+        if (p != path && *(p - 1) == SLASH_CH)
+        {
+            p++;
+            continue;
+        }
+        /* Put the path up to this point into a temporary to
+           pass to the make directory function. */
+        size_t len = p - path;
+        memcpy(temp, path, len);
+        temp[len] = '\0';
+        p++;
+#ifdef WIN32
+        if (CreateDirectory(temp, NULL) == 0)
+        {
+            if (GetLastError() != ERROR_ALREADY_EXISTS)
+            {
+                ret = 0;
+                break;
+            }
+        }
+#else
+        if (mkdir(temp, 0774) != 0)
+        {
+            if (errno != EEXIST)
+            {
+                ret = 0;
+                break;
+            }
+        }
+#endif
+    }
+    free(temp);
+    return ret;
 }

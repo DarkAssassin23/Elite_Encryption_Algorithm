@@ -55,13 +55,15 @@ static int generate_new_keys(HASH_TYPE hash_type, int num_keys,
 
     if (filename == NULL)
         filename = DEFAULT_KEYS_FILE;
-
-    if (!save_to_file(filename, keys_encrypted, encrypted_keys_string_len))
+    char *full_path = get_keys_path(filename);
+    if (!save_to_file(full_path, keys_encrypted, encrypted_keys_string_len))
     {
         fprintf(stderr, "%sError:%s Saving keys failed\n", colors[COLOR_ERROR],
                 colors[COLOR_RESET]);
         success = 0;
     }
+    if (full_path != NULL)
+        free(full_path);
 
     free(keys_encrypted);
     return success;
@@ -151,7 +153,16 @@ static void delete_keys_file(const char *filename)
     line[line_len - 1] = '\0';
 
     if (strcmp(line, "y") == 0 || strcmp(line, "Y") == 0)
-        was_deleted = (remove(filename) == 0);
+    {
+        char *full_path = get_keys_path(filename);
+        if (full_path == NULL)
+            was_deleted = 0;
+        else
+        {
+            was_deleted = (remove(full_path) == 0);
+            free(full_path);
+        }
+    }
 
     free(line);
 
@@ -274,15 +285,17 @@ static void view_keys(void)
         char **keys_decrypted = NULL;
         int num_keys = 0;
         size_t key_len = 0;
-        keys_decrypted = load_keys_from_file(keys_files_list[selection - 1],
-                                             &num_keys, &key_len);
+        char *key_file = get_keys_path(keys_files_list[selection - 1]);
+        keys_decrypted = load_keys_from_file(key_file, &num_keys, &key_len);
+        if (key_file != NULL)
+            free(key_file);
 
         if (keys_decrypted == NULL)
         {
             for (size_t f = 0; f < num_key_files; f++)
                 free(keys_files_list[f]);
             free(keys_files_list);
-            printf("Aborting...\n");
+            printf("No keys loaded. Aborting...\n");
             return;
         }
 
@@ -388,6 +401,8 @@ static void encrypt_single_file_mode(int ghost_mode)
 
     if (keys == NULL)
     {
+        fprintf(stderr, "%sEncryption failed:%s  Keys were NULL.\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
         free(filename);
         return;
     }
@@ -483,6 +498,8 @@ static void encrypt_directory_mode(int ghost_mode)
 
     if (keys == NULL)
     {
+        fprintf(stderr, "%sEncryption failed:%s  Keys were NULL.\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
         free(dir_name);
         free(contents);
         return;

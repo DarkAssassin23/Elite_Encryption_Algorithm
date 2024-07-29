@@ -3,6 +3,12 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#if WIN32
+static const char SLASH_CH = '\\';
+#else
+static const char SLASH_CH = '/';
+#endif
+
 /**
  * @enum FILE_TYPE
  * @brief The kind of value returned from get_file_type()
@@ -92,6 +98,14 @@ int keys_file_exists(void);
 char **get_all_keys_files(size_t *key_files_count);
 
 /**
+ * @brief Set the full path to the keys file
+ * @param[in] filename The name of the keys file
+ * @return Full path to keys file
+ * @note Return value must be freed
+ */
+char *get_keys_path(const char *filename);
+
+/**
  * @brief Gets all files and sub-directories of a given directory
  * @param[in] basePath Base path to traverse directory
  * @return All files in the directory and sub-directory separated by
@@ -116,3 +130,10 @@ int save_to_file(const char *filename, unsigned char *data,
  * @return The number of bytes read in, -1 if the reading failed
  */
 size_t read_in_file(const char *filename, unsigned char **buffer);
+
+/**
+ * @brief Make all directories in the given path, if they don't exist
+ * @param[in] path The path to make
+ * @return If all directories were created successfully
+ */
+int mkdir_path(const char *path);

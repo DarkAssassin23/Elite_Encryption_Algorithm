@@ -43,7 +43,10 @@ int prompt_for_keys_filename(char **filename)
             continue;
         }
 
-        if (file_exists(line))
+        char *path = get_keys_path(line);
+        if (path == NULL)
+            path = line;
+        if (file_exists(path))
         {
             printf("WARNING the file \'%s\' already exists.\n", line);
             printf(
@@ -61,6 +64,9 @@ int prompt_for_keys_filename(char **filename)
             }
             free(choice);
         }
+        if (path != line)
+            free(path);
+
         *filename = line;
         return 1;
     }
