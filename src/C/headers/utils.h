@@ -28,7 +28,7 @@ char *keys_to_string(const char **keys, int num_keys);
 
 /**
  * @brief Split the given string into an array of strings based on
- *   the delimiter
+ * the delimiter
  * @param[in] str The string to split
  * @param[in] delim The delimiter to split the string on
  * @param[out] size The resulting arrays size

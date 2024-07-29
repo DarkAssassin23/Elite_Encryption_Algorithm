@@ -318,7 +318,7 @@ static void view_keys(void)
 
 /**
  * @brief Function to handle checking and generating a keys file if one does
- *   not currently exist
+ * not currently exist
  * @return If keys file is present
  */
 static int handle_no_keys(void)
@@ -347,7 +347,7 @@ static int handle_no_keys(void)
  * @brief Encrypt a single file based on user input
  * @param[in] ghost_mode Whether we are encrypting in ghost mode
  * @note Ghost Mode opts to use new randomly generated keys, rather
- *       than keys from a keys file
+ * than keys from a keys file
  */
 static void encrypt_single_file_mode(int ghost_mode)
 {
@@ -433,10 +433,10 @@ static void encrypt_single_file_mode(int ghost_mode)
 
 /**
  * @brief Encrypt an entire directory and its subdirectories
- *   based on user input
+ * based on user input
  * @param[in] ghost_mode Whether we are encrypting in ghost mode
  * @note Ghost Mode opts to use new randomly generated keys, rather
- *       than keys from a keys file
+ * than keys from a keys file
  */
 static void encrypt_directory_mode(int ghost_mode)
 {
@@ -540,7 +540,7 @@ static void encrypt_directory_mode(int ghost_mode)
  * @brief Encrypt a single file based on user input
  * @param[in] ghost_mode Whether we are encrypting in ghost mode
  * @note Ghost Mode opts to use new randomly generated keys, rather
- *       than keys from a keys file
+ * than keys from a keys file
  */
 static void decrypt_single_file_mode(int ghost_mode)
 {
@@ -602,10 +602,10 @@ static void decrypt_single_file_mode(int ghost_mode)
 
 /**
  * @brief Decrypt an entire directory and its subdirectories
- *   based on user input
+ * based on user input
  * @param[in] ghost_mode Whether we are decrypting in ghost mode
  * @note Ghost Mode opts to use new randomly generated keys, rather
- *       than keys from a keys file
+ * than keys from a keys file
  */
 static void decrypt_directory_mode(int ghost_mode)
 {

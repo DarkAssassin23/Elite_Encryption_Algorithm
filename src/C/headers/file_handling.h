@@ -109,7 +109,7 @@ char *get_keys_path(const char *filename);
  * @brief Gets all files and sub-directories of a given directory
  * @param[in] basePath Base path to traverse directory
  * @return All files in the directory and sub-directory separated by
- *       a new line
+ * a new line
  */
 char *get_dir_contents(char *basePath);
 

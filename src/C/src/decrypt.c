@@ -25,7 +25,7 @@ static void get_prev_block(unsigned char *data, size_t start,
 
 /**
  * @brief Handle decrypting cipher text that contains multiple blocks
- *       where one block is the length of the key
+ * where one block is the length of the key
  * @param[in] data The data to decrypt
  * @param[in] data_len The size of the data to decrypt
  * @param[out] being_decrypted The resulting value of decryption
@@ -79,7 +79,7 @@ static void decrypt_multi_block(unsigned char *data, size_t data_len,
 
 /**
  * @brief Remove excess padding at the end of the plain text added
- *   during encryption
+ * during encryption
  * @param[in] plain_text The plain text with the padding to remove
  * @param[in] plain_text_len The current length of the plain text
  * @return The resulting length of the plain text after padding is removed

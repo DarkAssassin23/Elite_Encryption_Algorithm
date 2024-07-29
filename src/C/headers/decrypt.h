@@ -14,15 +14,15 @@ size_t decrypt(unsigned char *data, size_t data_len,
 
 /**
  * @brief Decrypt the keys prior to using them to a with the
- *   password used to encrypt them
+ * password used to encrypt them
  * @param[in] encrypted_string The string of keys encrypted
  * @param[in] encrypted_size The size of the encrypted string of keys
  * @param[out] keys_string The string containing all the keys decrypted
  * @note keys_string must be freed
  * @return Length of keys string
  * @attention This function assumes the password entered is the same as
- *    the one used to encrypt the keys. i.e. the keys you get back could be
- *    bogus or invalid.
+ * the one used to encrypt the keys. i.e. the keys you get back could be
+ * bogus or invalid.
  */
 size_t decrypt_keys(unsigned char *encrypted_string, size_t encrypted_size,
                     char **keys_string);
