@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,6 +97,37 @@ char **split_string(char *string, const char *delim, int *size)
     }
     *size = count;
     return result;
+}
+
+char *trim(char *str)
+{
+    // Trim leading whitespace
+    while (isspace((unsigned char) *str))
+        str++;
+
+    if (*str == 0)
+        return str;
+
+    // Trim trailing whitespace
+    char *end = &str[strlen(str) - 1];
+    do
+    {
+        end--;
+    } while (isspace((unsigned char) *end));
+    end++;
+
+    // No end whitespace
+    if (!isspace((unsigned char) *end))
+        return str;
+
+    // Set the first whitespace character after the string to null terminator
+    *end = '\0';
+    return str;
+}
+
+int starts_with(const char *str, const char *start)
+{
+    return strncmp(start, str, strlen(start)) == 0;
 }
 
 /**

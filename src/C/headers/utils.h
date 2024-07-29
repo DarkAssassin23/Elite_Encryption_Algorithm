@@ -38,6 +38,21 @@ char *keys_to_string(const char **keys, int num_keys);
 char **split_string(char *str, const char *delim, int *size);
 
 /**
+ * @brief Trim the leading and trailing white space from the string
+ * @param[in] str The string to trim
+ * @return The string with no leading or trailing whitespace
+ */
+char *trim(char *str);
+
+/**
+ * @brief Check if a given string starts with another string
+ * @param[in] str The string we are checking
+ * @param[in] start The sequence to see if str starts with
+ * @return If `str` starts with `start`
+ */
+int starts_with(const char *str, const char *start);
+
+/**
  * @brief Checks to see if they keys are valid
  * @param[in] keys The keys that will be checked
  * @param[in] num_keys The number of keys

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stddef.h>
+#include <stdio.h>
+
 /**
  * @enum FILE_TYPE
  * @brief The kind of value returned from get_file_type()

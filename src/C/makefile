@@ -20,6 +20,7 @@ OBJS = $(patsubst %.c, $(OBJDIR)/%.o, $(SRCS))
 ifeq ($(OS),Windows_NT)
 	RCS = $(wildcard version/*.rc)
 	RES = $(patsubst %.rc, $(OBJDIR)/%.res, $(RCS))
+	DEFINES = -DWIN32
 endif
 
 $(TARGET): $(OBJS) $(RES)
@@ -35,7 +36,7 @@ endif
 
 $(OBJDIR)/%.o: %.c $(HEADERS)
 	@mkdir -p $(@D)
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $< -o $@
 	@echo $(CC) "     "$@
 
 clean:

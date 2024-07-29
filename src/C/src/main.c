@@ -3,10 +3,13 @@
 #include <string.h>
 
 #include "app_functions.h"
+#include "config.h"
 #include "menu.h"
 
+char *keys_dir = NULL;
 int main(int argc, char **argv)
 {
+    load_config();
     while (1)
     {
         print_main_menu();
@@ -21,6 +24,8 @@ int main(int argc, char **argv)
         {
             printf("goodbye.\n");
             free(line);
+            if (keys_dir != NULL)
+                free(keys_dir);
             return 0;
         }
 

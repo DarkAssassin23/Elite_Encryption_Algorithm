@@ -397,7 +397,10 @@ size_t read_in_file(const char *filename, unsigned char **buffer)
 
     *buffer = calloc(file_size + 1, sizeof(char));
     if (*buffer == NULL)
+    {
+        fclose(fin);
         return -1;
+    }
 
     size_t read_bytes = fread(*buffer, sizeof(unsigned char), file_size, fin);
     fclose(fin);
