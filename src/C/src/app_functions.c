@@ -736,6 +736,10 @@ void manage_keys(void)
 
 void do_encryption(void)
 {
+    int ghost = using_ghost_mode();
+    if (ghost)
+        ghost_mode_warning();
+
     while (1)
     {
         print_encrypt_decrypt_menu(1); // Encrypting
@@ -768,18 +772,10 @@ void do_encryption(void)
         switch (choice)
         {
             case ENCRYPT_DECRYPT_MENU_FILE:
-                encrypt_single_file_mode(0); // Not using ghost mode
-                return;
-            case ENCRYPT_DECRYPT_MENU_FILE_GHOST:
-                if (prompt_for_ghost_mode_confirmation())
-                    encrypt_single_file_mode(1); // Using ghost mode
+                encrypt_single_file_mode(ghost);
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
-                encrypt_directory_mode(0); // Not using ghost mode
-                return;
-            case ENCRYPT_DECRYPT_MENU_DIR_GHOST:
-                if (prompt_for_ghost_mode_confirmation())
-                    encrypt_directory_mode(1); // sing ghost mode
+                encrypt_directory_mode(ghost);
                 return;
             default:
                 printf("Invalid selection\n");
@@ -790,6 +786,7 @@ void do_encryption(void)
 
 void do_decryption(void)
 {
+    int ghost = using_ghost_mode();
     while (1)
     {
         print_encrypt_decrypt_menu(0); // Decrypting
@@ -822,16 +819,10 @@ void do_decryption(void)
         switch (choice)
         {
             case ENCRYPT_DECRYPT_MENU_FILE:
-                decrypt_single_file_mode(0); // Not using ghost mode
-                return;
-            case ENCRYPT_DECRYPT_MENU_FILE_GHOST:
-                decrypt_single_file_mode(1); // Using ghost mode
+                decrypt_single_file_mode(ghost);
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
-                decrypt_directory_mode(0); // Not using ghost mode
-                return;
-            case ENCRYPT_DECRYPT_MENU_DIR_GHOST:
-                decrypt_directory_mode(1); // Using ghost mode
+                decrypt_directory_mode(ghost);
                 return;
             default:
                 printf("Invalid selection\n");

@@ -22,11 +22,15 @@ int prompt_for_num_keys(void);
 int prompt_for_num_threads(void);
 
 /**
- * @brief Warn the user they are about to use ghost mode and ask if they
- *       wish to proceed
- * @return Whether or not to proceed with ghost mode
+ * @brief Prompt the user if they would like to use ghost mode
+ * @return If they user wants to enable ghost mode
  */
-int prompt_for_ghost_mode_confirmation(void);
+int using_ghost_mode(void);
+
+/**
+ * @brief Warn the user they are about to use ghost mode
+ */
+void ghost_mode_warning(void);
 
 /**
  * @brief Prompt the user for the keys to use for ghost mode decryption

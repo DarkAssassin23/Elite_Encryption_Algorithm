@@ -146,15 +146,10 @@ int prompt_for_num_threads(void)
     return num_threads;
 }
 
-int prompt_for_ghost_mode_confirmation(void)
+int using_ghost_mode(void)
 {
     int success = 0;
-    printf(
-        "%sWarning:%s You are about to encrypt the data "
-        "with one time use keys.\nYou will be unable to decrypt the data "
-        "unless you manually copy down\nthe keys after you encrypt your data"
-        "\n\nAre you sure you would like to continue? (y/n) (default: n) ",
-        colors[COLOR_WARNING], colors[COLOR_RESET]);
+    printf("Would you like to enable Ghost Mode? (y/n) (default: n): ");
     char *line = NULL;
     size_t line_len = 0;
     line_len = getline(&line, &line_len, stdin);
@@ -166,6 +161,15 @@ int prompt_for_ghost_mode_confirmation(void)
     free(line);
 
     return success;
+}
+
+void ghost_mode_warning(void)
+{
+    printf(
+        "%sWarning:%s You are about to encrypt the data "
+        "with one time use keys.\nYou will be unable to decrypt the data "
+        "unless you manually copy down\nthe keys after you encrypt your data",
+        colors[COLOR_WARNING], colors[COLOR_RESET]);
 }
 
 int prompt_for_ghost_mode_keys(char ***keys, int *num_keys)

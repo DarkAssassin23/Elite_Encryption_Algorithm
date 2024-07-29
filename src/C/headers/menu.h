@@ -29,9 +29,7 @@ typedef enum
 typedef enum
 {
     ENCRYPT_DECRYPT_MENU_FILE = 0,
-    ENCRYPT_DECRYPT_MENU_FILE_GHOST = 1,
-    ENCRYPT_DECRYPT_MENU_DIR = 2,
-    ENCRYPT_DECRYPT_MENU_DIR_GHOST = 3
+    ENCRYPT_DECRYPT_MENU_DIR = 1,
 } ENCRYPT_DECRYPT_MENU_OPTIONS;
 
 static const char *main_menu_items[] = { "1. Manage Keys", "2. Encrypt",
@@ -51,9 +49,7 @@ static const size_t num_manage_keys_menu_items = sizeof(manage_keys_menu_items)
                                                  / sizeof(char *);
 
 static const char *encrypt_decrypt_menu_items[] = { "single file",
-                                                    "single file (Ghost Mode)",
-                                                    "directory",
-                                                    "directory (Ghost Mode)" };
+                                                    "directory" };
 static const size_t
     num_encrypt_decrypt_menu_items = sizeof(encrypt_decrypt_menu_items)
                                      / sizeof(char *);
