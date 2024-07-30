@@ -255,7 +255,9 @@ public class UserInput {
                 .invalidKey
             {
                 var err: String = "Error: Invalid keys detected. "
-                err += "Did you enter your password right?"
+                err += "This can occur when:\n"
+                err += "  1. The password entered is incorrect\n"
+                err += "  2. The keys file is corrupted\n"
                 throw LoadKeysError.invalid(err)
             } catch (let e) {
                 throw e
@@ -371,6 +373,8 @@ public class UserInput {
         do {
             let keys = try loadKeysFromFile(view: true)
             printKeys(keys: keys)
+        } catch LoadKeysError.invalid(let e) {
+            print(e)
         } catch (let e) {
             print("The following error occured when trying to view your keys:")
             print(e)
@@ -521,6 +525,8 @@ public class UserInput {
             }
             do {
                 keys = try loadKeysFromFile(view: false)
+            } catch LoadKeysError.invalid(let e) {
+                print(e)
             } catch (let e) {
                 print(
                     "The following error occured when trying to load",
