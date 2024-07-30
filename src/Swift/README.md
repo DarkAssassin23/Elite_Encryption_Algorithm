@@ -57,7 +57,7 @@ The CLI gives you the ability to generate your own keys as well as delete
 them if you choose to do so. When you create a new set of keys, the app will
 prompt you to choose how many keys you would like to generate and how long 
 you want your keys to be. After which, it will prompt you to enter a password
-so your keys can be encrypted themselves.
+so your keys can be encrypted.
 
 Like the [C implementation](../C/), you are able to have as many key
 files as you like and can select which one to use at the time of 
