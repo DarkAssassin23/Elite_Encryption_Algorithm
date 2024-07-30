@@ -30,6 +30,7 @@ typedef enum
 {
     ENCRYPT_DECRYPT_MENU_FILE = 0,
     ENCRYPT_DECRYPT_MENU_DIR = 1,
+    ENCRYPT_DECRYPT_MENU_TEXT = 2
 } ENCRYPT_DECRYPT_MENU_OPTIONS;
 
 static const char *main_menu_items[] = { "1. Manage Keys", "2. Encrypt",
@@ -48,8 +49,8 @@ static const char *manage_keys_menu_items[] = { "1. Add Keys",
 static const size_t num_manage_keys_menu_items = sizeof(manage_keys_menu_items)
                                                  / sizeof(char *);
 
-static const char *encrypt_decrypt_menu_items[] = { "single file",
-                                                    "directory" };
+static const char *encrypt_decrypt_menu_items[] = { "single file", "directory",
+                                                    "text" };
 static const size_t
     num_encrypt_decrypt_menu_items = sizeof(encrypt_decrypt_menu_items)
                                      / sizeof(char *);

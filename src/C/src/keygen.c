@@ -101,9 +101,7 @@ char **generate_keys(HASH_TYPE hash_type, int num_keys)
         keys[x] = generate_key(hash_type);
         if (keys[x] == NULL)
         {
-            for (int i = x; i >= 0; i--)
-                free(keys[i]);
-            free(keys);
+            free_keys(keys, num_keys, NULL);
             return NULL;
         }
     }

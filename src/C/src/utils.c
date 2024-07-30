@@ -130,6 +130,14 @@ int starts_with(const char *str, const char *start)
     return strncmp(start, str, strlen(start)) == 0;
 }
 
+int ends_with(const char *str, const char *end)
+{
+    size_t end_len = strlen(end), str_len = strlen(str);
+    if (end_len > str_len)
+        return 0;
+    return strncmp(str + (str_len - end_len), end, end_len) == 0;
+}
+
 /**
  * @see https://stackoverflow.com/a/8393473
  */
@@ -232,4 +240,42 @@ char **load_keys(int *num_keys)
 
     } while (keys_file_exists());
     return NULL;
+}
+
+void free_keys(char **keys, int num, const char *print)
+{
+    if (print != NULL)
+        printf("%s%s", print, strcmp(print, "") == 0 ? "" : "\n");
+
+    for (int k = 0; k < num; k++)
+    {
+        if (print != NULL)
+            printf("%d: %s\n", (k + 1), keys[k]);
+        free(keys[k]);
+    }
+    free(keys);
+}
+
+int buff_resize(char **buffer, size_t *max, size_t required)
+{
+    // Already have enough space
+    if (required < (*max - 1))
+        return 0;
+
+    // Keep doubling until we have enough space
+    size_t new_size = *max;
+    do
+    {
+        new_size *= 2;
+    } while ((new_size + 1) < required);
+
+    // Try and resize
+    char *tmp = realloc(*buffer, new_size);
+    if (tmp == NULL)
+        return 1;
+
+    // Resize succeeded, update values
+    *buffer = tmp;
+    *max = new_size;
+    return 0;
 }

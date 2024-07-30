@@ -162,9 +162,7 @@ char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
                     "Aborting...",
                     colors[COLOR_ERROR], colors[COLOR_RESET]);
             free(keys_string);
-            for (int x = k - 1; x >= 0; x--)
-                free(keys[x]);
-            free(keys);
+            free_keys(keys, num_keys, NULL);
             return NULL;
         }
         strncpy(key, &keys_string[index], key_len);
@@ -181,11 +179,8 @@ char **load_keys_from_file(const char *filename, int *total_keys, size_t *len)
                 "%sError:%s Invalid keys detected\n"
                 "Make sure you entered your password correctly\n",
                 colors[COLOR_ERROR], colors[COLOR_RESET]);
-        for (int k = 0; k < num_keys; k++)
-            free(keys[k]);
-        free(keys);
+        free_keys(keys, num_keys, NULL);
         return NULL;
-        // exit(EXIT_FAILURE);
     }
     return keys;
 }

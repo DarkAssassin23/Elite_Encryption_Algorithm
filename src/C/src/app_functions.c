@@ -13,6 +13,9 @@
 #include "thread_functions.h"
 #include "utils.h"
 
+static const char
+    *GHOST_ENCRYPT_PRINT = "The data was encrypted with the following keys:";
+
 /**
  * @brief Create new set of keys to use for encryption/decryption
  * @param[in] hash_type The kind of SHA has to use
@@ -40,18 +43,11 @@ static int generate_new_keys(HASH_TYPE hash_type, int num_keys,
     {
         fprintf(stderr, "%sError:%s Encrypting keys failed\n",
                 colors[COLOR_ERROR], colors[COLOR_RESET]);
-        for (int k = 0; k < num_keys; k++)
-            free(keys[k]);
-        free(keys);
+        free_keys(keys, num_keys, NULL);
         return 0;
     }
 
-    for (int k = 0; k < num_keys; k++)
-    {
-        printf("%d: %s\n", (k + 1), keys[k]);
-        free(keys[k]);
-    }
-    free(keys);
+    free_keys(keys, num_keys, "");
 
     if (filename == NULL)
         filename = DEFAULT_KEYS_FILE;
@@ -217,11 +213,9 @@ static void delete_keys_file_manager(void)
         int selection = strtol(line, NULL, 10);
         free(line);
         if (selection <= 0 || selection > num_key_files)
-        {
             printf("Invalid selection.\n");
-            continue;
-        }
-        delete_keys_file(keys_files_list[selection - 1]);
+        else
+            delete_keys_file(keys_files_list[selection - 1]);
 
         for (size_t f = 0; f < num_key_files; f++)
             free(keys_files_list[f]);
@@ -344,6 +338,66 @@ static int handle_no_keys(void)
 }
 
 /**
+ * @brief Prompt the user for what keys they would like to use
+ * @param[in] ghost Whether we are using ghost mode
+ * @param[in] encrypt Whether or not we are encrypting
+ * @param[out] num The number of keys in the returned list
+ * @return List of keys
+ */
+static char **keys_prompt(int ghost, int encrypt, int *num)
+{
+    const char *type = encrypt ? "encrypt" : "decrypt";
+    const char *type2 = encrypt ? "Encryption" : "Decryption";
+    char **keys = NULL;
+    *num = 0;
+
+    if (ghost && encrypt)
+    {
+        int hash_type = get_hash_type_for_key_gen();
+        if (hash_type == -1)
+            return NULL;
+
+        *num = prompt_for_num_keys();
+        if (*num == -1)
+            return NULL;
+
+        keys = generate_keys(hash_type, *num);
+    }
+    else if (ghost && !encrypt)
+    {
+        if (!prompt_for_ghost_mode_keys(&keys, num))
+        {
+            fprintf(stderr, "%sError:%s Invalid key provided\n",
+                    colors[COLOR_ERROR], colors[COLOR_RESET]);
+            return NULL;
+        }
+    }
+    else
+    {
+        if (handle_no_keys())
+            keys = load_keys(num);
+        else
+            goto keys_prompt_need_file;
+    }
+
+    if (keys == NULL)
+    {
+        fprintf(stderr, "%s%s failed:%s  Keys were NULL.\n",
+                colors[COLOR_ERROR], type2, colors[COLOR_RESET]);
+        return NULL;
+    }
+    return keys;
+
+keys_prompt_need_file:
+    fprintf(stderr,
+            "%sError:%s You cannot %s data without having "
+            "a keys file\nIf you wish to %s data without having a "
+            "keys file, enable\nghost mode.\n",
+            colors[COLOR_ERROR], colors[COLOR_RESET], type, type);
+    return NULL;
+}
+
+/**
  * @brief Encrypt a single file based on user input
  * @param[in] ghost_mode Whether we are encrypting in ghost mode
  * @note Ghost Mode opts to use new randomly generated keys, rather
@@ -366,43 +420,9 @@ static void encrypt_single_file_mode(int ghost_mode)
     int overwrite = prompt_for_overwrite(1); // single file
 
     int num_keys = 0;
-    char **keys = NULL;
-
-    if (ghost_mode)
-    {
-        int hash_type = get_hash_type_for_key_gen();
-        if (hash_type == -1)
-        {
-            free(filename);
-            return;
-        }
-
-        num_keys = prompt_for_num_keys();
-        if (num_keys == -1)
-        {
-            free(filename);
-            return;
-        }
-
-        keys = generate_keys(hash_type, num_keys);
-    }
-    else if (!ghost_mode && handle_no_keys())
-        keys = load_keys(&num_keys);
-    else
-    {
-        fprintf(stderr,
-                "%sError:%s You cannot encrypt files without having "
-                "a keys file\nIf you wish to encrypt files without having a "
-                "keys file select\nthe ghost mode option\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
-        free(filename);
-        return;
-    }
-
+    char **keys = keys_prompt(ghost_mode, 1, &num_keys);
     if (keys == NULL)
     {
-        fprintf(stderr, "%sEncryption failed:%s  Keys were NULL.\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
         free(filename);
         return;
     }
@@ -421,13 +441,8 @@ static void encrypt_single_file_mode(int ghost_mode)
         remove(filename);
 
     free(filename);
-    for (int k = 0; k < num_keys; k++)
-    {
-        if (ghost_mode)
-            printf("%d: %s\n", (k + 1), keys[k]);
-        free(keys[k]);
-    }
-    free(keys);
+    const char *print = ghost_mode ? GHOST_ENCRYPT_PRINT : NULL;
+    free_keys(keys, num_keys, print);
     return;
 }
 
@@ -460,48 +475,11 @@ static void encrypt_directory_mode(int ghost_mode)
     int threads = prompt_for_num_threads();
 
     int num_keys = 0;
-    char **keys = NULL;
-
-    if (ghost_mode)
-    {
-        int hash_type = get_hash_type_for_key_gen();
-        if (hash_type == -1)
-        {
-            free(dir_name);
-            free(contents);
-            return;
-        }
-
-        num_keys = prompt_for_num_keys();
-        if (num_keys == -1)
-        {
-            free(dir_name);
-            free(contents);
-            return;
-        }
-
-        keys = generate_keys(hash_type, num_keys);
-    }
-    else if (!ghost_mode && handle_no_keys())
-        keys = load_keys(&num_keys);
-    else
-    {
-        fprintf(stderr,
-                "%sError:%s You cannot encrypt files without having "
-                "a keys file\nIf you wish to encrypt files without having a "
-                "keys file select\nthe ghost mode option\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
-        free(dir_name);
-        free(contents);
-        return;
-    }
-
+    char **keys = keys_prompt(ghost_mode, 1, &num_keys);
     if (keys == NULL)
     {
-        fprintf(stderr, "%sEncryption failed:%s  Keys were NULL.\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
-        free(dir_name);
         free(contents);
+        free(dir_name);
         return;
     }
 
@@ -510,9 +488,7 @@ static void encrypt_directory_mode(int ghost_mode)
     free(contents);
     if (files_list == NULL)
     {
-        for (int k = 0; k < num_keys; k++)
-            free(keys[k]);
-        free(keys);
+        free_keys(keys, num_keys, NULL);
         free(dir_name);
         fprintf(stderr,
                 "%sError:%s Getting the list of individual files failed.\n",
@@ -526,13 +502,8 @@ static void encrypt_directory_mode(int ghost_mode)
     if (ghost_mode)
         printf("Your files were encrypted with the following keys:\n");
 
-    for (int k = 0; k < num_keys; k++)
-    {
-        if (ghost_mode)
-            printf("%d: %s\n", (k + 1), keys[k]);
-        free(keys[k]);
-    }
-    free(keys);
+    const char *print = ghost_mode ? GHOST_ENCRYPT_PRINT : NULL;
+    free_keys(keys, num_keys, print);
     return;
 }
 
@@ -551,33 +522,10 @@ static void decrypt_single_file_mode(int ghost_mode)
     int overwrite = prompt_for_overwrite(1); // single file
 
     int num_keys = 0;
-    char **keys = NULL;
-    int has_keys_file = handle_no_keys();
-
-    if (!ghost_mode && has_keys_file)
-        keys = load_keys(&num_keys);
-    else if (!ghost_mode && !has_keys_file)
-    {
-        fprintf(stderr,
-                "%sError:%s You cannot decrypt files without having "
-                "a keys file\nIf you wish to decrypt files without having a "
-                "keys file select\nthe ghost mode option",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
-        free(filename);
-        return;
-    }
-    else if (!prompt_for_ghost_mode_keys(&keys, &num_keys))
-    {
-        fprintf(stderr, "%sError:%s Invalid key provided\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
-        free(filename);
-        return;
-    }
-
+    char **keys = keys_prompt(ghost_mode, 1, &num_keys);
     if (keys == NULL)
     {
         free(filename);
-        fprintf(stderr, "No keys were provided. Aborting...\n");
         return;
     }
 
@@ -594,9 +542,7 @@ static void decrypt_single_file_mode(int ghost_mode)
         remove(filename);
 
     free(filename);
-    for (int k = 0; k < num_keys; k++)
-        free(keys[k]);
-    free(keys);
+    free_keys(keys, num_keys, NULL);
     return;
 }
 
@@ -630,36 +576,11 @@ static void decrypt_directory_mode(int ghost_mode)
     int threads = prompt_for_num_threads();
 
     int num_keys = 0;
-    char **keys = NULL;
-    int has_keys_file = handle_no_keys();
-
-    if (!ghost_mode && has_keys_file)
-        keys = load_keys(&num_keys);
-    else if (!ghost_mode && !has_keys_file)
-    {
-        fprintf(stderr,
-                "%sError:%s You cannot decrypt files without having "
-                "a keys file\nIf you wish to decrypt files without having a "
-                "keys file select\nthe ghost mode option",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
-        free(dir_name);
-        free(contents);
-        return;
-    }
-    else if (!prompt_for_ghost_mode_keys(&keys, &num_keys))
-    {
-        fprintf(stderr, "%sError:%s Invalid key provided\n",
-                colors[COLOR_ERROR], colors[COLOR_RESET]);
-        free(dir_name);
-        free(contents);
-        return;
-    }
-
+    char **keys = keys_prompt(ghost_mode, 1, &num_keys);
     if (keys == NULL)
     {
         free(dir_name);
         free(contents);
-        fprintf(stderr, "No keys were provided. Aborting...\n");
         return;
     }
 
@@ -668,9 +589,7 @@ static void decrypt_directory_mode(int ghost_mode)
     free(contents);
     if (files_list == NULL)
     {
-        for (int k = 0; k < num_keys; k++)
-            free(keys[k]);
-        free(keys);
+        free_keys(keys, num_keys, NULL);
         free(dir_name);
         fprintf(stderr,
                 "%sError:%s Getting the list of individual files failed.\n",
@@ -681,12 +600,101 @@ static void decrypt_directory_mode(int ghost_mode)
                               num_keys, overwrite, threads);
 
     free(dir_name);
-    for (int k = 0; k < num_keys; k++)
-    {
-        free(keys[k]);
-    }
-    free(keys);
+    free_keys(keys, num_keys, NULL);
     return;
+}
+
+/**
+ * @brief Encrypt and decrypt plain text
+ * @param[in] ghost_mode Encrypting/decrypting with ghost mode
+ * @param[in] encrypting Are we encrypting
+ */
+static void text_mode(int ghost_mode, int encrypting)
+{
+    const char *type = encrypting ? "encrypt" : "decrypt";
+    const char *type2 = encrypting ? "Encryption" : "Decryption";
+    const char done_str[] = "</done>";
+    int reading = 1;
+    size_t max_size = 64, size = 0;
+
+    char *text = calloc(max_size, sizeof(char));
+    if (text == NULL)
+    {
+        fprintf(stderr, "%sError:%s Failed to allocate memory. Aborting...\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
+        return;
+    }
+
+    printf("When you finish entering your text, type: %s\n", done_str);
+    printf("Enter the text you would like to %s:\n", type);
+    while (reading)
+    {
+        char *line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len - 1] = '\0';
+        if (ends_with(line, done_str))
+        {
+            line_len -= sizeof(done_str);
+            line[line_len] = 0;
+            reading = 0;
+        }
+        else
+            line[line_len - 1] = '\n';
+
+        if (buff_resize(&text, &max_size, line_len + size) != 0)
+        {
+            fprintf(stderr,
+                    "%sError:%s Failed to resize text buffer. Aborting...\n",
+                    colors[COLOR_ERROR], colors[COLOR_RESET]);
+            free(text);
+            free(line);
+            return;
+        }
+        strcat(text, line);
+        size += line_len;
+
+        free(line);
+    }
+
+    // Make sure text was entered
+    if (strcmp(text, "") == 0)
+    {
+        printf("No text entered. Nothing to do.\n");
+        free(text);
+        return;
+    }
+
+    int num_keys = 0;
+    char **keys = keys_prompt(ghost_mode, encrypting, &num_keys);
+    if (keys == NULL)
+    {
+        free(text);
+        return;
+    }
+
+    unsigned char *result = NULL;
+    int ret = 0;
+    if (encrypting)
+        ret = encrypt((unsigned char *) text, size, &result,
+                      (const char **) keys, num_keys);
+    else
+        ret = decrypt((unsigned char *) text, size, &result,
+                      (const char **) keys, num_keys);
+
+    const char *print = ghost_mode ? GHOST_ENCRYPT_PRINT : NULL;
+    free_keys(keys, num_keys, print);
+
+    if (ret)
+        fprintf(stdout, "%s%s Success!%s\n%s\n", colors[COLOR_SUCCESS], type2,
+                colors[COLOR_RESET], (char *) result);
+    else
+        fprintf(stderr, "%s%s Failed...%s\n", colors[COLOR_ERROR], type2,
+                colors[COLOR_RESET]);
+
+    free(text);
+    free(result);
 }
 
 void manage_keys(void)
@@ -777,6 +785,9 @@ void do_encryption(void)
             case ENCRYPT_DECRYPT_MENU_DIR:
                 encrypt_directory_mode(ghost);
                 return;
+            case ENCRYPT_DECRYPT_MENU_TEXT:
+                text_mode(ghost, 1);
+                return;
             default:
                 printf("Invalid selection\n");
                 break;
@@ -823,6 +834,9 @@ void do_decryption(void)
                 return;
             case ENCRYPT_DECRYPT_MENU_DIR:
                 decrypt_directory_mode(ghost);
+                return;
+            case ENCRYPT_DECRYPT_MENU_TEXT:
+                text_mode(ghost, 0);
                 return;
             default:
                 printf("Invalid selection\n");

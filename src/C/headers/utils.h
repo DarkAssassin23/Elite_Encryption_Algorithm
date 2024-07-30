@@ -53,6 +53,14 @@ char *trim(char *str);
 int starts_with(const char *str, const char *start);
 
 /**
+ * @brief Check if a given string ends with another string
+ * @param[in] str The string we are checking
+ * @param[in] start The sequence to see if str ends with
+ * @return If `str` ends with `end`
+ */
+int ends_with(const char *str, const char *end);
+
+/**
  * @brief Checks to see if they keys are valid
  * @param[in] keys The keys that will be checked
  * @param[in] num_keys The number of keys
@@ -74,3 +82,20 @@ size_t find_key_len(const char *keys_string);
  * @note List of keys must be freed
  */
 char **load_keys(int *num_keys);
+
+/**
+ * @brief Free the list of keys
+ * @param[in] keys The list of keys to be freed
+ * @param[in] num The number of keys in the list
+ * @param[in] print Text to display for printing the keys
+ */
+void free_keys(char **keys, int num, const char *print);
+
+/**
+ * @brief Resize the buffer if needed
+ * @param buffer The buffer to resize
+ * @param max The current maximum size of the buffer
+ * @param required The minimum size the buffer needs to be
+ * @return 0 on success, 1 if something went wrong
+ */
+int buff_resize(char **buffer, size_t *max, size_t required);

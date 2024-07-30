@@ -116,12 +116,28 @@ size_t decrypt(unsigned char *data, size_t data_len,
         decoded = 0;
     }
 
+    // Check if data and keys are valid
+    if (data_size % key_len != 0)
+    {
+        fprintf(stderr, "%sError:%s Invalid data and or keys provided\n",
+                colors[COLOR_ERROR], colors[COLOR_RESET]);
+        if (decoded)
+        {
+            free(raw_data);
+            raw_data = NULL;
+        }
+        return 0;
+    }
+
     // Allocate memory for the plain text
     unsigned char *temp = malloc(data_size + 1);
     if (temp == NULL)
     {
         if (decoded)
+        {
             free(raw_data);
+            raw_data = NULL;
+        }
         return 0;
     }
 
@@ -129,7 +145,10 @@ size_t decrypt(unsigned char *data, size_t data_len,
     if (key_block == NULL)
     {
         if (decoded)
+        {
             free(raw_data);
+            raw_data = NULL;
+        }
         free(temp);
         return 0;
     }
@@ -152,7 +171,10 @@ size_t decrypt(unsigned char *data, size_t data_len,
             temp[x] = key_block[x] ^ raw_data[x];
     }
     if (decoded)
+    {
         free(raw_data);
+        raw_data = NULL;
+    }
     free(key_block);
     size_t plain_text_size = remove_padding(&temp, data_size);
     *plain_text = temp;
@@ -178,7 +200,14 @@ size_t decrypt_keys(unsigned char *encrypted_string, size_t encrypted_size,
         decrypted_keys_len = decrypt(unchanged, decrypted_keys_len,
                                      &decrypted_keys,
                                      (const char **) &password_hash, 1);
-        free(unchanged);
+        if (unchanged != NULL)
+            free(unchanged);
+        if (decrypted_keys_len == 0)
+        {
+            printf("An error occured during decryption. Aborting...\n");
+            free(password_hash);
+            return 0;
+        }
     }
 
     // Remove the salt
