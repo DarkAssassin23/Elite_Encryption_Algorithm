@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #define MIN_KEY_LEN 64
+#define MIN_KEY_BITS 256
 
 static const unsigned char PADDING = 0;
 static const int ROUNDS = 5;

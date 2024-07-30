@@ -106,7 +106,7 @@ int prompt_for_num_keys(void)
 
         // Make sure number of keys is greater than 1 and
         // protect against integer underflows and overflows
-        if (num_keys <= 0 || is_negative)
+        if (num_keys < 0 || is_negative)
         {
             printf("Invalid number of keys, should be at least 1.\n");
             free(line);
@@ -114,6 +114,40 @@ int prompt_for_num_keys(void)
         }
         free(line);
         return num_keys;
+    }
+}
+
+int prompt_key_size(void)
+{
+    while (1)
+    {
+        printf("Enter the size each key should be, or 'q' to quit: ");
+        char *line = NULL;
+        size_t line_len = 0;
+        line_len = getline(&line, &line_len, stdin);
+        // Replace new line with null terminator
+        line[line_len - 1] = '\0';
+        if (strcmp(line, "q") == 0 || strcmp(line, "Q") == 0)
+        {
+            free(line);
+            return -1;
+        }
+
+        int key_size = strtol(line, NULL, 10);
+        int is_negative = line[0] == '-';
+
+        // Make sure the key size is greater than 256-bits and
+        // protect against integer underflows and overflows
+        if (key_size < MIN_KEY_BITS || key_size % MIN_KEY_BITS != 0
+            || is_negative)
+        {
+            printf("Invalid key size. The size must be a multiple of %d.\n",
+                   MIN_KEY_BITS);
+            free(line);
+            continue;
+        }
+        free(line);
+        return key_size;
     }
 }
 

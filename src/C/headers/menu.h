@@ -39,7 +39,10 @@ static const size_t NUM_MAIN_MENU_ITEMS = sizeof(MAIN_MENU_ITEMS)
                                           / sizeof(char *);
 
 static const char *KEY_GEN_MENU_ITEMS[] = { "1. 256-bits", "2. 512-bits",
-                                            "3. 1024-bits", "4. 2048-bits" };
+                                            "3. 1024-bits", "4. 2048-bits",
+                                            "5. Other" };
+
+static const unsigned short KEY_BIT_SIZES[] = { 256, 512, 1024, 2048 };
 static const size_t NUM_KEY_GEN_MENU_ITEMS = sizeof(KEY_GEN_MENU_ITEMS)
                                              / sizeof(char *);
 

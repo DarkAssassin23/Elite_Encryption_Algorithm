@@ -22,9 +22,9 @@ static const char
  * @param[in] num_keys The number of keys to generate
  * @param[in] filename Name fo the new keys file to create
  * @return If the keys were generated and saved successfully
- * @see HASH_TYPE enum for more info on the hash_type parameter
+ * @see HashType enum for more info on the hash_type parameter
  */
-static int generate_new_keys(HASH_TYPE hash_type, int num_keys,
+static int generate_new_keys(HashType hash_type, int num_keys,
                              const char *filename)
 {
     int success = 1;
@@ -66,9 +66,21 @@ static int generate_new_keys(HASH_TYPE hash_type, int num_keys,
 }
 
 /**
- * @brief Prompt for which HASH_TYPE should be used for key generation
- * @return Type of HASH_TYPE to use as an int, -1 for the user exiting
- * @see HASH_TYPE enum for more info
+ * @brief Convert the given HashType to a size in bits
+ * @param[in] ht The hash type
+ * @return The size of the corresponding hash type in bits
+ */
+static int hash_type_to_size(HashType ht)
+{
+    if (ht < HASH_TYPE_OTHER)
+        return KEY_BIT_SIZES[(int) ht];
+    return prompt_key_size();
+}
+
+/**
+ * @brief Prompt for which HashType should be used for key generation
+ * @return Type of HashType to use as an int, -1 for the user exiting
+ * @see HashType enum for more info
  */
 static int get_hash_type_for_key_gen(void)
 {
@@ -111,9 +123,14 @@ static int get_hash_type_for_key_gen(void)
  */
 static int generate_new_keys_file(void)
 {
-    int hash_type = get_hash_type_for_key_gen();
-    if (hash_type == -1)
-        return 0;
+    int hash_type = 0, hash_size = -1;
+    do
+    {
+        hash_type = get_hash_type_for_key_gen();
+        if (hash_type == -1)
+            return 0;
+        hash_size = hash_type_to_size(hash_type);
+    } while (hash_size == -1);
 
     int num_keys = prompt_for_num_keys();
     if (num_keys == -1)
@@ -127,7 +144,7 @@ static int generate_new_keys_file(void)
         return 0;
     }
 
-    int rc = generate_new_keys(hash_type, num_keys, filename);
+    int rc = generate_new_keys(hash_size, num_keys, filename);
     free(filename);
     return rc;
 }
@@ -353,15 +370,15 @@ static char **keys_prompt(int ghost, int encrypt, int *num)
 
     if (ghost && encrypt)
     {
-        int hash_type = get_hash_type_for_key_gen();
-        if (hash_type == -1)
+        int hash_size = hash_type_to_size(get_hash_type_for_key_gen());
+        if (hash_size == -1)
             return NULL;
 
         *num = prompt_for_num_keys();
         if (*num == -1)
             return NULL;
 
-        keys = generate_keys(hash_type, *num);
+        keys = generate_keys(hash_size, *num);
     }
     else if (ghost && !encrypt)
     {

@@ -15,6 +15,12 @@ int prompt_for_keys_filename(char **filename);
 int prompt_for_num_keys(void);
 
 /**
+ * @brief Prompt for large the keys should be
+ * @return The size of keys to generate, -1 for the user exiting
+ */
+int prompt_key_size(void);
+
+/**
  * @brief Prompt for the number of threads to use when encrypting
  * or decrypting a directory
  * @return The number of threads to use

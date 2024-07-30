@@ -4,6 +4,7 @@
 
 #include <openssl/sha.h>
 
+#include "globals.h"
 #include "keygen.h"
 #include "utils.h"
 
@@ -49,22 +50,19 @@ static char *get_sha512_key(void)
     return hash;
 }
 
-char *generate_key(HASH_TYPE hash_type)
+char *generate_key(size_t hash_size)
 {
-    if (hash_type == HASH_TYPE_SHA256)
-        return get_sha256_key();
+    if (hash_size % MIN_KEY_BITS != 0)
+        return NULL;
 
-    size_t hashlen = 128;
-    size_t currlen = 0;
+    size_t curr_len = 0, curr_size = 0;
+    const int sha512_len = 128, sha256_len = 64;
     char *key = NULL;
-
-    int i = 0;
-    if (hash_type == HASH_TYPE_SHA2048)
-        i--;
-
-    do
+    while (curr_size < hash_size)
     {
-        char *tmp = realloc(key, ((currlen + hashlen) + 1));
+        int inc = ((hash_size - curr_size) > MIN_KEY_BITS) ? sha512_len
+                                                           : sha256_len;
+        char *tmp = realloc(key, (curr_len + inc + 1));
         if (tmp == NULL)
         {
             if (key != NULL)
@@ -72,24 +70,24 @@ char *generate_key(HASH_TYPE hash_type)
             return NULL;
         }
         key = tmp;
-        char *hash = get_sha512_key();
+        char *hash = (inc == sha256_len) ? get_sha256_key() : get_sha512_key();
         if (hash == NULL)
         {
             free(key);
             return NULL;
         }
 
-        sprintf(&key[currlen], "%s", hash);
-        currlen += hashlen;
+        sprintf(&key[curr_len], "%s", hash);
+        curr_len += inc;
+        curr_size += (inc == sha256_len) ? MIN_KEY_BITS : MIN_KEY_BITS * 2;
         free(hash);
-        i++;
-    } while (i < hash_type);
+    }
     return key;
 }
 
-char **generate_keys(HASH_TYPE hash_type, int num_keys)
+char **generate_keys(size_t hash_size, int num_keys)
 {
-    if (num_keys < 1)
+    if (num_keys < 1 && hash_size % MIN_KEY_BITS != 0)
         return NULL;
 
     char **keys = malloc(sizeof(char *) * num_keys);
@@ -98,10 +96,12 @@ char **generate_keys(HASH_TYPE hash_type, int num_keys)
 
     for (int x = 0; x < num_keys; x++)
     {
-        keys[x] = generate_key(hash_type);
+        keys[x] = generate_key(hash_size);
         if (keys[x] == NULL)
         {
-            free_keys(keys, num_keys, NULL);
+            for (int i = x - 1; i >= 0; i--)
+                free(keys[x]);
+            free(keys);
             return NULL;
         }
     }
