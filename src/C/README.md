@@ -68,6 +68,12 @@ make debug
 This implementation utilizes a command-line interface (CLI) to allow
 you to manage your keys as well as encrypt and decrypt data.
 
+### Configuration
+When you run EEA, it will create a config file, `eea.conf`, if one doesn't
+already exist. This is where you can specify where EEA should look for your
+`.keys` files, or the files that store your keys used for encryption and
+decryption
+
 ### Key Generation
 The CLI gives you the ability to generate your own keys as well as delete
 them if you choose to do so. When you create a new set of keys, the app will
