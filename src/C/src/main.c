@@ -37,7 +37,7 @@ int main(int argc, char **argv)
             continue;
         }
 
-        MAIN_MENU_OPTIONS menu_selection;
+        MainMenuOptions menu_selection;
         menu_selection = selection - 1;
 
         switch (menu_selection)

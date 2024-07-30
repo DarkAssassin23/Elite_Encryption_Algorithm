@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @enum MAIN_MENU_OPTIONS
+ * @enum MainMenuOptions
  * @brief Menu options for the main menu
  */
 typedef enum
@@ -9,10 +9,10 @@ typedef enum
     MAIN_MENU_KEYS = 0,
     MAIN_MENU_ENCRYPT = 1,
     MAIN_MENU_DECRYPT = 2
-} MAIN_MENU_OPTIONS;
+} MainMenuOptions;
 
 /**
- * @enum MANAGE_KEYS_MENU_OPTIONS
+ * @enum ManageKeysMenuOptions
  * @brief Menu options for the key management menu
  */
 typedef enum
@@ -20,10 +20,10 @@ typedef enum
     MANAGE_KEYS_MENU_ADD = 0,
     MANAGE_KEYS_MENU_DELETE = 1,
     MANAGE_KEYS_MENU_VIEW = 2
-} MANAGE_KEYS_MENU_OPTIONS;
+} ManageKeysMenuOptions;
 
 /**
- * @enum ENCRYPT_DECRYPT_MENU_OPTIONS
+ * @enum EncryptDecryptMenuOptions
  * @brief Menu options for the encryption menu
  */
 typedef enum
@@ -31,7 +31,7 @@ typedef enum
     ENCRYPT_DECRYPT_MENU_FILE = 0,
     ENCRYPT_DECRYPT_MENU_DIR = 1,
     ENCRYPT_DECRYPT_MENU_TEXT = 2
-} ENCRYPT_DECRYPT_MENU_OPTIONS;
+} EncryptDecryptMenuOptions;
 
 static const char *MAIN_MENU_ITEMS[] = { "1. Manage Keys", "2. Encrypt",
                                          "3. Decrypt" };

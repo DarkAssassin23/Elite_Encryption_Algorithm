@@ -740,7 +740,7 @@ void manage_keys(void)
             printf("Invalid selection.\n");
             continue;
         }
-        MANAGE_KEYS_MENU_OPTIONS choice = selection - 1;
+        ManageKeysMenuOptions choice = selection - 1;
         switch (choice)
         {
             case MANAGE_KEYS_MENU_ADD:
@@ -792,7 +792,7 @@ void do_encryption(void)
             printf("Invalid selection.\n");
             continue;
         }
-        ENCRYPT_DECRYPT_MENU_OPTIONS choice = selection - 1;
+        EncryptDecryptMenuOptions choice = selection - 1;
 
         switch (choice)
         {
@@ -842,7 +842,7 @@ void do_decryption(void)
             printf("Invalid selection.\n");
             continue;
         }
-        ENCRYPT_DECRYPT_MENU_OPTIONS choice = selection - 1;
+        EncryptDecryptMenuOptions choice = selection - 1;
 
         switch (choice)
         {

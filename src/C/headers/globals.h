@@ -17,7 +17,7 @@ static const int DEFAULT_NUM_KEYS = 3;
 extern char *colors[];
 
 /**
- * @enum COLOR_OPTIONS
+ * @enum ColorOptions
  * @brief Index for the color options in the colors array
  */
 typedef enum
@@ -26,4 +26,4 @@ typedef enum
     COLOR_SUCCESS = 1,
     COLOR_WARNING = 2,
     COLOR_ERROR = 3
-} COLOR_OPTIONS;
+} ColorOptions;
