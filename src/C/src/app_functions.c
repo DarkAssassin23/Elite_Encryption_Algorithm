@@ -261,9 +261,10 @@ static void view_keys(void)
         for (size_t f = 0; f < num_key_files; f++)
             printf("%zu: %s\n", (f + 1), keys_files_list[f]);
         if (num_key_files > 1)
-            printf("(1-%zu) or 'q' to quit: ", num_key_files);
+            printf("(1-%zu) or 'q' to quit", num_key_files);
         else
-            printf("(1) or 'q' to quit: ");
+            printf("(1) or 'q' to quit");
+        printf(" (default: 1): ");
 
         char *line = NULL;
         size_t line_len = 0;

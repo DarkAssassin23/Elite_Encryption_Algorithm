@@ -84,7 +84,7 @@ public class UserInput {
             print("(1) or 'q' to quit", terminator: "")
         }
         if def > 0 {
-            print(" (default \(def))", terminator: "")
+            print(" (default: \(def))", terminator: "")
         }
         print(": ", terminator: "")
 
@@ -401,8 +401,6 @@ public class UserInput {
             } else {
                 if input == "q" {
                     break
-                } else if input == "" {
-                    choice = 1
                 } else {
                     choice = -1
                 }

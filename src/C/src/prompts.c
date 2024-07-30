@@ -78,7 +78,7 @@ int prompt_for_num_keys(void)
     while (1)
     {
         printf("Enter the number of keys to generate "
-               "or 'q' to quit (default %d): ",
+               "or 'q' to quit (default: %d): ",
                DEFAULT_NUM_KEYS);
         char *line = NULL;
         size_t line_len = 0;
