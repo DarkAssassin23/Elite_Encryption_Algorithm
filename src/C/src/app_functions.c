@@ -643,7 +643,7 @@ static void text_mode(int ghost_mode, int encrypting)
         else
             line[line_len - 1] = '\n';
 
-        if (buff_resize(&text, &max_size, line_len + size) != 0)
+        if (buff_resize(&text, &max_size, (line_len + size) + 1) != 0)
         {
             fprintf(stderr,
                     "%sError:%s Failed to resize text buffer. Aborting...\n",

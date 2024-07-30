@@ -267,7 +267,7 @@ int buff_resize(char **buffer, size_t *max, size_t required)
     do
     {
         new_size *= 2;
-    } while ((new_size + 1) < required);
+    } while (new_size <= required);
 
     // Try and resize
     char *tmp = realloc(*buffer, new_size);
