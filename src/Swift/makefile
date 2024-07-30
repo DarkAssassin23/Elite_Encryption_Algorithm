@@ -11,7 +11,7 @@ debug: build
 
 release:
 	swift build -c release
-	@cp .build/debug/EEA .
+	@cp .build/release/EEA .
 
 rund: build
 	@./.build/debug/EEA
