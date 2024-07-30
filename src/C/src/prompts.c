@@ -48,7 +48,8 @@ int prompt_for_keys_filename(char **filename)
             path = line;
         if (file_exists(path))
         {
-            printf("WARNING the file \'%s\' already exists.\n", line);
+            fprintf(stdout, "%sWARNING%s the file \'%s\' already exists.\n",
+                    colors[COLOR_WARNING], colors[COLOR_RESET], line);
             printf(
                 "Are you sure you want to override it? (y/n) (default: n): ");
             char *choice = NULL;
