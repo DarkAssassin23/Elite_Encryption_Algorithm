@@ -86,16 +86,16 @@ files as you like and can select which one to use at the time of
 encryption and decryption.
 
 ## Encryption and Decryption
-Both encryption and decryption modes allow you to either encrypt or decrypt
-single files or directories. The directories are encrypted recursively, so
-any and all files inside that directory will be encrypted. As for
-decryption, only `.eea` files will be decrypted, but, like with encryption,
-decryption is done recursively when performed on directories.
+Both encryption and decryption modes allow you to encrypt or decrypt
+single files, directories, or strings of text. The directories are encrypted
+recursively, so any and all files inside that directory will be encrypted.
+As for decryption, only `.eea` files will be decrypted, but, like with
+encryption, decryption is done recursively when performed on directories.
 
 ### Ghost Mode
-Both encryption and decryption on single files and directories has a mode 
-called Ghost Mode. In Ghost Mode, you have the ability to either manually 
-enter (in the case of decryption) or create one-time-use keys. 
+All encryption and decryption methods have a mode called Ghost Mode.
+In Ghost Mode, you have the ability to either manually enter 
+(in the case of decryption) or create one-time-use keys. 
 Ghost Mode does not utilize any of your saved keys files, nor does it 
 generate a new one. The reason it is called "Ghost Mode" is so your 
 encryption/decryption are like a ghost and your keys only ever exist in 
