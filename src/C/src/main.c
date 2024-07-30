@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 
         int selection = strtol(line, NULL, 10);
         free(line);
-        if (selection <= 0 || selection > num_main_menu_items)
+        if (selection <= 0 || selection > NUM_MAIN_MENU_ITEMS)
         {
             printf("Invalid selection\n");
             continue;

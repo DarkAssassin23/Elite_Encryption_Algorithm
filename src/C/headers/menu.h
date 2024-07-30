@@ -33,26 +33,26 @@ typedef enum
     ENCRYPT_DECRYPT_MENU_TEXT = 2
 } ENCRYPT_DECRYPT_MENU_OPTIONS;
 
-static const char *main_menu_items[] = { "1. Manage Keys", "2. Encrypt",
+static const char *MAIN_MENU_ITEMS[] = { "1. Manage Keys", "2. Encrypt",
                                          "3. Decrypt" };
-static const size_t num_main_menu_items = sizeof(main_menu_items)
+static const size_t NUM_MAIN_MENU_ITEMS = sizeof(MAIN_MENU_ITEMS)
                                           / sizeof(char *);
 
-static const char *key_gen_menu_items[] = { "1. 256-bits", "2. 512-bits",
+static const char *KEY_GEN_MENU_ITEMS[] = { "1. 256-bits", "2. 512-bits",
                                             "3. 1024-bits", "4. 2048-bits" };
-static const size_t num_key_gen_menu_items = sizeof(key_gen_menu_items)
+static const size_t NUM_KEY_GEN_MENU_ITEMS = sizeof(KEY_GEN_MENU_ITEMS)
                                              / sizeof(char *);
 
-static const char *manage_keys_menu_items[] = { "1. Add Keys",
+static const char *MANAGE_KEYS_MENU_ITEMS[] = { "1. Add Keys",
                                                 "2. Delete Keys",
                                                 "3. View Keys" };
-static const size_t num_manage_keys_menu_items = sizeof(manage_keys_menu_items)
+static const size_t NUM_MANAGE_KEYS_MENU_ITEMS = sizeof(MANAGE_KEYS_MENU_ITEMS)
                                                  / sizeof(char *);
 
-static const char *encrypt_decrypt_menu_items[] = { "single file", "directory",
+static const char *ENCRYPT_DECRYPT_MENU_ITEMS[] = { "single file", "directory",
                                                     "text" };
 static const size_t
-    num_encrypt_decrypt_menu_items = sizeof(encrypt_decrypt_menu_items)
+    NUM_ENCRYPT_DECRYPT_MENU_ITEMS = sizeof(ENCRYPT_DECRYPT_MENU_ITEMS)
                                      / sizeof(char *);
 
 /**

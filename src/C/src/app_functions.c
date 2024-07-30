@@ -96,7 +96,7 @@ static int get_hash_type_for_key_gen(void)
             selection = strtol(line, NULL, 10);
 
         free(line);
-        if (selection <= 0 || selection > num_key_gen_menu_items)
+        if (selection <= 0 || selection > NUM_KEY_GEN_MENU_ITEMS)
         {
             printf("Invalid selection\n");
             continue;
@@ -718,7 +718,7 @@ void manage_keys(void)
 
         int selection = strtol(line, NULL, 10);
         free(line);
-        if (selection <= 0 || selection > num_manage_keys_menu_items)
+        if (selection <= 0 || selection > NUM_MANAGE_KEYS_MENU_ITEMS)
         {
             printf("Invalid selection.\n");
             continue;
@@ -770,7 +770,7 @@ void do_encryption(void)
             selection = strtol(line, NULL, 10);
 
         free(line);
-        if (selection <= 0 || selection > num_encrypt_decrypt_menu_items)
+        if (selection <= 0 || selection > NUM_ENCRYPT_DECRYPT_MENU_ITEMS)
         {
             printf("Invalid selection.\n");
             continue;
@@ -820,7 +820,7 @@ void do_decryption(void)
             selection = strtol(line, NULL, 10);
 
         free(line);
-        if (selection <= 0 || selection > num_encrypt_decrypt_menu_items)
+        if (selection <= 0 || selection > NUM_ENCRYPT_DECRYPT_MENU_ITEMS)
         {
             printf("Invalid selection.\n");
             continue;
