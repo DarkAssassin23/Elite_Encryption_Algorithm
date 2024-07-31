@@ -39,11 +39,11 @@ dnf install openssl
 ```
 #### Arch-based
 ```bash
-pacman -S install openssl openssl-devel
+pacman -S openssl openssl-devel
 ```
 ### Windows (using MSYS2)
 ```bash
-pacman -S install openssl openssl-devel
+pacman -S openssl openssl-devel
 ```
 > [!NOTE]
 > This implementation has been built and tested against 
