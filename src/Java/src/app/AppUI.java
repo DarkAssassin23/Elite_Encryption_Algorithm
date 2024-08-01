@@ -116,8 +116,8 @@ public class AppUI {
 	private void initialize() {
 		frmEliteEncryption = new JFrame();
 		frmEliteEncryption.setTitle("Elite Encryption");
-		//frmEliteEncryption.setBounds(100, 100, 550, 420);
-		frmEliteEncryption.setBounds(100, 100, 450, 300);
+		frmEliteEncryption.setBounds(0, 0, 450, 300);
+		frmEliteEncryption.setLocationRelativeTo(null);
 		frmEliteEncryption.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmEliteEncryption.getContentPane().setLayout(null);
 		frmEliteEncryption.setResizable(false);
