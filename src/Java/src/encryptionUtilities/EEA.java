@@ -227,7 +227,7 @@ public class EEA
 	{
 		for(String k : keys)
 		{
-			if(k.length()%128 != 0 && k.length() != 64)
+			if(k.length() % 64 != 0)
 				return false;
 			try
 			{
