@@ -1,8 +1,10 @@
 package encryptionUtilities;
 
+import java.lang.IllegalArgumentException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 /**
  * Class of the implementation of the Elite Encryption Algorithm (EEA)
@@ -13,7 +15,9 @@ import java.security.NoSuchAlgorithmException;
 public class EEA 
 {
 	final private byte PADDING = 0;
-	
+	final private Base64.Encoder base64Encode = Base64.getEncoder();
+	final private Base64.Decoder base64Decode = Base64.getDecoder();
+
 	/**
 	 * Algorithm for encrypting the data.
 	 * First the key is XORed byte-by-byte against the data until the
@@ -61,9 +65,9 @@ public class EEA
 			loop++;
 		}
 		
-		return cipherText;
+		return base64Encode.encode(cipherText);
 	}
-	
+
 	/**
 	 * Algorithm for decrypting the data.
 	 * First the algorithm pulls the second to last block in the sequence 
@@ -82,6 +86,13 @@ public class EEA
 		byte[][] keysList = new byte[keys.length][blockSize];
 		for(int x=0;x<keys.length;x++)
 			keysList[x] = keys[x].getBytes();
+
+		// Try and decode from base64
+		try
+		{
+			cipherText = base64Decode.decode(cipherText);
+		}
+		catch (IllegalArgumentException e) {}
 
 		byte[] plainText = new byte[cipherText.length];
 		
