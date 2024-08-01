@@ -81,7 +81,7 @@ prompt you to choose how many keys you would like to generate and how long
 you want your keys to be. After which, it will prompt you to enter a password
 so your keys can be encrypted.
 
-Unlike the [Java implementation](../Java/), you are able to have as many key
+Like the [Java implementation](../Java/), you are able to have as many key
 files as you like and can select which one to use at the time of 
 encryption and decryption.
 
