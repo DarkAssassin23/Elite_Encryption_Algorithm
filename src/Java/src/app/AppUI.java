@@ -555,60 +555,61 @@ public class AppUI {
 	
 	private void handleStandardText()
 	{
-		if(utils.keysExist())
+		String[] keys = utils.getKeys();
+		if (keys == null)
 		{
-			boolean success = false;
-			if(encryptionOn)
+			JOptionPane.showMessageDialog(frmEliteEncryption, "No keys were loaded", "ERROR", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		boolean success = false;
+		if(encryptionOn)
+		{
+			try 
 			{
-				try 
+				if(textTextArea.getText().equals(""))
+					JOptionPane.showMessageDialog(frmEliteEncryption, "No text to encrypt was entered.\nPlease enter some text and try again", 
+							"ERROR",JOptionPane.ERROR_MESSAGE);
+				else
 				{
-					if(textTextArea.getText().equals(""))
-						JOptionPane.showMessageDialog(frmEliteEncryption, "No text to encrypt was entered.\nPlease enter some text and try again", 
-								"ERROR",JOptionPane.ERROR_MESSAGE);
-					else
-					{
-						String encryptedText = new String(eea.encryptData(textTextArea.getText().getBytes(), utils.getKeys()));
-						textTextArea.setText(encryptedText);
-						lblText.setText("Encrypted Text:");
-						success = true;
-					}
-				}
-				catch(Exception e)
-				{
-					JOptionPane.showMessageDialog(frmEliteEncryption, "An error occured trying to encrypt your text.\n"+
-						"If the problem persists, try saving your text to a .txt file and then try encrypting that", 
-						"ERROR",JOptionPane.ERROR_MESSAGE);
-					success = false;
+					String encryptedText = new String(eea.encryptData(textTextArea.getText().getBytes(), keys));
+					textTextArea.setText(encryptedText);
+					lblText.setText("Encrypted Text:");
+					success = true;
 				}
 			}
-			else
+			catch(Exception e)
 			{
-				try 
-				{
-					if(textTextArea.getText().equals(""))
-						JOptionPane.showMessageDialog(frmEliteEncryption, "No text to decrypt was entered.\nPlease enter the encrypted text and try again", 
-								"ERROR",JOptionPane.ERROR_MESSAGE);
-					else 
-					{
-						String decryptedText = new String(eea.decryptData(textTextArea.getText().getBytes(), utils.getKeys()));
-						textTextArea.setText(decryptedText);
-						lblText.setText("Decrypted Text:");
-						success = true;
-					}
-				}
-				catch(Exception e)
-				{
-					JOptionPane.showMessageDialog(frmEliteEncryption, "An error occured trying to decrypt your text.\n",
-						"ERROR",JOptionPane.ERROR_MESSAGE);
-					success = false;
-				}
+				JOptionPane.showMessageDialog(frmEliteEncryption, "An error occured trying to encrypt your text.\n"+
+					"If the problem persists, try saving your text to a .txt file and then try encrypting that", 
+					"ERROR",JOptionPane.ERROR_MESSAGE);
+				success = false;
 			}
-			if(success)
-				btnContinue.setVisible(false);
 		}
 		else
-			JOptionPane.showMessageDialog(frmEliteEncryption, "You have no saved keys file\nYou can create one on the previous page", 
+		{
+			try 
+			{
+				if(textTextArea.getText().equals(""))
+					JOptionPane.showMessageDialog(frmEliteEncryption, "No text to decrypt was entered.\nPlease enter the encrypted text and try again", 
+							"ERROR",JOptionPane.ERROR_MESSAGE);
+				else 
+				{
+					String decryptedText = new String(eea.decryptData(textTextArea.getText().getBytes(), keys));
+					textTextArea.setText(decryptedText);
+					lblText.setText("Decrypted Text:");
+					success = true;
+				}
+			}
+			catch(Exception e)
+			{
+				JOptionPane.showMessageDialog(frmEliteEncryption, "An error occured trying to decrypt your text.\n",
 					"ERROR",JOptionPane.ERROR_MESSAGE);
+				success = false;
+			}
+		}
+		if(success)
+			btnContinue.setVisible(false);
 	}
 	
 	
@@ -654,53 +655,52 @@ public class AppUI {
 		boolean success = true;
 		btnContinue.setEnabled(false);
 		
-		String[] keys;
-		if(utils.keysExist())
+		String[] keys = utils.getKeys();
+		if (keys == null)
 		{
-			keys = utils.getKeys();
-			if(encryptionOn)
-			{	
-				if(typeOfOperation == TypeOfOperation.FILE)
-					success = encryptFile(keys);
-				else
-					success = encryptDirectory(keys);
-				
-				if(success)
-				{
-					textTextArea.append("done.");
-					if(typeOfOperation == TypeOfOperation.FILE)
-						JOptionPane.showMessageDialog(frmEliteEncryption, "Your file was encrypted", 
-								"Success",JOptionPane.INFORMATION_MESSAGE);
-					else if(typeOfOperation == TypeOfOperation.DIRECTORY)
-						JOptionPane.showMessageDialog(frmEliteEncryption, "All the files in your directory were encrypted", 
-								"Success",JOptionPane.INFORMATION_MESSAGE);
-				}
-	
-			}
+			JOptionPane.showMessageDialog(frmEliteEncryption, "No keys were loaded", "ERROR", JOptionPane.ERROR_MESSAGE);
+			btnContinue.setEnabled(true);
+			return;
+		}
+		if(encryptionOn)
+		{	
+			if(typeOfOperation == TypeOfOperation.FILE)
+				success = encryptFile(keys);
 			else
-			{	
-				if(typeOfOperation == TypeOfOperation.FILE)
-					success = decryptFile(keys);
-				else
-					success = decryptDirectory(keys);
-				
-				if(success)
-				{
-					textTextArea.append("done.");
-					if(typeOfOperation == TypeOfOperation.FILE)
-						JOptionPane.showMessageDialog(frmEliteEncryption, "Your file was decrypted", 
-								"Success",JOptionPane.INFORMATION_MESSAGE);
-					else if(typeOfOperation == TypeOfOperation.DIRECTORY)
-						JOptionPane.showMessageDialog(frmEliteEncryption, "All the files in your directory were decrypted", 
-								"Success",JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
+				success = encryptDirectory(keys);
+			
 			if(success)
-				btnContinue.setVisible(false);
+			{
+				textTextArea.append("done.");
+				if(typeOfOperation == TypeOfOperation.FILE)
+					JOptionPane.showMessageDialog(frmEliteEncryption, "Your file was encrypted", 
+							"Success",JOptionPane.INFORMATION_MESSAGE);
+				else if(typeOfOperation == TypeOfOperation.DIRECTORY)
+					JOptionPane.showMessageDialog(frmEliteEncryption, "All the files in your directory were encrypted", 
+							"Success",JOptionPane.INFORMATION_MESSAGE);
+			}
+
 		}
 		else
-			JOptionPane.showMessageDialog(frmEliteEncryption, "You have no saved keys file\nYou can create one on the previous page", 
-					"ERROR",JOptionPane.ERROR_MESSAGE);
+		{	
+			if(typeOfOperation == TypeOfOperation.FILE)
+				success = decryptFile(keys);
+			else
+				success = decryptDirectory(keys);
+			
+			if(success)
+			{
+				textTextArea.append("done.");
+				if(typeOfOperation == TypeOfOperation.FILE)
+					JOptionPane.showMessageDialog(frmEliteEncryption, "Your file was decrypted", 
+							"Success",JOptionPane.INFORMATION_MESSAGE);
+				else if(typeOfOperation == TypeOfOperation.DIRECTORY)
+					JOptionPane.showMessageDialog(frmEliteEncryption, "All the files in your directory were decrypted", 
+							"Success",JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+		if(success)
+			btnContinue.setVisible(false);
 		btnContinue.setEnabled(true);
 	}
 	

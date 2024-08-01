@@ -4,10 +4,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.IllegalArgumentException;
+import java.lang.NullPointerException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.Scanner;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 /**
  * Class of utilities used for reading and writing the keys
@@ -20,10 +31,12 @@ public class Utilities implements Serializable
 	// Added to fix Serializable warning
 	private static final long serialVersionUID = 1L;
 	
+	final private Base64.Encoder base64Encode = Base64.getEncoder();
+	final private Base64.Decoder base64Decode = Base64.getDecoder();
 	// Fixes bug where double-clicking on the .jar file would
 	// set the working directory as a temproary location and 
 	// not where the file is
-	static final String keyFilePath = new File(Utilities.class.getProtectionDomain().getCodeSource().getLocation().getPath()).toString().replace("EEA_App.jar", "keys.ser");
+	static final String legacyKeyFilePath = new File(Utilities.class.getProtectionDomain().getCodeSource().getLocation().getPath()).toString().replace("EEA_App.jar", "keys.ser");
 	
 	/**
 	 * Saves the the array of keys as a serialized object into keys.ser
@@ -32,11 +45,34 @@ public class Utilities implements Serializable
 	 */
 	public boolean writeKeys(String[] keys)
 	{
+		JFileChooser fc = new JFileChooser();
+		FileFilter filter = new FileNameExtensionFilter("Keys File", "keys");
+		fc.setFileFilter(filter);
+		fc.setDialogTitle("Select where to save the keys file");
+		fc.showSaveDialog(null);
+		File keysFile = fc.getSelectedFile();
 		try 
 		{
-			ObjectOutputStream objOutputStream = new ObjectOutputStream(new FileOutputStream(keyFilePath));
-			objOutputStream.writeObject(keys);
-			objOutputStream.close();
+			if (!keysFile.getName().endsWith(".keys"))
+				keysFile = new File(keysFile.getAbsolutePath() + ".keys");
+			if (keysFile.exists())
+			{
+				int x = JOptionPane.showConfirmDialog(null, "The keys file you entered already exists.\n"+
+							"Are you sure you would like to continue?","Caution",JOptionPane.YES_OPTION);
+				if (x != JOptionPane.YES_OPTION)
+					return false;
+			}
+
+			FileWriter writer = new FileWriter(keysFile);
+			String allKeys = new String();
+			for (String k : keys)
+			{
+				if (!allKeys.isEmpty())
+					allKeys += "\n";
+				allKeys += k;
+			}
+			writer.write(base64Encode.encodeToString(allKeys.getBytes()));
+			writer.close();
 		} 
 		catch (FileNotFoundException e1) 
 		{
@@ -48,6 +84,11 @@ public class Utilities implements Serializable
 			e1.printStackTrace();
 			return false;
 		}
+		catch (NullPointerException e)
+		{
+			System.out.println("Keys file save aborted");
+			return false;
+		}
 		return true;
 	}
 	
@@ -57,22 +98,57 @@ public class Utilities implements Serializable
 	 */
 	private String[] readKeys()
 	{
-		String[] keys = new String[] {};
-		try 
+		String[] keys = null;
+		// Legacy 
+		if (keysExist())
 		{
-			ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream(keyFilePath));
-			keys = (String[]) objInputStream.readObject();
-			objInputStream.close();
-		} 
+			try 
+			{
+				ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream(legacyKeyFilePath));
+				keys = (String[]) objInputStream.readObject();
+				objInputStream.close();
+			} 
+			catch (IOException e1) 
+			{
+				e1.printStackTrace();
+			} 
+			catch (ClassNotFoundException e1) 
+			{
+				e1.printStackTrace();
+			}
+			return keys;
+		}
+		
+		JFileChooser fc = new JFileChooser();
+		FileFilter filter = new FileNameExtensionFilter("Keys File", "keys");
+		fc.setFileFilter(filter);
+		fc.setDialogTitle("Select the keys file to use");
+		fc.showOpenDialog(null);
+		File keysFile = fc.getSelectedFile();
+		try
+		{
+			if (!keysFile.getName().endsWith(".keys"))
+			{
+				JOptionPane.showMessageDialog(null, "The file selected is not a keys file.", 
+									          "ERROR",JOptionPane.ERROR_MESSAGE);
+				return keys;
+			}
+			byte[] data = Files.readAllBytes(Paths.get(keysFile.getAbsolutePath()));
+			byte[] decoded = base64Decode.decode(data);
+			keys = new String(decoded).split("\n");
+		}
 		catch (IOException e1) 
 		{
 			e1.printStackTrace();
-		} 
-		catch (ClassNotFoundException e1) 
-		{
-			e1.printStackTrace();
 		}
-		
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			System.out.println("Keys file selection aborted");
+		}
 		return keys;
 	}
 	
@@ -82,7 +158,7 @@ public class Utilities implements Serializable
 	 */
 	public boolean keysExist()
 	{
-		File file = new File(keyFilePath);
+		File file = new File(legacyKeyFilePath);
 		return file.exists();
 	}
 	
@@ -93,12 +169,12 @@ public class Utilities implements Serializable
 	 */
 	public String[] getKeys()
 	{	
-		if(!keysExist())
-		{
-			String[] keys = null;
+		// if(!keysExist())
+		// {
+		// 	String[] keys = null;
 			
-			return keys;	
-		}
+		// 	return keys;	
+		// }
 		
 		return readKeys();
 	}
@@ -109,7 +185,7 @@ public class Utilities implements Serializable
 	 */
 	public boolean deleteKeys()
 	{
-		File file = new File(keyFilePath);
+		File file = new File(legacyKeyFilePath);
 		return file.delete();
 	}
 }
