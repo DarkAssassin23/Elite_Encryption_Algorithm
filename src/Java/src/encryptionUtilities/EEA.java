@@ -223,7 +223,7 @@ public class EEA
 	 * @param keys Array of keys to validate
 	 * @return True if all keys are valid, False otherwise
 	 */
-	public boolean validKeyCheck(String[] keys)
+	static public boolean validKeyCheck(String[] keys)
 	{
 		for(String k : keys)
 		{
