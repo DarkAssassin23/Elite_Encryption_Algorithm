@@ -311,8 +311,14 @@ public class AppUI {
 					}
 				}
 				else
-					JOptionPane.showMessageDialog(frmEliteEncryption, "You do not currently have a keys file\nNo deletion occured", 
-							"Information",JOptionPane.INFORMATION_MESSAGE);
+				{
+					if (utils.deleteKeys())
+						JOptionPane.showMessageDialog(frmEliteEncryption, "Your keys file was deleted successfully", 
+									"Success",JOptionPane.INFORMATION_MESSAGE);
+					else
+						JOptionPane.showMessageDialog(frmEliteEncryption, "No keys file was deleted", 
+									"Note",JOptionPane.INFORMATION_MESSAGE);
+				}
 					
 			}
 		});

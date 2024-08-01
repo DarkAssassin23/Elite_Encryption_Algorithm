@@ -323,7 +323,34 @@ public class Utilities implements Serializable
 	 */
 	public boolean deleteKeys()
 	{
+		// Legacy
 		File file = new File(legacyKeyFilePath);
-		return file.delete();
+		if (file.exists())
+			return file.delete();
+
+		JFileChooser fc = new JFileChooser();
+		FileFilter filter = new FileNameExtensionFilter("Keys File", "keys");
+		fc.setFileFilter(filter);
+		fc.setDialogTitle("Select the keys file to delete");
+		fc.showDialog(null, "Delete");
+		File keysFile = fc.getSelectedFile();
+		try
+		{
+			if (!keysFile.getName().endsWith(".keys"))
+			{
+				JOptionPane.showMessageDialog(null, "The file selected is not a keys file.", 
+									          "ERROR",JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
+			int x = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this keys file?","Caution",JOptionPane.YES_OPTION);
+			if (x != JOptionPane.YES_OPTION)
+					return false;
+			return keysFile.delete();
+		}
+		catch (NullPointerException e)
+		{
+			System.out.println("Keys file selection aborted");
+		}
+		return false;
 	}
 }
