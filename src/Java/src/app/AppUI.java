@@ -52,6 +52,7 @@ public class AppUI {
 	private JButton btnContinue;
 	private JButton btnDelKeys;
 	private JButton btnCreateKeys;
+	private JButton btnViewKeys;
 	
 	private JPanel numKeysPanel;
 	private JComboBox<String> keyLenSelection;
@@ -322,9 +323,9 @@ public class AppUI {
 					
 			}
 		});
-		btnDelKeys.setBounds(74, 185, 117, 29);
+		btnDelKeys.setBounds(50, 185, 117, 29);
 		frmEliteEncryption.getContentPane().add(btnDelKeys);
-		btnDelKeys.setToolTipText("Deletes current keys file");
+		btnDelKeys.setToolTipText("Delete a keys file");
 		
 		btnCreateKeys = new JButton("Create Keys");
 		btnCreateKeys.addActionListener(new ActionListener() 
@@ -409,8 +410,20 @@ public class AppUI {
 			}
 		});
 		btnCreateKeys.setToolTipText("Creates a new keys file");
-		btnCreateKeys.setBounds(252, 185, 117, 29);
+		btnCreateKeys.setBounds(290, 185, 117, 29);
 		frmEliteEncryption.getContentPane().add(btnCreateKeys);
+
+		btnViewKeys = new JButton("View Keys");
+		btnViewKeys.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e) 
+			{
+				utils.viewKeys();
+			}
+		});
+		btnViewKeys.setBounds(169, 185, 117, 29);
+		frmEliteEncryption.getContentPane().add(btnViewKeys);
+		btnViewKeys.setToolTipText("View keys in a keys file");
 		
 		/*
 		 * Text Panel
@@ -914,6 +927,7 @@ public class AppUI {
 		chckbxGhostMode.setVisible(b);
 		btnCreateKeys.setVisible(b);
 		btnDelKeys.setVisible(b);
+		btnViewKeys.setVisible(b);
 		
 		if(b)
 		{

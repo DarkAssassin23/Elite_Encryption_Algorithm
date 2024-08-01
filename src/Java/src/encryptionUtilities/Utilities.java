@@ -1,5 +1,7 @@
 package encryptionUtilities;
 
+import java.awt.Dimension;
+import java.awt.Font;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +28,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * Class of utilities used for reading and writing the keys
@@ -295,6 +299,34 @@ public class Utilities implements Serializable
 			System.out.println("Keys file selection aborted");
 		}
 		return keys;
+	}
+
+	public void viewKeys()
+	{
+		String[] keys = readKeys();
+		if (keys == null)
+			return;
+
+		JTextArea textArea = new JTextArea();
+		textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		textArea.setLineWrap(true);
+		textArea.setWrapStyleWord(true);
+		textArea.setEditable(false);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+		String keysList = new String();
+		for (int x = 0; x < keys.length; x++)
+		{
+			keysList += String.valueOf(x + 1) + ". " + keys[x];
+			if (x != keys.length - 1)
+				keysList += "\n";
+		}
+		textArea.setText(keysList);
+		scrollPane.setViewportView(textArea);
+		scrollPane.setPreferredSize( new Dimension( 500, 350 ) );
+		JOptionPane.showMessageDialog(null, scrollPane, "Keys", JOptionPane.DEFAULT_OPTION);
 	}
 	
 	/**
