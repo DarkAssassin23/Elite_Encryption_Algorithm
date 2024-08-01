@@ -597,7 +597,7 @@ static void decrypt_directory_mode(int ghost_mode)
     int threads = prompt_for_num_threads();
 
     int num_keys = 0;
-    char **keys = keys_prompt(ghost_mode, 1, &num_keys);
+    char **keys = keys_prompt(ghost_mode, 0, &num_keys);
     if (keys == NULL)
     {
         free(dir_name);
