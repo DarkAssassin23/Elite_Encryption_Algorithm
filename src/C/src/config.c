@@ -59,7 +59,7 @@ static char *exe_path(size_t *path_len)
     }
 #elif defined(__APPLE__)
     pid_t pid = getpid();
-    if (proc_pidpath(pid, path, PATH_MAX) != 0)
+    if (proc_pidpath(pid, path, PATH_MAX) == 0)
     {
         free(path);
         return NULL;
