@@ -372,7 +372,7 @@ static char **keys_prompt(int ghost, int encrypt, int *num)
     if (ghost && encrypt)
     {
         int hash_type = get_hash_type_for_key_gen();
-        if (hash_type = -1)
+        if (hash_type == -1)
             return NULL;
         int hash_size = hash_type_to_size(hash_type);
         if (hash_size == -1)
