@@ -117,13 +117,7 @@ public struct EEA {
     /// - Parameter data: Cipher text to be encoded
     /// - Returns: The cipher texted encoded as a base64 string
     public func encode(data: [UInt8]) throws -> String {
-        guard let coded = String(bytes: data, encoding: .utf8)?.toBase64()
-        else {
-            throw Base64Error.encodeFailed(
-                "Error: Encoding data to base64 failed."
-            )
-        }
-        return coded
+        return Data(data).base64EncodedString()
     }
 
     /// Given an string of text and a list of keys, encrypt the data
@@ -286,12 +280,12 @@ public struct EEA {
     /// - Parameter data: Cipher text to be decoded
     /// - Returns: The cipher texted decoded from base64
     public func decode(data: String) throws -> [UInt8] {
-        guard let decoded = data.fromBase64() else {
+        guard let decoded = Data(base64Encoded: data) else {
             throw Base64Error.decodeFailed(
                 "Decoding the data from base64 failed."
             )
         }
-        return Array(decoded.utf8)
+        return Array(decoded)
     }
 
     /// Given an string of text and a list of keys, decrypt the data
