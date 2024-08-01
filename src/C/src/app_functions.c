@@ -371,7 +371,10 @@ static char **keys_prompt(int ghost, int encrypt, int *num)
 
     if (ghost && encrypt)
     {
-        int hash_size = hash_type_to_size(get_hash_type_for_key_gen());
+        int hash_type = get_hash_type_for_key_gen();
+        if (hash_type = -1)
+            return NULL;
+        int hash_size = hash_type_to_size(hash_type);
         if (hash_size == -1)
             return NULL;
 
@@ -540,7 +543,7 @@ static void decrypt_single_file_mode(int ghost_mode)
     int overwrite = prompt_for_overwrite(1); // single file
 
     int num_keys = 0;
-    char **keys = keys_prompt(ghost_mode, 1, &num_keys);
+    char **keys = keys_prompt(ghost_mode, 0, &num_keys);
     if (keys == NULL)
     {
         free(filename);
