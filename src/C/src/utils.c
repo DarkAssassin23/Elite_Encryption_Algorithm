@@ -144,7 +144,7 @@ int ends_with(const char *str, const char *end)
 int validate_keys(const char **keys, int num_keys)
 {
     size_t key_len = strlen(keys[0]);
-    if (key_len % MIN_KEY_LEN != 0)
+    if (key_len % MIN_KEY_LEN != 0 || key_len < MIN_KEY_LEN)
         return 0;
 
     for (int k = 0; k < num_keys; k++)

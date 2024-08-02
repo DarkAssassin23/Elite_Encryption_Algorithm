@@ -55,7 +55,7 @@ public struct EEA {
                 "Error: No keys were provided"
             )
         }
-        if size % minSize != 0 {
+        if size % minSize != 0 || size < minSize {
             throw KeyError.invalidLength(
                 "The key length, \(size), is not a multiple of \(minSize)."
             )

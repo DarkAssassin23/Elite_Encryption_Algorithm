@@ -15,6 +15,7 @@ import java.util.Base64;
 public class EEA
 {
     final private byte PADDING = 0;
+    static final private byte MIN_SIZE = 64;
     final private Base64.Encoder base64Encode = Base64.getEncoder();
     final private Base64.Decoder base64Decode = Base64.getDecoder();
 
@@ -233,9 +234,16 @@ public class EEA
      */
     static public boolean validKeyCheck(String[] keys)
     {
+        if (keys.length < 1)
+            return false;
+
+        int keyLength = keys[0].length();
+        if (keyLength % MIN_SIZE != 0 || keyLength < MIN_SIZE)
+            return false;
+
         for (String k : keys)
         {
-            if (k.length() % 64 != 0)
+            if (k.length() != keyLength)
                 return false;
             try
             {
