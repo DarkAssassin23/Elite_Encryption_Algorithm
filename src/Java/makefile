@@ -11,18 +11,18 @@ MAIN = app/AppUI
 #Class Files Directory
 BINDIR = bin
 
-JCFLAGS = -cp $(SRC) -d $(BINDIR)
+JCFLAGS = -cp $(SRC) -sourcepath $(SRC) -d $(BINDIR)
 
 #Source Files
 SRCS = $(wildcard $(UTILDIR)/*.java $(APPDIR)/*.java)
 
 #Class Files
-CLS = $(patsubst %.java, $(BINDIR)/%.class, $(SRCS))
+CLS = $(patsubst $(SRC)/%,$(BINDIR)/%,$(patsubst %.java,%.class,$(SRCS)))
 
 default: $(CLS)
 all: jar
 
-$(CLS): $(BINDIR)/%.class: %.java
+$(BINDIR)/%.class: $(SRC)/%.java
 	@mkdir -p $(@D)
 	$(JC) $(JCFLAGS) $<
 	
