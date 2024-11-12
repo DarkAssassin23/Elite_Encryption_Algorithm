@@ -10,6 +10,7 @@ enum FileIOError: Error {
 public struct FileIO {
     private let fileManager = FileManager.default
 
+    public init() {}
     /// Read the contents of the file and return the raw data
     /// - Parameter filename: The name of the file to read the data from
     /// - Returns: A byte array containing the raw file data

@@ -8,6 +8,8 @@ enum KeygenError: Error {
 
 /// Class to handle the generation of keys
 public struct Keygen {
+    public init() {}
+
     /// Generate a set of keys for EEA
     /// - Parameters:
     ///   - size: The hash size of the keys to generate (e.g. 256 = SHA256)

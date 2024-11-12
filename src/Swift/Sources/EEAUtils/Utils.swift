@@ -27,7 +27,8 @@ extension Data {
 ///   - count: The number of bytes to generate
 ///   - encode: Should the result be encoded in base64
 /// - Returns: Random data
-func genRandBytes(count: Int = SHA256.byteCount, encode: Bool = true) throws
+public func genRandBytes(count: Int = SHA256.byteCount, encode: Bool = true)
+    throws
     -> String
 {
     #if (os(macOS) || os(iOS) || os(watchOS) || os(tvOS))
@@ -59,14 +60,14 @@ func genRandBytes(count: Int = SHA256.byteCount, encode: Bool = true) throws
 
 /// Given a list of keys, print them out
 /// - Parameter keys: The list of keys to print
-func printKeys(keys: [String]) {
+public func printKeys(keys: [String]) {
     for i in (0..<keys.count) {
         print("\(i + 1). \(keys[i])")
     }
 }
 
 /// Generate the default config file
-func generateDefaultConfig() {
+public func generateDefaultConfig() {
     let fileIO = FileIO()
     let cfg: String = """
         # Elite Encryption Algorithm (EEA) config file
@@ -81,7 +82,7 @@ func generateDefaultConfig() {
 
 /// Create the directory to store the .keys files
 /// - Parameter path: The path to create
-func makeKeysDir(_ path: String) -> Bool {
+public func makeKeysDir(_ path: String) -> Bool {
     print("The directory, \(path), does not exist.")
     print("Would you like to create it? (y/n) (default: y): ", terminator: "")
     let input = readLine()
@@ -106,7 +107,7 @@ func makeKeysDir(_ path: String) -> Bool {
 }
 
 /// Load the config file to set the directory to set environment variables
-func loadConfig() {
+public func loadConfig() {
     let fileIO = FileIO()
     guard let data = try? fileIO.readFile(Globals.cfgFile) else {
         if !fileIO.doesExist(path: Globals.cfgFile) {
@@ -144,7 +145,8 @@ func loadConfig() {
 ///   - filename: The name of the keys file to load the keys from
 ///   - password: The password used to decrypt the keys
 /// - Returns: List of keys from the keys file
-func loadKeys(_ filename: String, _ password: String) throws -> [String] {
+public func loadKeys(_ filename: String, _ password: String) throws -> [String]
+{
     let fileIO = FileIO()
     let eea = EEA()
 
@@ -185,7 +187,7 @@ func loadKeys(_ filename: String, _ password: String) throws -> [String] {
     /// Implementation of getpass for use on Windows
     /// - Parameter prompt: The password prompt to display to the user
     /// - Returns: The password
-    func getpass(_ prompt: String) -> [CChar]? {
+    public func getpass(_ prompt: String) -> [CChar]? {
         let star = [UInt8]("*".utf8)
         var password: String = String()
 

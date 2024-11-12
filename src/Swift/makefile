@@ -11,6 +11,7 @@ debug: build
 
 release:
 	swift build -c release
+	@strip .build/release/EEA
 	@cp .build/release/EEA .
 
 rund: build
@@ -18,6 +19,9 @@ rund: build
 
 run: release
 	@./.build/release/EEA
+
+test:
+	swift test
 
 clean:
 	$(RM) -r .build
