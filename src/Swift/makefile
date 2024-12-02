@@ -21,7 +21,7 @@ run: release
 	@./.build/release/EEA
 
 test:
-	swift test
+	swift test --parallel
 
 clean:
 	$(RM) -r .build
