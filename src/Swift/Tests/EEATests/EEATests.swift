@@ -61,13 +61,21 @@ struct EEASwiftTests {
         }
         #expect(passed, "File Encrypt Test Error: Key generation")
 
+        let filename = "output.txt"
         let ogString: String = "This is a test string.\nIt will be encrypted."
-
         let data: [UInt8] = Array(ogString.utf8)
-        _ = try? io.writeFile(data, filename: "output.txt")
-        _ = try? crypto.encryptFile(inFile: "output.txt", keys: keys)
-        _ = try? crypto.decryptFile(inFile: "output.txt.eea", keys: keys)
-        let tmp = try? io.readFile("output.txt")
+        _ = try? io.writeFile(data, filename: filename)
+        _ = try? crypto.encryptFile(inFile: filename, keys: keys)
+        _ = try? crypto.decryptFile(
+            inFile: String("\(filename).eea"),
+            keys: keys
+        )
+        let tmp = try? io.readFile(filename)
+
+        // Cleanup
+        let deleted = io.deleteFile(filename: filename)
+        #expect(deleted, "File Encrypt Test Error: Deleting \(filename)")
+
         passed = passed && (tmp == data)
         #expect(passed, "File Encrypt Test Failed")
     }
