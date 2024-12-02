@@ -44,8 +44,8 @@ var useLocalDependencies: Bool {
 var dependencies: [Package.Dependency] {
     if useLocalDependencies {
         return [
-            .package(path: "./swift-crypto"),
-            .package(path: "./swift-testing"),
+            .package(path: "./Dependencies/swift-crypto"),
+            .package(path: "./Dependencies/swift-testing"),
         ]
     } else {
         return [

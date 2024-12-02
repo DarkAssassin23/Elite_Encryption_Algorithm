@@ -4,5 +4,4 @@
 .swiftpm/
 .build
 Package.resolved
-swift-crypto/
-swift-testing/
+Dependencies/
