@@ -136,9 +136,17 @@ import EEAUtils
 
         /// Test case to make sure key generation works
         func testKeygen() throws {
-            var keys: [String]
+            var keys: [String]!
             do {
-                keys = try keygen.genKeys()
+                for x in (1...10) {
+                    let size: Int = Int.random(in: 1...10) * 256
+                    keys = try keygen.genKeys(size: size, num: x)
+                    XCTAssertTrue(keys.count == x)
+                    for key in keys {
+                        let length = (size / 4)
+                        XCTAssertTrue(key.count == length)
+                    }
+                }
                 try crypto.keyCheck(keys)
             } catch (let e) {
                 throw e
