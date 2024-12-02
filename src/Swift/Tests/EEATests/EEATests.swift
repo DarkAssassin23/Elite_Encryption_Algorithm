@@ -11,8 +11,22 @@ struct EEASwiftTests {
         var keys: [String]
         var passed: Bool = true
         do {
-            keys = try keygen.genKeys()
-            try crypto.keyCheck(keys)
+            for x in (1...10) {
+                let size: Int = Int.random(in: 1...10) * 256
+                keys = try keygen.genKeys(size: size, num: x)
+                #expect(
+                    keys.count == x,
+                    "Key Generation Test Failed: Number of keys invalid"
+                )
+                for key in keys {
+                    let length = (size / 4)
+                    #expect(
+                        key.count == length,
+                        "Key Generation Test Failed: Key length invalid"
+                    )
+                }
+                try crypto.keyCheck(keys)
+            }
         } catch (_) {
             passed = false
         }
