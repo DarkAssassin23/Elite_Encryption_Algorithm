@@ -57,7 +57,7 @@ var useLocalDependencies: Bool {
                 ),
                 .package(
                     url: "https://github.com/swiftlang/swift-testing.git",
-                    from: "510.0.0"
+                    from: "600.0.0"
                 ),
             ]
         }
