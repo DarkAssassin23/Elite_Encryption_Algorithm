@@ -402,12 +402,12 @@ public class UserInput {
                 menu: keyFiles,
                 msg: "Select which keys file you would like to delete:"
             )
-            let input = readLine()
+            let keyFileInput = readLine()
             var choice: Int
-            if let c = Int(input ?? "N/A") {
+            if let c = Int(keyFileInput ?? "N/A") {
                 choice = c
             } else {
-                if input == "q" {
+                if keyFileInput == "q" {
                     break
                 } else {
                     choice = -1
@@ -422,10 +422,10 @@ public class UserInput {
                 "(y/n) (default: n): ",
                 terminator: ""
             )
-            guard let input = readLine() else {
+            guard let confirmInput = readLine() else {
                 continue
             }
-            if input != "y" {
+            if confirmInput != "y" {
                 continue
             }
 
@@ -465,22 +465,22 @@ public class UserInput {
         while selection == 0 {
             printMenu(menu: keyMenuOpts)
             let input = readLine()
-            guard let choice = Int(input ?? "N/A") else {
+            guard let menuChoice = Int(input ?? "N/A") else {
                 if input == "q" {
                     break
                 }
                 print("Invalid selection.")
                 continue
             }
-            if choice < 1 || choice > keyMenuOpts.count {
+            if menuChoice < 1 || menuChoice > keyMenuOpts.count {
                 print("Invalid selection.")
                 continue
             }
-            selection = choice
-            guard let choice = KeyOpts(rawValue: UInt8(selection)) else {
+            selection = menuChoice
+            guard let optChoice = KeyOpts(rawValue: UInt8(selection)) else {
                 return
             }
-            switch choice {
+            switch optChoice {
             case KeyOpts.add:
                 addKeys()
                 break

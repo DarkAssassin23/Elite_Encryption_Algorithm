@@ -1,7 +1,7 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.3
 
-import PackageDescription
 import Foundation
+import PackageDescription
 
 func hasEnvironmentVariable(_ name: String) -> Bool {
     return ProcessInfo.processInfo.environment[name] != nil
@@ -15,14 +15,14 @@ var useLocalDependencies: Bool {
     var dependencies: [Package.Dependency] {
         if useLocalDependencies {
             return [
-                .package(path: "./Dependencies/swift-crypto"),
+                .package(path: "./Dependencies/swift-crypto")
             ]
         } else {
             return [
                 .package(
                     url: "https://github.com/apple/swift-crypto.git",
                     from: "3.5.0"
-                ),
+                )
             ]
         }
     }
@@ -37,7 +37,7 @@ var useLocalDependencies: Bool {
             return [
                 .package(
                     url: "https://github.com/apple/swift-crypto.git",
-                    from: "2.1.0"
+                    from: "2.0.0"
                 )
             ]
         }
@@ -61,7 +61,7 @@ let package = Package(
                 .product(name: "Crypto", package: "swift-crypto")
             ]
         ),
-        .executableTarget(
+        .target(
             name: "EEA",
             dependencies: [
                 "EEAUtils"
