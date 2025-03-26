@@ -1,6 +1,7 @@
 // swift-tools-version:5.4
 
 import PackageDescription
+import Foundation
 
 func hasEnvironmentVariable(_ name: String) -> Bool {
     return ProcessInfo.processInfo.environment[name] != nil
@@ -36,7 +37,7 @@ var useLocalDependencies: Bool {
             return [
                 .package(
                     url: "https://github.com/apple/swift-crypto.git",
-                    from: "3.5.0"
+                    from: "2.1.0"
                 )
             ]
         }

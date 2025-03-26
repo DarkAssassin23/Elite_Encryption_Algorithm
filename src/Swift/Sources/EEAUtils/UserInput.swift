@@ -14,7 +14,9 @@ public class UserInput {
 
     private var hasKeys: Bool
     private var fileQueue: [String]
-    private let queue: DispatchQueue
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        private let queue: DispatchQueue
+    #endif
     enum MenuOpts: UInt8 {
         case keys = 1
         case encrypt = 2
@@ -58,7 +60,9 @@ public class UserInput {
             path: Globals.keysDir
         ).isEmpty
         self.fileQueue = [String]()
-        self.queue = DispatchQueue(label: "fileQueue")
+        #if compiler(>=5.5) && canImport(_Concurrency)
+            self.queue = DispatchQueue(label: "fileQueue")
+        #endif
     }
 
     /*============================================*/
@@ -555,30 +559,32 @@ public class UserInput {
         return overwrite
     }
 
-    /// Prompt the user for how many jobs should be run
-    /// - Returns: The number of concurrent jobs to run
-    private func getNumJobs() -> Int {
-        print(
-            "Enter the number of threads to use (default: 1): ",
-            terminator: ""
-        )
-        guard let input = readLine() else {
-            return 1
-        }
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        /// Prompt the user for how many jobs should be run
+        /// - Returns: The number of concurrent jobs to run
+        private func getNumJobs() -> Int {
+            print(
+                "Enter the number of threads to use (default: 1): ",
+                terminator: ""
+            )
+            guard let input = readLine() else {
+                return 1
+            }
 
-        var choice: Int = 1
-        if let c = Int(input) {
-            choice = c
-        }
-        if choice < 1 {
-            choice = 1
-        }
-        if choice > maxJobs {
-            choice = maxJobs
-        }
+            var choice: Int = 1
+            if let c = Int(input) {
+                choice = c
+            }
+            if choice < 1 {
+                choice = 1
+            }
+            if choice > maxJobs {
+                choice = maxJobs
+            }
 
-        return choice
-    }
+            return choice
+        }
+    #endif  // #if compiler(>=5.5) && canImport(_Concurrency)
 
     /// Prompt the user for the file or directory to encrypt/decrypt
     /// - Parameters:
@@ -613,69 +619,138 @@ public class UserInput {
     ///   - encrypt: Are we encrypting
     ///   - overwrite: Should the files be overwritten
     /// - Returns: If all files were processed successfully
-    private func encryptDecryptFiles(
-        keys: [String],
-        encrypt: Bool,
-        overwrite: Bool
-    ) async -> Bool {
-        let type: String = encrypt ? "Encryption" : "Decryption"
-        while true {
-            var filename: String = String()
-            var done: Bool = false
-            queue.sync {
-                if let f = fileQueue.first {
-                    filename = f
-                    fileQueue.removeFirst()
-                } else {
-                    done = true
-                }
-            }
-            if done {
-                break
-            }
-
-            do {
-                if encrypt {
-                    let outfile: String? = overwrite ? nil : filename + ".eea"
-                    _ = try eea.encryptFile(
-                        inFile: filename,
-                        keys: keys,
-                        outFile: outfile
-                    )
-                } else {
-                    if !filename.hasSuffix(".eea") {
-                        continue
-                    }
-                    if overwrite {
-                        _ = try eea.decryptFile(inFile: filename, keys: keys)
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        private func encryptDecryptFiles(
+            keys: [String],
+            encrypt: Bool,
+            overwrite: Bool
+        ) async -> Bool {
+            let type: String = encrypt ? "Encryption" : "Decryption"
+            while true {
+                var filename: String = String()
+                var done: Bool = false
+                queue.sync {
+                    if let f = fileQueue.first {
+                        filename = f
+                        fileQueue.removeFirst()
                     } else {
-                        // Remove .eea extension
-                        let index = filename.lastIndex(of: ".")!
-                        let outfile = String(
-                            filename[filename.startIndex..<index]
-                        )
-                        _ = try eea.decryptFile(
+                        done = true
+                    }
+                }
+                if done {
+                    break
+                }
+
+                do {
+                    if encrypt {
+                        let outfile: String? =
+                            overwrite ? nil : filename + ".eea"
+                        _ = try eea.encryptFile(
                             inFile: filename,
                             keys: keys,
                             outFile: outfile
                         )
+                    } else {
+                        if !filename.hasSuffix(".eea") {
+                            continue
+                        }
+                        if overwrite {
+                            _ = try eea.decryptFile(
+                                inFile: filename,
+                                keys: keys
+                            )
+                        } else {
+                            // Remove .eea extension
+                            let index = filename.lastIndex(of: ".")!
+                            let outfile = String(
+                                filename[filename.startIndex..<index]
+                            )
+                            _ = try eea.decryptFile(
+                                inFile: filename,
+                                keys: keys,
+                                outFile: outfile
+                            )
+                        }
                     }
+                } catch (let e) {
+                    print("\(type) failed with the following error:")
+                    print(e)
+                    return false
                 }
-            } catch (let e) {
-                print("\(type) failed with the following error:")
-                print(e)
-                return false
-            }
 
-            guard let name: String = URL(string: filename)?.lastPathComponent
-            else {
-                print("\(type) success: \(filename)")
-                continue
+                guard
+                    let name: String = URL(string: filename)?.lastPathComponent
+                else {
+                    print("\(type) success: \(filename)")
+                    continue
+                }
+                print("\(type) success: \(name)")
             }
-            print("\(type) success: \(name)")
+            return true
         }
-        return true
-    }
+    #else
+        private func encryptDecryptFiles(
+            keys: [String],
+            encrypt: Bool,
+            overwrite: Bool
+        ) -> Bool {
+            let type: String = encrypt ? "Encryption" : "Decryption"
+            var count: Int = 0
+            while true {
+                if count == fileQueue.count {
+                    break
+                }
+                let filename: String = fileQueue[count]
+
+                do {
+                    if encrypt {
+                        let outfile: String? =
+                            overwrite ? nil : filename + ".eea"
+                        _ = try eea.encryptFile(
+                            inFile: filename,
+                            keys: keys,
+                            outFile: outfile
+                        )
+                    } else {
+                        if !filename.hasSuffix(".eea") {
+                            continue
+                        }
+                        if overwrite {
+                            _ = try eea.decryptFile(
+                                inFile: filename,
+                                keys: keys
+                            )
+                        } else {
+                            // Remove .eea extension
+                            let index = filename.lastIndex(of: ".")!
+                            let outfile = String(
+                                filename[filename.startIndex..<index]
+                            )
+                            _ = try eea.decryptFile(
+                                inFile: filename,
+                                keys: keys,
+                                outFile: outfile
+                            )
+                        }
+                    }
+                } catch (let e) {
+                    print("\(type) failed with the following error:")
+                    print(e)
+                    return false
+                }
+
+                guard
+                    let name: String = URL(string: filename)?.lastPathComponent
+                else {
+                    print("\(type) success: \(filename)")
+                    continue
+                }
+                print("\(type) success: \(name)")
+                count += 1
+            }
+            return true
+        }
+    #endif  // #if compiler(>=5.5) && canImport(_Concurrency)
 
     /// Handle encryption and decryption of a file or directory
     /// > Note: Directories are encrypted or decrypted recursively
@@ -683,46 +758,88 @@ public class UserInput {
     ///   - dir: Are we dealing with a directory
     ///   - ghost: Encrypting or decrypting with Ghost Mode
     ///   - encrypt: Are we encrypting
-    private func encryptDecryptTarget(dir: Bool, ghost: Bool, encrypt: Bool)
-        async
-    {
-        guard let contents = getTarget(encrypt, dir: dir) else {
-            return
-        }
-        if contents.isEmpty {
-            print("No files found.")
-            return
-        }
-        fileQueue = contents
-        guard let overwrite = shouldOverwrite(dir: dir) else {
-            return
-        }
-        var jobs: Int = 1
-        if dir {
-            jobs = min(getNumJobs(), contents.count)
-        }
-        guard let keys: [String] = keysPrompt(ghost, encrypt) else {
-            print("Aborting...")
-            return
-        }
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        private func encryptDecryptTarget(
+            dir: Bool,
+            ghost: Bool,
+            encrypt: Bool
+        )
+            async
+        {
+            guard let contents = getTarget(encrypt, dir: dir) else {
+                return
+            }
+            if contents.isEmpty {
+                print("No files found.")
+                return
+            }
+            fileQueue = contents
 
-        if ghost && encrypt {
-            print("The file(s) will be encrypted with the following keys:")
-            printKeys(keys: keys)
-        }
+            guard let overwrite = shouldOverwrite(dir: dir) else {
+                return
+            }
+            var jobs: Int = 1
+            if dir {
+                jobs = min(getNumJobs(), contents.count)
+            }
+            guard let keys: [String] = keysPrompt(ghost, encrypt) else {
+                print("Aborting...")
+                return
+            }
 
-        await withTaskGroup(of: Bool.self) { group in
-            for _ in (0..<jobs) {
-                group.addTask {
-                    return await self.encryptDecryptFiles(
-                        keys: keys,
-                        encrypt: encrypt,
-                        overwrite: overwrite
-                    )
+            if ghost && encrypt {
+                print("The file(s) will be encrypted with the following keys:")
+                printKeys(keys: keys)
+            }
+
+            await withTaskGroup(of: Bool.self) { group in
+                for _ in (0..<jobs) {
+                    group.addTask {
+                        return await self.encryptDecryptFiles(
+                            keys: keys,
+                            encrypt: encrypt,
+                            overwrite: overwrite
+                        )
+                    }
                 }
             }
         }
-    }
+    #else
+        private func encryptDecryptTarget(
+            dir: Bool,
+            ghost: Bool,
+            encrypt: Bool
+        ) {
+            guard let contents = getTarget(encrypt, dir: dir) else {
+                return
+            }
+            if contents.isEmpty {
+                print("No files found.")
+                return
+            }
+            fileQueue = contents
+
+            guard let overwrite = shouldOverwrite(dir: dir) else {
+                return
+            }
+
+            guard let keys: [String] = keysPrompt(ghost, encrypt) else {
+                print("Aborting...")
+                return
+            }
+
+            if ghost && encrypt {
+                print("The file(s) will be encrypted with the following keys:")
+                printKeys(keys: keys)
+            }
+
+            _ = self.encryptDecryptFiles(
+                keys: keys,
+                encrypt: encrypt,
+                overwrite: overwrite
+            )
+        }
+    #endif  // #if compiler(>=5.5) && canImport(_Concurrency)
 
     /// Handle encryption and decryption of text
     /// - Parameters:
@@ -785,48 +902,93 @@ public class UserInput {
     /// - Parameters:
     ///   - ghost: Encrypting or decrypting with Ghost Mode
     ///   - encrypt: Are we encrypting
-    private func encryptDecryptSubmenu(ghost: Bool, encrypt: Bool) async {
-        while true {
-            printEncryptDecryptMenu(encrypt: encrypt)
-            let input = readLine()
-            var choice: Int
-            if let c = Int(input ?? "N/A") {
-                choice = c
-            } else {
-                if input == "q" {
-                    return
-                } else if input == "" {
-                    choice = 1
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        private func encryptDecryptSubmenu(ghost: Bool, encrypt: Bool) async {
+            while true {
+                printEncryptDecryptMenu(encrypt: encrypt)
+                let input = readLine()
+                var choice: Int
+                if let c = Int(input ?? "N/A") {
+                    choice = c
                 } else {
-                    choice = 0
+                    if input == "q" {
+                        return
+                    } else if input == "" {
+                        choice = 1
+                    } else {
+                        choice = 0
+                    }
+                }
+                guard let opt = EncryptDecryptOpts(rawValue: UInt8(choice))
+                else {
+                    print("Invalid selection.")
+                    continue
+                }
+                switch opt {
+                case EncryptDecryptOpts.file:
+                    await encryptDecryptTarget(
+                        dir: false,
+                        ghost: ghost,
+                        encrypt: encrypt
+                    )
+                    return
+                case EncryptDecryptOpts.dir:
+                    await encryptDecryptTarget(
+                        dir: true,
+                        ghost: ghost,
+                        encrypt: encrypt
+                    )
+                    return
+                case EncryptDecryptOpts.text:
+                    encryptDecryptText(ghost: ghost, encrypt: encrypt)
+                    return
                 }
             }
-            guard let opt = EncryptDecryptOpts(rawValue: UInt8(choice))
-            else {
-                print("Invalid selection.")
-                continue
-            }
-            switch opt {
-            case EncryptDecryptOpts.file:
-                await encryptDecryptTarget(
-                    dir: false,
-                    ghost: ghost,
-                    encrypt: encrypt
-                )
-                return
-            case EncryptDecryptOpts.dir:
-                await encryptDecryptTarget(
-                    dir: true,
-                    ghost: ghost,
-                    encrypt: encrypt
-                )
-                return
-            case EncryptDecryptOpts.text:
-                encryptDecryptText(ghost: ghost, encrypt: encrypt)
-                return
+        }
+    #else
+        private func encryptDecryptSubmenu(ghost: Bool, encrypt: Bool) {
+            while true {
+                printEncryptDecryptMenu(encrypt: encrypt)
+                let input = readLine()
+                var choice: Int
+                if let c = Int(input ?? "N/A") {
+                    choice = c
+                } else {
+                    if input == "q" {
+                        return
+                    } else if input == "" {
+                        choice = 1
+                    } else {
+                        choice = 0
+                    }
+                }
+                guard let opt = EncryptDecryptOpts(rawValue: UInt8(choice))
+                else {
+                    print("Invalid selection.")
+                    continue
+                }
+                switch opt {
+                case EncryptDecryptOpts.file:
+                    encryptDecryptTarget(
+                        dir: false,
+                        ghost: ghost,
+                        encrypt: encrypt
+                    )
+                    return
+                case EncryptDecryptOpts.dir:
+                    encryptDecryptTarget(
+                        dir: true,
+                        ghost: ghost,
+                        encrypt: encrypt
+                    )
+                    return
+                case EncryptDecryptOpts.text:
+                    encryptDecryptText(ghost: ghost, encrypt: encrypt)
+                    return
+                }
             }
         }
-    }
+    #endif  // #if compiler(>=5.5) && canImport(_Concurrency)
     /*=============================*/
     /* End Encrypt/Decrypt Submenu */
     /*=============================*/
@@ -918,22 +1080,43 @@ public class UserInput {
 
     /// Go to the submenu the user selected
     /// - Parameter menu: The ID of the submenu to go to
-    public func submenu(menu: Int) async {
-        guard let choice = MenuOpts(rawValue: UInt8(menu)) else {
-            return
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        public func submenu(menu: Int) async {
+            guard let choice = MenuOpts(rawValue: UInt8(menu)) else {
+                return
+            }
+            switch choice {
+            case MenuOpts.keys:
+                keysSubmenu()
+                break
+            case MenuOpts.encrypt:
+                let ghost = promptGhostMode(encrypt: true)
+                await encryptDecryptSubmenu(ghost: ghost, encrypt: true)
+                break
+            case MenuOpts.decrypt:
+                let ghost = promptGhostMode(encrypt: false)
+                await encryptDecryptSubmenu(ghost: ghost, encrypt: false)
+                break
+            }
         }
-        switch choice {
-        case MenuOpts.keys:
-            keysSubmenu()
-            break
-        case MenuOpts.encrypt:
-            let ghost = promptGhostMode(encrypt: true)
-            await encryptDecryptSubmenu(ghost: ghost, encrypt: true)
-            break
-        case MenuOpts.decrypt:
-            let ghost = promptGhostMode(encrypt: false)
-            await encryptDecryptSubmenu(ghost: ghost, encrypt: false)
-            break
+    #else
+        public func submenu(menu: Int) {
+            guard let choice = MenuOpts(rawValue: UInt8(menu)) else {
+                return
+            }
+            switch choice {
+            case MenuOpts.keys:
+                keysSubmenu()
+                break
+            case MenuOpts.encrypt:
+                let ghost = promptGhostMode(encrypt: true)
+                encryptDecryptSubmenu(ghost: ghost, encrypt: true)
+                break
+            case MenuOpts.decrypt:
+                let ghost = promptGhostMode(encrypt: false)
+                encryptDecryptSubmenu(ghost: ghost, encrypt: false)
+                break
+            }
         }
-    }
+    #endif  // #if compiler(>=5.5) && canImport(_Concurrency)
 }

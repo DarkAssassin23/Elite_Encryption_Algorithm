@@ -1,19 +1,37 @@
 import EEAUtils
 
-func main() async {
-    loadConfig()
-    let userIn = UserInput()
-    while true {
-        let ret = userIn.mainMenu()
-        if ret == -1 {
-            break
-        } else if ret == 0 {
-            print("Invalid selection.")
-        } else {
-            await userIn.submenu(menu: ret)
+#if compiler(>=5.5) && canImport(_Concurrency)
+    func main() async {
+        loadConfig()
+        let userIn = UserInput()
+        while true {
+            let ret = userIn.mainMenu()
+            if ret == -1 {
+                break
+            } else if ret == 0 {
+                print("Invalid selection.")
+            } else {
+                await userIn.submenu(menu: ret)
+            }
         }
+        print("goodbye.")
     }
-    print("goodbye.")
-}
-
-await main()
+    await main()
+#else
+    func main() {
+        loadConfig()
+        let userIn = UserInput()
+        while true {
+            let ret = userIn.mainMenu()
+            if ret == -1 {
+                break
+            } else if ret == 0 {
+                print("Invalid selection.")
+            } else {
+                userIn.submenu(menu: ret)
+            }
+        }
+        print("goodbye.")
+    }
+    main()
+#endif
